@@ -9,10 +9,16 @@ import net.fxft.common.jdbc.JdbcUtil;
 import net.fxft.common.jdbc.RowDataMap;
 import net.fxft.common.log.AttrLog;
 import net.fxft.common.util.BasicUtil;
+import net.fxft.common.util.JacksonUtil;
+import net.fxft.gateway.event.EventMsg;
+import net.fxft.gateway.event.alarm.AreaAlarmEvent;
+import net.fxft.gateway.event.everyunit.UpdateCacheEvent;
+import net.fxft.gatewaybusi.kafka.KafkaMessageSender;
 import net.fxft.gatewaybusi.service.IRealDataService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -680,6 +686,9 @@ public class AreaAlarmService implements IAreaAlarmService {
         return sr;
     }
 
+    @Autowired
+    private KafkaMessageSender kafkaMessageSender;
+
     /**
      * 生成区域报警记录
      *
@@ -690,7 +699,13 @@ public class AreaAlarmService implements IAreaAlarmService {
     private void insertAlarm(String alarmSource, String alarmType,
                              GPSRealData rd, String areaName) {
         rd.setLocation("电子围栏:" + areaName);
-        this.newAlarmService.insertAlarm(alarmSource, alarmType, rd, "AreaAlarmService");
+        Alarm alarm=this.newAlarmService.insertAlarm(alarmSource, alarmType, rd, "AreaAlarmService");
+        AreaAlarmEvent areaAlarmEvent = new AreaAlarmEvent();
+        BeanUtils.copyProperties(alarm,areaAlarmEvent);
+        EventMsg em = new EventMsg();
+        em.setEventBody(areaAlarmEvent);
+        em.loadDefaultDevMsgAttr();
+        kafkaMessageSender.sendAreaAlarmEventMsg(em);
     }
 
 

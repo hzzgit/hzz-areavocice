@@ -64,6 +64,19 @@ public class KafkaMessageSender{
         }
     }
 
+    public boolean sendAreaAlarmEventMsg(EventMsg eventMsg) {
+        try {
+            byte[] bytes = KryoUtil.object2clsbyte(eventMsg);
+            kafkaTemplate.send(UnitConfig.instance.getAlarmEventTopic(), bytes);
+            log.debug("kafka发送围栏报警！" + eventMsg);
+            totalSendCount.increment();
+            sendKafkaTps.inc();
+            return true;
+        } catch (Exception e) {
+            log.error("kafka发送围栏报警！", e);
+            return false;
+        }
+    }
 
     public void resetMonitorCount() {
         totalSendCount.reset();

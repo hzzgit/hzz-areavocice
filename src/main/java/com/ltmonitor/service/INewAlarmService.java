@@ -25,7 +25,7 @@ public interface INewAlarmService  {
 	 * @param alarmSource
 	 * @param rd
 	 */
-	void insertAlarm(String alarmSource, String alarmType,
+	Alarm insertAlarm(String alarmSource, String alarmType,
                      GPSRealData rd, String remark);
 
 

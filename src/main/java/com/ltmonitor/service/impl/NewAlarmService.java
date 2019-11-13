@@ -183,7 +183,7 @@ public class NewAlarmService implements INewAlarmService {
     }
 
 
-    public void insertAlarm(String alarmSource, String alarmType, GPSRealData rd, String remark) {
+    public Alarm insertAlarm(String alarmSource, String alarmType, GPSRealData rd, String remark) {
         try {
             Alarm ar = new Alarm();
             ar.setVehicleId(rd.getVehicleId());
@@ -205,11 +205,13 @@ public class NewAlarmService implements INewAlarmService {
             ar.setAlarmType(alarmType);
             ar.setAlarmSource(alarmSource);
             ar.setLocation(rd.getLocation());
-            String alarmTalbeName = Constants.getAlarmTableName();
-            ar.setTableName(alarmTalbeName);
+//            String alarmTalbeName = Constants.getAlarmTableName();
+//            ar.setTableName(alarmTalbeName);
             this.enQueue(ar, remark);
+            return  ar;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+            return  null;
         }
     }
 
