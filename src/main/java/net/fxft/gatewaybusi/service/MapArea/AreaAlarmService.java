@@ -218,7 +218,7 @@ public class AreaAlarmService implements IAreaAlarmService {
                     AlarmItem ai = offsetRouteWarn.get(key);
                     if (ai != null && ai.getSimNo() != null) {
                         GPSRealData rd = this.realDataService.get(ai.getSimNo());
-                        rd.setOffsetRouteAlarm(null);
+//                        rd.setOffsetRouteAlarm(null);
 
                         log.error(rd.getPlateNo() + "路线偏移报警关闭:" + key);
                     }
@@ -232,7 +232,7 @@ public class AreaAlarmService implements IAreaAlarmService {
                     if (ai != null && ai.getSimNo() != null) {
                         areaAlarmMap.remove(key);
                         GPSRealData rd = this.realDataService.get(ai.getSimNo());
-                        rd.setMapAreaAlarm(null);
+//                        rd.setMapAreaAlarm(null);
                         log.error(rd.getPlateNo() + "区域报警关闭:" + key);
                     }
                 }
@@ -245,10 +245,10 @@ public class AreaAlarmService implements IAreaAlarmService {
                     if (ai != null && ai.getSimNo() != null) {
                         keyPlaceAlarmMap.remove(key);
                         GPSRealData rd = this.realDataService.get(ai.getSimNo());
-                        if (AlarmRecord.TYPE_ARRIVE_NOT_ON_TIME.equals(ai.getAlarmType()))
-                            rd.setArriveKeyPlaceAlarm(null);
-                        else
-                            rd.setLeaveKeyPlaceAlarm(null);
+//                        if (AlarmRecord.TYPE_ARRIVE_NOT_ON_TIME.equals(ai.getAlarmType()))
+//                            rd.setArriveKeyPlaceAlarm(null);
+//                        else
+//                            rd.setLeaveKeyPlaceAlarm(null);
 
                         log.error(rd.getPlateNo() + "关键点报警关闭:" + key);
                     }
@@ -262,7 +262,7 @@ public class AreaAlarmService implements IAreaAlarmService {
                     if (ai != null && ai.getSimNo() != null) {
                         overSpeedAlarmMap.remove(key);
                         GPSRealData rd = this.realDataService.get(ai.getSimNo());
-                        rd.setOverSpeedAlarm(null);
+//                        rd.setOverSpeedAlarm(null);
                         log.error(rd.getPlateNo() + "分段限速报警关闭:" + key);
                     }
                 }
@@ -285,11 +285,11 @@ public class AreaAlarmService implements IAreaAlarmService {
                     long s = System.currentTimeMillis();   //获取开始时间
                     String key = areaId + rd.getSimNo();
                     if (rd != null) {
-                        rd.setOffsetRouteAlarm(null);
-                        rd.setMapAreaAlarm(null);
-                        rd.setArriveKeyPlaceAlarm(null);
-                        rd.setLeaveKeyPlaceAlarm(null);
-                        rd.setOverSpeedAlarm(null);
+//                        rd.setOffsetRouteAlarm(null);
+//                        rd.setMapAreaAlarm(null);
+//                        rd.setArriveKeyPlaceAlarm(null);
+//                        rd.setLeaveKeyPlaceAlarm(null);
+//                        rd.setOverSpeedAlarm(null);
                         GPSRealData oldRd = realDataMap.get(key);
                         if (oldRd != null) {
                             if (oldRd.getLatitude() == rd.getLatitude()
@@ -302,7 +302,7 @@ public class AreaAlarmService implements IAreaAlarmService {
                         oldRd.setLatitude(rd.getLatitude());
                         oldRd.setLongitude(rd.getLongitude());
                         realDataMap.put(key, oldRd);
-                        String hql = "from MapArea where areaId = ? and Deleted = false";
+                        String hql = "from MapArea where areaId = ? ";
                         MapArea ec = (MapArea) this.mapAreaService.find(hql, areaId);
                         if (ec != null) {
                             ec.setStartDate(TimeUtils.todatetime(TimeUtils.dateTodetailStr(ec.getStartDate())));;
@@ -352,7 +352,7 @@ public class AreaAlarmService implements IAreaAlarmService {
                         AlarmRecord.TYPE_OVER_SPEED_ON_ROUTE, TURN_OFF, rd,
                         alarmItem.getAlarmId(), null);
                 //关闭分段超速报警
-                rd.setOverSpeedAlarm(null);
+//                rd.setOverSpeedAlarm(null);
             }
             return;
         }
@@ -382,8 +382,8 @@ public class AreaAlarmService implements IAreaAlarmService {
                 insertAlarm(AlarmRecord.ALARM_FROM_PLATFORM,
                         AlarmRecord.TYPE_OVER_SPEED_ON_ROUTE, rd, ec.getName()
                                 + ",分段名称:" + rs.getName());
-                rd.setOverSpeedAlarm("路线名称:" + ec.getName() + ",分段:"
-                        + rs.getName() + "速度:" + rd.getVelocity());
+//                rd.setOverSpeedAlarm("路线名称:" + ec.getName() + ",分段:"
+//                        + rs.getName() + "速度:" + rd.getVelocity());
                 if (AlarmRecord.STATUS_NEW.equals(alarmItem.getStatus())) {
                     //创建分段超速报警
                     CreateWarnRecord(AlarmRecord.ALARM_FROM_PLATFORM,
@@ -403,7 +403,7 @@ public class AreaAlarmService implements IAreaAlarmService {
                         AlarmRecord.TYPE_OVER_SPEED_ON_ROUTE, TURN_OFF, rd,
                         seg.getEntityId(), null);
             }
-            rd.setOverSpeedAlarm(null);
+//            rd.setOverSpeedAlarm(null);
         }
     }
 
@@ -443,7 +443,7 @@ public class AreaAlarmService implements IAreaAlarmService {
                         && offsetAlarm.getStatus().equals("")) {
                     offsetAlarm.setStatus(AlarmRecord.STATUS_NEW); //报警开始
                     this.insertAlarm(alarmSource, alarmType, rd, ec.getName());
-                    rd.setOffsetRouteAlarm("偏离路线:" + ec.getName());
+//                    rd.setOffsetRouteAlarm("偏离路线:" + ec.getName());
                     Date originTime = rd.getSendTime();
                     rd.setSendTime(offsetTime);
                     // 创建偏离报警
@@ -480,7 +480,7 @@ public class AreaAlarmService implements IAreaAlarmService {
                             ec.getEntityId(), null);
                     offsetRouteWarn.remove(alarmKey);
                 }
-                rd.setOffsetRouteAlarm(null);
+//                rd.setOffsetRouteAlarm(null);
                 if (onRouteAlarm == null) {
                     onRouteAlarm = new AlarmItem(rd, AlarmRecord.TYPE_ON_ROUTE,
                             alarmSource);
@@ -510,13 +510,13 @@ public class AreaAlarmService implements IAreaAlarmService {
      */
     private void CreateWarnRecord(String OperateType, String alarmType,
                                   String warnState, GPSRealData rd, long areaId, String location) {
-        AlarmRecord sr = CreateRecord(OperateType, alarmType, warnState, rd,
-                areaId);
-        if (sr != null) {
-            if (location != null)
-                sr.setLocation(location);
-            alarmRecordService.saveOrUpdate(sr);
-        }
+//        AlarmRecord sr = CreateRecord(OperateType, alarmType, warnState, rd,
+//                areaId);
+//        if (sr != null) {
+//            if (location != null)
+//                sr.setLocation(location);
+//            alarmRecordService.saveOrUpdate(sr);
+//        }
     }
 
     //获取分段信息
@@ -584,13 +584,13 @@ public class AreaAlarmService implements IAreaAlarmService {
     private void CrossBorder(MapArea ec, GPSRealData rd, boolean isInArea) {
         MapArea oldArea = getOldMapArea(rd.getPlateNo(), ec.getEntityId());
 
-        if (isInArea) {
-            if (this.alarmConfigService.isAlarmEnabled(AlarmRecord.TYPE_IN_AREA, AlarmRecord.ALARM_FROM_PLATFORM))
-                rd.setMapAreaAlarm("进入区域:" + ec.getName());
-        } else {
-            if (this.alarmConfigService.isAlarmEnabled(AlarmRecord.TYPE_CROSS_BORDER, AlarmRecord.ALARM_FROM_PLATFORM))
-                rd.setMapAreaAlarm("离开区域:" + ec.getName());
-        }
+//        if (isInArea) {
+//            if (this.alarmConfigService.isAlarmEnabled(AlarmRecord.TYPE_IN_AREA, AlarmRecord.ALARM_FROM_PLATFORM))
+//                rd.setMapAreaAlarm("进入区域:" + ec.getName());
+//        } else {
+//            if (this.alarmConfigService.isAlarmEnabled(AlarmRecord.TYPE_CROSS_BORDER, AlarmRecord.ALARM_FROM_PLATFORM))
+//                rd.setMapAreaAlarm("离开区域:" + ec.getName());
+//        }
 
         if (isInArea && oldArea == null) {
             insertAlarm(AlarmRecord.ALARM_FROM_PLATFORM,
@@ -629,14 +629,14 @@ public class AreaAlarmService implements IAreaAlarmService {
      */
     private void CreateAlarmRecord(String alarmSource, String alarmType,
                                    String alarmState, GPSRealData rd, MapArea ec) {
-        AlarmRecord sr = CreateRecord(alarmSource, alarmType, alarmState, rd,
-                ec.getEntityId());
-        if (sr != null && ec != null) {
-            sr.setStation(ec.getEntityId());
-            sr.setLocation(ec.getName());
-        }
-        if (sr != null)
-            alarmRecordService.saveOrUpdate(sr);
+//        AlarmRecord sr = CreateRecord(alarmSource, alarmType, alarmState, rd,
+//                ec.getEntityId());
+//        if (sr != null && ec != null) {
+//            sr.setStation(ec.getEntityId());
+//            sr.setLocation(ec.getName());
+//        }
+//        if (sr != null)
+//            alarmRecordService.saveOrUpdate(sr);
     }
 
     private AlarmRecord CreateRecord(String alarmSource, String alarmType,
@@ -732,12 +732,12 @@ public class AreaAlarmService implements IAreaAlarmService {
         if (MapArea.ROUTE.equals(ec.getAreaType())) {
             AnalyzeOffsetRoute(rd, ec, mp);
         } else {
-            if (ec.getKeyPoint() == 1) {
+            if (ec.getKeyPoint() == 1) {//这边计算关键点，但是不准确而且和圆是一样的
                 if (ec.getByTime())
                     monitorKeyPointArrvie(rd, ec, mp);// 进入指定的关键点报警
                 else
                     monitorKeyPointLeave(rd, ec, mp); // 离开指定的关键点报警
-            } else {
+            } else {//这边计算进区域
                 boolean isbytime = true;
                 if (ec.getByTime()) {//时间范围，如果不在时间范围那么就不进行围栏判断
                     if (!TimeUtils.isEffectiveDate(rd.getSendTime(), ec.getStartDate(), ec.getEndDate())) {
@@ -747,7 +747,7 @@ public class AreaAlarmService implements IAreaAlarmService {
                 if (isbytime) {
                     String key = rd.getSimNo() + "_" + ec.getEntityId();
                     boolean arg = true;
-                    boolean inArea = IsInArea(ec, mp);
+                    boolean inArea = IsInArea(ec, mp);//这边进行计算是否在区域内
                     if (CrossMap.containsKey(key)) {
                         if (inArea == CrossMap.get(key)) {//如果进去和出去和之前报警的相同，那么就不产生报警
                             arg = false;
@@ -788,12 +788,12 @@ public class AreaAlarmService implements IAreaAlarmService {
                 boolean inEnclosure = IsInArea(ec, mp);
                 if (inEnclosure == false) {
                     this.insertAlarm(alarmSource, alarmType, rd, ec.getName());
-                    rd.setArriveKeyPlaceAlarm("关键点:" + ec.getName());
+//                    rd.setArriveKeyPlaceAlarm("关键点:" + ec.getName());
                 } else {
                     item = new AlarmItem(rd, alarmType, alarmSource);
                     item.setStatus(AlarmRecord.STATUS_OLD);
                     keyPlaceAlarmMap.put(key, item);
-                    rd.setArriveKeyPlaceAlarm(null);
+//                    rd.setArriveKeyPlaceAlarm(null);
                 }
             }
         }
@@ -822,8 +822,7 @@ public class AreaAlarmService implements IAreaAlarmService {
                     this.insertAlarm(alarmSource, alarmType, rd, ec.getName());
                     item = new AlarmItem(rd, alarmType, alarmSource);
                     keyPlaceAlarmMap.put(key, item);
-
-                    rd.setLeaveKeyPlaceAlarm("关键点:" + ec.getName());
+//                    rd.setLeaveKeyPlaceAlarm("关键点:" + ec.getName());
                 }
             } else if (item.getStatus().equals(AlarmRecord.STATUS_NEW)) {
                 boolean inArea = IsInArea(ec, mp);
@@ -831,7 +830,7 @@ public class AreaAlarmService implements IAreaAlarmService {
                     item = new AlarmItem(rd, alarmType, alarmSource);
                     item.setStatus(AlarmRecord.STATUS_OLD);
                     keyPlaceAlarmMap.put(key, item);
-                    rd.setArriveKeyPlaceAlarm(null);
+//                    rd.setArriveKeyPlaceAlarm(null);
                 }
             }
         }
