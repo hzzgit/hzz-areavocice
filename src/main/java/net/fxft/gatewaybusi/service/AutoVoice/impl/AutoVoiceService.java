@@ -96,6 +96,10 @@ public class AutoVoiceService implements IAutoVoiceService {
                                     v.setConfigTime(new HashMap<>());
                                 }
                             }
+                        }else{
+                            log.debug("语音播报中移除缓存simno"+p);
+                            v.setIsacc(false);
+                            v.setConfigTime(new HashMap<>());
                         }
                     }
                 });
