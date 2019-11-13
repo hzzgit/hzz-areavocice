@@ -217,62 +217,62 @@ public class AreaAlarmService implements IAreaAlarmService {
                 }
                 AreaConfigMap = AreaConfigMap1;
             }
-            Set<String> keys = offsetRouteWarn.keySet();
-            for (String key : keys) {
-                if (areaBindingMap.containsKey(key) == false) {
-                    //取消绑定，该报警结束;
-                    AlarmItem ai = offsetRouteWarn.get(key);
-                    if (ai != null && ai.getSimNo() != null) {
-                        GPSRealData rd = this.realDataService.get(ai.getSimNo());
-//                        rd.setOffsetRouteAlarm(null);
-
-                        log.error(rd.getPlateNo() + "路线偏移报警关闭:" + key);
-                    }
-                }
-            }
-            keys = this.areaAlarmMap.keySet();
-            for (String key : keys) {
-                if (areaBindingMap.containsKey(key) == false) {
-                    //取消绑定，该报警结束;
-                    AlarmItem ai = this.areaAlarmMap.get(key);
-                    if (ai != null && ai.getSimNo() != null) {
-                        areaAlarmMap.remove(key);
-                        GPSRealData rd = this.realDataService.get(ai.getSimNo());
-//                        rd.setMapAreaAlarm(null);
-                        log.error(rd.getPlateNo() + "区域报警关闭:" + key);
-                    }
-                }
-            }
-            keys = this.keyPlaceAlarmMap.keySet();
-            for (String key : keys) {
-                if (areaBindingMap.containsKey(key) == false) {
-                    //取消绑定，该报警结束;
-                    AlarmItem ai = this.keyPlaceAlarmMap.get(key);
-                    if (ai != null && ai.getSimNo() != null) {
-                        keyPlaceAlarmMap.remove(key);
-                        GPSRealData rd = this.realDataService.get(ai.getSimNo());
-//                        if (AlarmRecord.TYPE_ARRIVE_NOT_ON_TIME.equals(ai.getAlarmType()))
-//                            rd.setArriveKeyPlaceAlarm(null);
-//                        else
-//                            rd.setLeaveKeyPlaceAlarm(null);
-
-                        log.error(rd.getPlateNo() + "关键点报警关闭:" + key);
-                    }
-                }
-            }
-            keys = this.overSpeedAlarmMap.keySet();
-            for (String key : keys) {
-                if (areaBindingMap.containsKey(key) == false) {
-                    //取消绑定，该报警结束;
-                    AlarmItem ai = this.overSpeedAlarmMap.get(key);
-                    if (ai != null && ai.getSimNo() != null) {
-                        overSpeedAlarmMap.remove(key);
-                        GPSRealData rd = this.realDataService.get(ai.getSimNo());
-//                        rd.setOverSpeedAlarm(null);
-                        log.error(rd.getPlateNo() + "分段限速报警关闭:" + key);
-                    }
-                }
-            }
+//            Set<String> keys = offsetRouteWarn.keySet();
+//            for (String key : keys) {
+//                if (areaBindingMap.containsKey(key) == false) {
+//                    //取消绑定，该报警结束;
+//                    AlarmItem ai = offsetRouteWarn.get(key);
+//                    if (ai != null && ai.getSimNo() != null) {
+//                        GPSRealData rd = this.realDataService.get(ai.getSimNo());
+////                        rd.setOffsetRouteAlarm(null);
+//
+//                        log.error(rd.getPlateNo() + "路线偏移报警关闭:" + key);
+//                    }
+//                }
+//            }
+//            keys = this.areaAlarmMap.keySet();
+//            for (String key : keys) {
+//                if (areaBindingMap.containsKey(key) == false) {
+//                    //取消绑定，该报警结束;
+//                    AlarmItem ai = this.areaAlarmMap.get(key);
+//                    if (ai != null && ai.getSimNo() != null) {
+//                        areaAlarmMap.remove(key);
+//                        GPSRealData rd = this.realDataService.get(ai.getSimNo());
+////                        rd.setMapAreaAlarm(null);
+//                        log.error(rd.getPlateNo() + "区域报警关闭:" + key);
+//                    }
+//                }
+//            }
+//            keys = this.keyPlaceAlarmMap.keySet();
+//            for (String key : keys) {
+//                if (areaBindingMap.containsKey(key) == false) {
+//                    //取消绑定，该报警结束;
+//                    AlarmItem ai = this.keyPlaceAlarmMap.get(key);
+//                    if (ai != null && ai.getSimNo() != null) {
+//                        keyPlaceAlarmMap.remove(key);
+//                        GPSRealData rd = this.realDataService.get(ai.getSimNo());
+////                        if (AlarmRecord.TYPE_ARRIVE_NOT_ON_TIME.equals(ai.getAlarmType()))
+////                            rd.setArriveKeyPlaceAlarm(null);
+////                        else
+////                            rd.setLeaveKeyPlaceAlarm(null);
+//
+//                        log.error(rd.getPlateNo() + "关键点报警关闭:" + key);
+//                    }
+//                }
+//            }
+//            keys = this.overSpeedAlarmMap.keySet();
+//            for (String key : keys) {
+//                if (areaBindingMap.containsKey(key) == false) {
+//                    //取消绑定，该报警结束;
+//                    AlarmItem ai = this.overSpeedAlarmMap.get(key);
+//                    if (ai != null && ai.getSimNo() != null) {
+//                        overSpeedAlarmMap.remove(key);
+//                        GPSRealData rd = this.realDataService.get(ai.getSimNo());
+////                        rd.setOverSpeedAlarm(null);
+//                        log.error(rd.getPlateNo() + "分段限速报警关闭:" + key);
+//                    }
+//                }
+//            }
             long e = System.currentTimeMillis(); //获取结束时间
             log.debug(alog.toString() + "用时：" + (e - s) + "ms");
         } catch (Exception e) {

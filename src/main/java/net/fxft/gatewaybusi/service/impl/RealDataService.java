@@ -101,8 +101,12 @@ public class RealDataService implements IRealDataService {
 
 
     public VehicleData getVehicleData(String simNo) {
-        String sql = "select * from vehicle where deleted=false and simno=? ";
-        return JdbcUtil.getDefault().sql(sql).addIndexParam(simNo).queryFirst(VehicleData.class);
+        VehicleData vehicleData = null;
+        if(vehicleDataMap.containsKey(simNo)){
+            vehicleData = vehicleDataMap.get(simNo);
+        }
+        return  vehicleData;
+
     }
 
 }

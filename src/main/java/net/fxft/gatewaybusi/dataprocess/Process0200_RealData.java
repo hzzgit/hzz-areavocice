@@ -1,6 +1,7 @@
 package net.fxft.gatewaybusi.dataprocess;
 
 import com.ltmonitor.entity.GPSRealData;
+import com.ltmonitor.entity.VehicleData;
 import com.ltmonitor.jt808.protocol.JT_0200;
 import com.ltmonitor.jt808.protocol.JT_0201;
 import com.ltmonitor.jt808.protocol.T808Message;
@@ -13,6 +14,7 @@ import net.fxft.gateway.util.SimNoUtil;
 import net.fxft.gatewaybusi.service.AutoVoice.IAutoVoiceService;
 import net.fxft.gatewaybusi.service.IRealDataService;
 import net.fxft.gatewaybusi.service.MapArea.AreaAlarmService;
+import net.fxft.gatewaybusi.service.impl.RealDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,9 @@ public class Process0200_RealData{
     private static final Logger log = LoggerFactory.getLogger(Process0200_RealData.class);
 
     private static long MaxAfterMillis = 20*3600*1000;
+
+    @Autowired
+    private RealDataService realDataService;
 
     //语音播报服务层
     @Autowired
@@ -72,6 +77,10 @@ public class Process0200_RealData{
             // 保证是有效坐标
             rd.setLatitude(latitude);
             rd.setLongitude(longitude);
+        }
+        VehicleData vehicleData= realDataService.getVehicleData(simNo);
+        if(vehicleData!=null){
+            rd.setVehicleId(vehicleData.getEntityId());
         }
         rd.setVelocity(speed);
         rd.setStatus(jvi.getStrStatus());
