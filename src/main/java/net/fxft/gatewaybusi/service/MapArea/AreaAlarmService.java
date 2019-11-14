@@ -14,6 +14,7 @@ import net.fxft.gateway.event.EventMsg;
 import net.fxft.gateway.event.alarm.AreaAlarmEvent;
 import net.fxft.gateway.event.everyunit.UpdateCacheEvent;
 import net.fxft.gatewaybusi.kafka.KafkaMessageSender;
+import net.fxft.gatewaybusi.kafka.StartKafkaComsumer;
 import net.fxft.gatewaybusi.service.IRealDataService;
 
 import org.slf4j.Logger;
@@ -59,15 +60,9 @@ public class AreaAlarmService implements IAreaAlarmService {
 
     @Autowired
     private INewAlarmService newAlarmService;
+
     @Autowired
-    private IAlarmConfigService alarmConfigService;
-
-
-    @Resource
-    private IRealDataService realDataService;
-
-
-
+    private StartKafkaComsumer startKafkaComsumer;
     /**
      * 报警分析线程，单独开辟一个线程进行分析
      */
@@ -180,7 +175,12 @@ public class AreaAlarmService implements IAreaAlarmService {
         if (analyzeThread == null)
             return;
         try {
+            startKafkaComsumer.shutdownHook();
             analyzeThread.interrupt();
+            while(AreaQueue.size()>0){
+                log.debug("围栏处理队列中还有"+AreaQueue.size()+"条，等待处理完再关闭");
+                Thread.sleep(500);
+            }
 //			analyzeThread.join(2000);
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
