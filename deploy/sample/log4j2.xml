@@ -1,0 +1,48 @@
+<Configuration status="WARN">
+
+    <Properties>
+		<Property name="FILE_PATH">logs</Property>
+        <Property name="FILE_SIZE">60MB</Property>
+        <Property name="FILE_MAXCOUNT">30</Property>
+        <Property name="console_pattern">%d{HH:mm:ss.SSS} %5p [%thread] (%c:%M:%L) - %m%n</Property>
+        <Property name="file_pattern">%d %5p [%thread] (%c:%M:%L) - %m%n</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${console_pattern}"/>
+        </Console>
+        <RollingRandomAccessFile name="debugFile"
+                                 fileName="${FILE_PATH}/debug.log" filePattern="${FILE_PATH}/debug.log.%i" immediateFlush="false">
+            <PatternLayout pattern="${file_pattern}"/>
+            <SizeBasedTriggeringPolicy size="${FILE_SIZE}"/>
+            <DefaultRolloverStrategy max="${FILE_MAXCOUNT}"/>
+        </RollingRandomAccessFile>
+        <RollingRandomAccessFile name="infoFile"
+                                 fileName="${FILE_PATH}/info.log" filePattern="${FILE_PATH}/info.log.%i" immediateFlush="false">
+            <PatternLayout pattern="${file_pattern}"/>
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            <SizeBasedTriggeringPolicy size="${FILE_SIZE}"/>
+            <DefaultRolloverStrategy max="${FILE_MAXCOUNT}"/>
+        </RollingRandomAccessFile>
+    </Appenders>
+
+    <Loggers>
+        <Root level="info" includeLocation="false">
+            <AppenderRef ref="console"/>
+            <AppenderRef ref="debugFile"/>
+            <AppenderRef ref="infoFile"/>
+        </Root>
+        <AsyncLogger name="net.fxft" level="debug" additivity="false" includeLocation="true">
+            <AppenderRef ref="console"/>
+            <AppenderRef ref="debugFile"/>
+            <AppenderRef ref="infoFile"/>
+        </AsyncLogger>
+        <AsyncLogger name="com.ltmonitor" level="debug" additivity="false" includeLocation="true">
+            <AppenderRef ref="console"/>
+            <AppenderRef ref="debugFile"/>
+            <AppenderRef ref="infoFile"/>
+        </AsyncLogger>
+    </Loggers>
+
+</Configuration>

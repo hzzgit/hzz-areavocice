@@ -5,6 +5,10 @@ import net.fxft.cloud.metrics.Tps;
 import net.fxft.common.tpool.BlockedThreadPoolExecutor;
 import net.fxft.common.util.ByteUtil;
 import net.fxft.gateway.kafka.UnitConfig;
+import net.fxft.gateway.protocol.DeviceMsg;
+import net.fxft.gateway.protocol.DeviceMsgBuilder;
+import net.fxft.gateway.protocol.TransferMsg;
+import net.fxft.gateway.protocol.TransferMsgBuilder;
 import net.fxft.gateway.util.KryoUtil;
 import net.fxft.gatewaybusi.IShutdownHook;
 import net.fxft.gatewaybusi.service.IMessageProcessService;
@@ -26,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
 
 @Component
-public class StartKafkaComsumer implements IShutdownHook{
+public class StartKafkaComsumer implements IShutdownHook {
 
     private static final Logger log = LoggerFactory.getLogger(StartKafkaComsumer.class);
     @Autowired
@@ -40,7 +44,7 @@ public class StartKafkaComsumer implements IShutdownHook{
     private BlockedThreadPoolExecutor execPool = null;
 
     @Value("${kafkaComsumer.threadPool:10}")
-    private int threadCount ;
+    private int threadCount;
 
     private Tps processTps = new Tps();
 
@@ -48,7 +52,6 @@ public class StartKafkaComsumer implements IShutdownHook{
 
     private volatile boolean stopped = false;
     private Thread kafkaThread;
-
 
 
     public void startListener() throws Exception {
@@ -74,7 +77,6 @@ public class StartKafkaComsumer implements IShutdownHook{
     }
 
 
-
     private void startKafkaListener() {
         kafkaThread = new Thread(new Runnable() {
             @Override
@@ -91,7 +93,7 @@ public class StartKafkaComsumer implements IShutdownHook{
                     } catch (Exception e) {
                         log.error("kafka poll出错！", e);
                     }
-                    if(stopped){
+                    if (stopped) {
                         try {
                             log.info("---开始停止KafkaListener！");
                             long l1 = System.currentTimeMillis();
@@ -102,7 +104,7 @@ public class StartKafkaComsumer implements IShutdownHook{
                                 log.error("", e);
                             }
                             long l2 = System.currentTimeMillis();
-                            log.info("---KafkaListener已停止！耗时="+(l2-l1));
+                            log.info("---KafkaListener已停止！耗时=" + (l2 - l1));
                         } finally {
                             break;
                         }
@@ -122,15 +124,23 @@ public class StartKafkaComsumer implements IShutdownHook{
         });
     }
 
-    private void pocess(byte[] message){
+    private void pocess(byte[] message) {
+
         try {
-            T808Message tm  = KryoUtil.clsbyte2object(message);
-
+            TransferMsg transferMsg = TransferMsgBuilder.decodeFromBytes(message);
+            if (transferMsg.isDecodable()) {
+                DeviceMsg dm = (DeviceMsg) transferMsg.getMsgObject();
+                T808Message tm = DeviceMsgBuilder.buildFromDeviceMsg(dm);
+                if (tm == null) {
+                    log.debug("接收到非T808Message消息, 丢弃！dm=" + dm);
+                    return;
+                }
                 messageProcessService.processMsg(tm);
+            }
         } catch (Exception e) {
-            log.error("kafka接收fromDeviceMsg处理出错！bytes="+ ByteUtil.byteToHexStr(message), e);
+            log.error("kafka接收fromDeviceMsg处理出错！bytes=" + ByteUtil.byteToHexStr(message), e);
         }
-    }
 
+    }
 
 }
