@@ -21,16 +21,13 @@ public class AfterStarted implements AfterStartedRunner {
 
     @Autowired
     private StartKafkaComsumer startKafkaComsumer;
-    @Autowired
-    private NoticeEventConsumer eventConsumer;
+
 
     @Override
     public void run() throws Exception {
 
         log.info("启动围栏报警和语音播报服务");
         startKafkaComsumer.startListener();
-        eventConsumer.start();
-
     }
 
 

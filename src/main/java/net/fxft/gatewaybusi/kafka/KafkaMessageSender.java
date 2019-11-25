@@ -3,6 +3,7 @@ package net.fxft.gatewaybusi.kafka;
 import net.fxft.cloud.metrics.Tps;
 import net.fxft.gateway.event.EventMsg;
 import net.fxft.gateway.kafka.UnitConfig;
+import net.fxft.gateway.protocol.TransferMsgBuilder;
 import net.fxft.gateway.util.KryoUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,8 +40,7 @@ public class KafkaMessageSender{
 
     public boolean sendEveryUnitEventMsg(EventMsg eventMsg) {
         try {
-            byte[] bytes = KryoUtil.object2clsbyte(eventMsg);
-            kafkaTemplate.send(UnitConfig.instance.getEveryUnitEventTopic(), bytes);
+            kafkaTemplate.send(UnitConfig.instance.getEveryUnitEventTopic(), TransferMsgBuilder.build(eventMsg).toTransferBytes());
             log.debug("kafka发送EveryUnitEvent！" + eventMsg);
             totalSendCount.increment();
             sendKafkaTps.inc();
@@ -52,8 +52,7 @@ public class KafkaMessageSender{
     }
     public boolean sendAlarmEventMsg(EventMsg eventMsg, String simNo) {
         try {
-            byte[] bytes = KryoUtil.object2clsbyte(eventMsg);
-            kafkaTemplate.send(UnitConfig.instance.getAlarmEventTopic(),simNo, bytes);
+            kafkaTemplate.send(UnitConfig.instance.getAlarmEventTopic(),simNo, TransferMsgBuilder.build(eventMsg).toTransferBytes());
             log.debug("kafka发送AlarmEvent！" + eventMsg);
             totalSendCount.increment();
             sendKafkaTps.inc();
@@ -66,8 +65,7 @@ public class KafkaMessageSender{
 
     public boolean sendAreaAlarmEventMsg(EventMsg eventMsg) {
         try {
-            byte[] bytes = KryoUtil.object2clsbyte(eventMsg);
-            kafkaTemplate.send(UnitConfig.instance.getAlarmEventTopic(), bytes);
+            kafkaTemplate.send(UnitConfig.instance.getAlarmEventTopic(),TransferMsgBuilder.build(eventMsg).toTransferBytes());
             log.debug("kafka发送围栏报警！" + eventMsg);
             totalSendCount.increment();
             sendKafkaTps.inc();

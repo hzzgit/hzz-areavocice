@@ -63,7 +63,10 @@ public class GatewayBusiApplicationStart {
     public UnitConfig crateUnitConfig() {
         return new UnitConfig();
     }
-
+    @Bean
+    public EveryUnitKafkaHelper createEveryUnitKafkaHelper() {
+        return new EveryUnitKafkaHelper();
+    }
 
     @Bean(destroyMethod = "shutdown")
     public ScheduledExecutorService createScheduledExecutor() {
