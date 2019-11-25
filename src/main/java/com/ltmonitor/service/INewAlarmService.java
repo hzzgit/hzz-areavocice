@@ -3,9 +3,6 @@ package com.ltmonitor.service;
 import com.ltmonitor.entity.Alarm;
 import com.ltmonitor.entity.GPSRealData;
 
-
-import java.util.Date;
-
 /**
  * 最新报警入库服务
  * @author admin
@@ -26,7 +23,7 @@ public interface INewAlarmService  {
 	 * @param rd
 	 */
 	Alarm insertAlarm(String alarmSource, String alarmType,
-                     GPSRealData rd, String remark);
+					  GPSRealData rd, String remark);
 
 
 }
