@@ -72,9 +72,9 @@ public class MapArea extends TenantEntity implements Serializable {
     // 半径，以地图的米为单位
     private double radius;
     // 是否根据时间
-    private boolean byTime;
+    private int byTime; //0是false,1是true
     // 是否限速
-    private boolean limitSpeed;
+    private int limitSpeed;
     /**
      * 偏移报警延迟时间
      */
@@ -95,7 +95,7 @@ public class MapArea extends TenantEntity implements Serializable {
         setEndDate(new Date());
         this.maxSpeed = 89;
         this.delay = 10;
-        this.limitSpeed = true;
+        this.limitSpeed = 1;
         this.setLineWidth(50);
         //this.mapType = Constants.MAP_GOOGLE;
     }
@@ -181,18 +181,26 @@ public class MapArea extends TenantEntity implements Serializable {
     }
 
     public boolean getByTime() {
-        return byTime;
+        if(byTime==0){
+            return  false;
+        }else{
+            return  true;
+        }
     }
 
-    public void setByTime(boolean value) {
+    public void setByTime(int value) {
         byTime = value;
     }
 
     public boolean getLimitSpeed() {
-        return limitSpeed;
+        if(limitSpeed==0){
+            return  false;
+        }else{
+            return  true;
+        }
     }
 
-    public void setLimitSpeed(boolean value) {
+    public void setLimitSpeed(int value) {
         limitSpeed = value;
     }
 

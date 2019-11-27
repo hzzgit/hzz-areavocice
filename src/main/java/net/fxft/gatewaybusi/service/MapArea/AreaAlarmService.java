@@ -308,7 +308,7 @@ public class AreaAlarmService implements IAreaAlarmService {
                         oldRd.setLatitude(rd.getLatitude());
                         oldRd.setLongitude(rd.getLongitude());
                         realDataMap.put(key, oldRd);
-                        String hql = "from MapArea where areaId = ? ";
+                        String hql = "select * from MapArea where areaId = ? ";
                         MapArea ec = (MapArea) this.mapAreaService.find(hql, areaId);
                         if (ec != null) {
                             ec.setStartDate(TimeUtils.todatetime(TimeUtils.dateTodetailStr(ec.getStartDate())));;

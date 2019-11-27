@@ -254,8 +254,7 @@ public class AutoVoiceService implements IAutoVoiceService {
             } catch (Exception e) {
                 alog.log("出现异常", BasicUtil.exceptionMsg(e));
             } finally {
-                long e=System.currentTimeMillis(); //获取结束时间
-                log.debug(alog.toString()+"用时"+(e-s)+"ms");
+
             }
         }
     }
