@@ -203,7 +203,7 @@ public class NewAlarmService implements INewAlarmService {
             ar.setLocation(rd.getLocation());
 //            String alarmTalbeName = Constants.getAlarmTableName();
 //            ar.setTableName(alarmTalbeName);
-          //  this.enQueue(ar, remark);//2019版就不插入到alarm表
+            this.enQueue(ar, remark);//2019版就不插入到alarm表
             return  ar;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
