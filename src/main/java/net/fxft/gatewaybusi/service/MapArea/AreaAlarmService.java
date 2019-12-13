@@ -191,7 +191,7 @@ public class AreaAlarmService implements IAreaAlarmService {
 
     //缓存围栏配置信息
     private void AreaConfigThread() {
-        AttrLog alog = AttrLog.get("缓存围栏配置信息");
+        AttrLog alog = AttrLog.get("缓存围栏配置信息20191213版本");
         try {
             long s = System.currentTimeMillis();   //获取开始时间
             Map<String, Integer> areaBindingMap = new HashMap<String, Integer>();
@@ -647,7 +647,7 @@ public class AreaAlarmService implements IAreaAlarmService {
 
     private AlarmRecord CreateRecord(String alarmSource, String alarmType,
                                      String alarmState, GPSRealData rd, long stationId) {
-        String hsql = "from AlarmRecord rec where rec.plateNo = ? and rec.status = ? and rec.alarmSource = ? and rec.alarmType = ? and station = ?";
+        String hsql = "select from AlarmRecord rec where rec.plateNo = ? and rec.status = ? and rec.alarmSource = ? and rec.alarmType = ? and station = ?";
         // 创建报警记录
         AlarmRecord sr = (AlarmRecord) alarmRecordService.find(hsql,
                 new Object[]{rd.getPlateNo(), AlarmRecord.STATUS_NEW,
