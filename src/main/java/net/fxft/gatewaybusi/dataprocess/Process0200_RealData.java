@@ -35,52 +35,9 @@ public class Process0200_RealData{
     @Autowired
     private AreaAlarmService areaAlarmService;
 
-    public void processData(String simNo, T808Message message) throws Exception {
-        int headerType = message.getHeader().getMessageType();
-        JT_0200 jvi = null;
-        if (headerType == 0x0200) {
-            jvi = (JT_0200) message.getMessageContents();
-        } else if (headerType == 0x0201) {
-            JT_0201 jt = (JT_0201) message.getMessageContents();
-            jvi = jt.getPositionReport();
-        }
-        if (jvi == null) {
-            return;
-        }
-        Date dt = DateUtil.stringToDatetime(jvi.getTime(),
-                "yyyy-MM-dd HH:mm:ss");
-        if (dt == null) {
-            log.error(message.getSimNo() + "," + message.getPlateNo()
-                    + "定位包无效的日期:" + jvi.getTime());
-            return; // 对于无效日期的包，是否丢弃?
-        }
-        if (dt.getTime() - System.currentTimeMillis() > MaxAfterMillis) {
-            log.error("定位数据日期无效，收到未来的时间！" + message.getSimNo() + ",定位包信息:" +
-                    jvi.toString());
-            return;
-        }
+    public void processData(String simNo, GPSRealData rd) throws Exception {
 
-        double latitude = 0.000001 * jvi.getLatitude();
-        double longitude =  0.000001 * jvi.getLongitude();
-        double speed = jvi.getSpeed() / 10.0;
-        GPSRealData rd = new GPSRealData();
-//        rd.setResponseSn((int) (message.getHeader().getMessageSerialNo()));
-        simNo = SimNoUtil.toSimNo12(simNo);
-        rd.setSimNo(simNo);
-        rd.setSendTime(dt);
-        if (latitude > 0 && longitude > 0) {
-            // 保证是有效坐标
-            rd.setLatitude(latitude);
-            rd.setLongitude(longitude);
-        }
-        VehicleData vehicleData= realDataService.getVehicleData(simNo);
-        if(vehicleData!=null){
-            rd.setVehicleId(vehicleData.getEntityId());
-        }
-        rd.setVelocity(speed);
-        rd.setStatus(jvi.getStrStatus());
-        rd.setOnlineDate(dt);
-        rd.setOnline(true);
+
         autoVoiceService.autoVoiceMain(rd);
         areaAlarmService.addAreaqueue(rd);
 

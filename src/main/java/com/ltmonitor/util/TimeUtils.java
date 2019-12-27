@@ -225,7 +225,16 @@ public final class TimeUtils {
         }
     }
 
-
+    /**
+     * 时间戳转时间
+     * @param timeStamp
+     * @return 字符串类型的时间
+     */
+    public static Date timeStamptotime(long timeStamp)   {
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//这个是你要转成后的时间的格式
+        Date da= new Date(timeStamp);
+        return da;
+    }
     /**
      * date2比date1多的天数
      *
