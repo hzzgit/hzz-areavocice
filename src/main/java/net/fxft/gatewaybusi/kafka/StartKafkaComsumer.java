@@ -7,6 +7,7 @@ import com.ltmonitor.jt808.protocol.JT_0704;
 import com.ltmonitor.jt808.protocol.T808Message;
 import com.ltmonitor.util.ConverterUtils;
 import com.ltmonitor.util.DateUtil;
+import com.ltmonitor.util.StringUtil;
 import com.ltmonitor.util.TimeUtils;
 import net.fxft.cloud.metrics.Tps;
 import net.fxft.common.tpool.BlockedThreadPoolExecutor;
@@ -20,7 +21,9 @@ import net.fxft.gateway.protocol.gps.LocationMsg;
 import net.fxft.gateway.util.KryoUtil;
 import net.fxft.gateway.util.SimNoUtil;
 import net.fxft.gatewaybusi.IShutdownHook;
+import net.fxft.gatewaybusi.service.AutoVoice.IAutoVoiceService;
 import net.fxft.gatewaybusi.service.IMessageProcessService;
+import net.fxft.gatewaybusi.service.MapArea.AreaAlarmService;
 import net.fxft.gatewaybusi.service.impl.RealDataService;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -65,6 +68,13 @@ public class StartKafkaComsumer implements IShutdownHook {
     private volatile boolean stopped = false;
     private Thread kafkaThread;
 
+    //语音播报服务层
+    @Autowired
+    private IAutoVoiceService autoVoiceService;
+
+    //注入围栏报警的类
+    @Autowired
+    private AreaAlarmService areaAlarmService;
 
     @Autowired
     private RealDataService realDataService;
@@ -151,6 +161,8 @@ public class StartKafkaComsumer implements IShutdownHook {
                         JT_0200 jt_0200 = (JT_0200) dm.getMsgBody();
                         GPSRealData rd = getGPS(dm.getSimNo(),jt_0200);
                         messageProcessService.processMsg(rd);
+//                        autoVoiceService.autoVoiceMain(rd);
+//                        areaAlarmService.addAreaqueue(rd);
                     }else if(dm.getMsgBody() instanceof LocationMsg){
                         LocationMsg lm = (LocationMsg) dm.getMsgBody();
                         GPSRealData rd = getGPS(dm.getSimNo(),lm);
@@ -207,11 +219,9 @@ public class StartKafkaComsumer implements IShutdownHook {
             rd.setVehicleId(vehicleData.getEntityId());
         }
         rd.setVelocity(speed);
-        rd.setStatus(jvi.getStrStatus());
-        if(jvi.getStrStatus()==null){
-            rd.setStatus(ConverterUtils.toString(jvi.getStatus()));
-        }
-
+        String staStatus = Integer.toBinaryString(jvi.getStatus());
+        staStatus = StringUtil.leftPad(staStatus, 32, '0');
+        rd.setStatus(staStatus);
         rd.setOnlineDate(dt);
         rd.setOnline(true);
         return  rd;
@@ -247,7 +257,9 @@ public class StartKafkaComsumer implements IShutdownHook {
             rd.setVehicleId(vehicleData.getEntityId());
         }
         rd.setVelocity(speed);
-        rd.setStatus(ConverterUtils.toString(jvi.getStatus()));
+        String staStatus = Integer.toBinaryString(jvi.getStatus());
+        staStatus = StringUtil.leftPad(staStatus, 32, '0');
+        rd.setStatus(staStatus);
         rd.setOnlineDate(dt);
         rd.setOnline(true);
         return  rd;
