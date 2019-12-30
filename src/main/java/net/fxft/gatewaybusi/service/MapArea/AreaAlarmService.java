@@ -90,10 +90,41 @@ public class AreaAlarmService implements IAreaAlarmService {
     //处理实时数据的队列
     private ConcurrentLinkedQueue<GPSRealData> AreaQueue = new ConcurrentLinkedQueue();
 
+    private ConcurrentMap<String, Date> AreaTimeMap = new ConcurrentHashMap<>();//当前车辆点位的时间情况
+
+
+
     //添加到队列
     public void addAreaqueue(GPSRealData rd) {
+
+
         if (AreaConfigMap.containsKey(rd.getSimNo())) {//如果存在这个围栏配置就加入队列进行运算
-            AreaQueue.add(rd);
+            boolean isargTme = false;
+            if (TimeUtils.isdifferminute(rd.getSendTime(), new Date(),1200)) {//如果超过20小时直接干掉
+                return;
+            }
+            if (AreaTimeMap.containsKey(rd.getSimNo())) {//如果存在那么就要去比对时间
+                Date areaTime = AreaTimeMap.get(rd.getSimNo());
+                if(rd.getSendTime().getTime()>areaTime.getTime()){//如果这个大于这个原来的时间
+                    isargTme = true;
+                    AreaTimeMap.put(rd.getSimNo(), rd.getSendTime());
+                }else{//如果小于这个时间，但是却没有差距很大，那么也
+                    if(TimeUtils.isdifferminute(rd.getSendTime(), areaTime,30)&&!TimeUtils.isdifferminute(rd.getSendTime(), new Date(),5)){//如果小于的和记录的差距在30分钟以上
+                        isargTme = true;
+                        AreaTimeMap.put(rd.getSimNo(), rd.getSendTime());
+                    }else{
+                        isargTme=false;
+                    }
+                }
+            }else{//如果不存在，那么就直接算作第一个时间点，时间不存在
+                isargTme = true;
+                AreaTimeMap.put(rd.getSimNo(), rd.getSendTime());
+            }
+            if(isargTme) {
+                AreaQueue.add(rd);
+            }
+        }else{
+            AreaTimeMap.remove(rd.getSimNo());
         }
     }
 
@@ -217,62 +248,6 @@ public class AreaAlarmService implements IAreaAlarmService {
                 }
                 AreaConfigMap = AreaConfigMap1;
             }
-//            Set<String> keys = offsetRouteWarn.keySet();
-//            for (String key : keys) {
-//                if (areaBindingMap.containsKey(key) == false) {
-//                    //取消绑定，该报警结束;
-//                    AlarmItem ai = offsetRouteWarn.get(key);
-//                    if (ai != null && ai.getSimNo() != null) {
-//                        GPSRealData rd = this.realDataService.get(ai.getSimNo());
-////                        rd.setOffsetRouteAlarm(null);
-//
-//                        log.error(rd.getPlateNo() + "路线偏移报警关闭:" + key);
-//                    }
-//                }
-//            }
-//            keys = this.areaAlarmMap.keySet();
-//            for (String key : keys) {
-//                if (areaBindingMap.containsKey(key) == false) {
-//                    //取消绑定，该报警结束;
-//                    AlarmItem ai = this.areaAlarmMap.get(key);
-//                    if (ai != null && ai.getSimNo() != null) {
-//                        areaAlarmMap.remove(key);
-//                        GPSRealData rd = this.realDataService.get(ai.getSimNo());
-////                        rd.setMapAreaAlarm(null);
-//                        log.error(rd.getPlateNo() + "区域报警关闭:" + key);
-//                    }
-//                }
-//            }
-//            keys = this.keyPlaceAlarmMap.keySet();
-//            for (String key : keys) {
-//                if (areaBindingMap.containsKey(key) == false) {
-//                    //取消绑定，该报警结束;
-//                    AlarmItem ai = this.keyPlaceAlarmMap.get(key);
-//                    if (ai != null && ai.getSimNo() != null) {
-//                        keyPlaceAlarmMap.remove(key);
-//                        GPSRealData rd = this.realDataService.get(ai.getSimNo());
-////                        if (AlarmRecord.TYPE_ARRIVE_NOT_ON_TIME.equals(ai.getAlarmType()))
-////                            rd.setArriveKeyPlaceAlarm(null);
-////                        else
-////                            rd.setLeaveKeyPlaceAlarm(null);
-//
-//                        log.error(rd.getPlateNo() + "关键点报警关闭:" + key);
-//                    }
-//                }
-//            }
-//            keys = this.overSpeedAlarmMap.keySet();
-//            for (String key : keys) {
-//                if (areaBindingMap.containsKey(key) == false) {
-//                    //取消绑定，该报警结束;
-//                    AlarmItem ai = this.overSpeedAlarmMap.get(key);
-//                    if (ai != null && ai.getSimNo() != null) {
-//                        overSpeedAlarmMap.remove(key);
-//                        GPSRealData rd = this.realDataService.get(ai.getSimNo());
-////                        rd.setOverSpeedAlarm(null);
-//                        log.error(rd.getPlateNo() + "分段限速报警关闭:" + key);
-//                    }
-//                }
-//            }
             long e = System.currentTimeMillis(); //获取结束时间
             log.debug(alog.toString() + "用时：" + (e - s) + "ms");
         } catch (Exception e) {
@@ -602,7 +577,8 @@ public class AreaAlarmService implements IAreaAlarmService {
 //                rd.setMapAreaAlarm("离开区域:" + ec.getName());
 //        }
 
-        if (isInArea && oldArea == null) {
+        if (isInArea && oldArea == null&&checkisarea(ec.getAlarmType(),isInArea)) {
+
             insertAlarm(AlarmRecord.ALARM_FROM_PLATFORM,
                     AlarmRecord.TYPE_IN_AREA, rd, ec.getName());
 
@@ -616,7 +592,7 @@ public class AreaAlarmService implements IAreaAlarmService {
         }
 
         //离开围栏
-        if (isInArea == false && oldArea != null) {
+        if (isInArea == false && oldArea != null&&checkisarea(ec.getAlarmType(),isInArea)) {
 
             insertAlarm(AlarmRecord.ALARM_FROM_PLATFORM,
                     AlarmRecord.TYPE_CROSS_BORDER, rd, ec.getName());
@@ -627,7 +603,26 @@ public class AreaAlarmService implements IAreaAlarmService {
         }
 
     }
+    //用来判断配置的围栏是进去的还是出去的
+    private boolean checkisarea(String alarmtype,boolean isInArea){
+        boolean arg = false;
+        if(!StringUtil.isNullOrEmpty(alarmtype)){//这个地方是判断是进出围栏还是怎么的
+            if(isInArea){
+                if(alarmtype.indexOf("进区域报警给平台")>-1){
+                    arg = true;
+                }
+            }else{
+                if(alarmtype.indexOf("出区域报警给平台")>-1){
+                    arg = true;
+                }
+            }
+        }
+        return arg;
+    }
 
+    public static void main(String[] args) {
+        System.out.println(new AreaAlarmService().checkisarea("出区域报警给平台,", false));
+    }
     /**
      * 创建围栏进出记录
      *

@@ -366,6 +366,23 @@ public final class TimeUtils {
 
     }
 
+    /**
+     * 判断两个时间是否相差多少分钟以上
+     *
+     * @return
+     */
+    public static long isdifferminute(Date startTime, Date endTime) {
+        try {
+            LocalDateTime start = date2LocalDateTime(startTime);
+            LocalDateTime end = date2LocalDateTime(endTime);
+            Duration between = Duration.between(start, end);
+           return   between.getSeconds();
+        } catch (Exception e) {
+            return  0;
+        }
+
+    }
+
 
     //获取离线时长,当前时间减去上次在线时间，但是必须是离线的车辆
     public static String getdur(Date onlineTime) {
