@@ -225,8 +225,8 @@ public class AreaAlarmService implements IAreaAlarmService {
         AttrLog alog = AttrLog.get("缓存围栏配置信息20191213版本");
         try {
             long s = System.currentTimeMillis();   //获取开始时间
-            Map<String, Integer> areaBindingMap = new HashMap<String, Integer>();
-            String sql="\t\tselect v.plateNo,b.areaId,v.simNo from MapAreaBinding b\n" +
+          //  Map<String, Integer> areaBindingMap = new HashMap<String, Integer>();
+            String sql="\t\tselect b.owner,b.areaId,v.simNo from MapAreaBinding b\n" +
                     "\t\tleft join vehicle v  on b.vehicleId=v.vehicleId\n" +
                     "\t\twhere 1=1  and b.bindType = 'platform' and v.deleted=false\n" +
                     "\t\t\tand b.configType !=3";
@@ -235,10 +235,11 @@ public class AreaAlarmService implements IAreaAlarmService {
             ConcurrentMap<String, List<Integer>> AreaConfigMap1 = new ConcurrentHashMap<>();
             if (ConverterUtils.isList(bindings)) {
                 for (RowDataMap binding : bindings) {
-                    String plateNo = ConverterUtils.toString(binding.get("plateNo"));
+                  //  String plateNo = ConverterUtils.toString(binding.get("plateNo"));
                     String simNo = ConverterUtils.toString(binding.get("simNo"));
+                    String owner = binding.getStringValue("owner");
                     int areaId = ConverterUtils.toInt(binding.get("areaId"));
-                    areaBindingMap.put(plateNo + "_" + areaId, areaId);
+                   // areaBindingMap.put(plateNo + "_" + areaId, areaId);
                     List<Integer> integerList = new ArrayList<>();
                     if (AreaConfigMap1.containsKey(simNo)) {//如果存在就新增
                         integerList = AreaConfigMap1.get(simNo);
@@ -246,7 +247,7 @@ public class AreaAlarmService implements IAreaAlarmService {
                     integerList.add(areaId);
                     AreaConfigMap1.put(simNo, integerList);
                     String key=simNo+"_"+areaId;
-                    if(!CrossMap.containsKey(key)){
+                    if(!StringUtil.isNullOrEmpty(owner)&&"clw".equalsIgnoreCase(owner)&&!CrossMap.containsKey(key)){
                         CrossMap.put(key, true);
                     }
                 }
