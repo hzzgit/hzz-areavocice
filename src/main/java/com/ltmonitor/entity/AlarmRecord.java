@@ -43,7 +43,7 @@ public class AlarmRecord extends TenantEntity {
 
 
 	public static String TYPE_NIGHT_DRIVING = "NightDriving";
-	public static String TYPE_CROSS_BORDER = "CrossBorder"; // 围栏报警
+	public static String TYPE_CROSS_BORDER = "CrossBorder"; // 平台离开围栏报警
 	public static String TYPE_CROSS_BORDER_TERM = "CrossBorderByTerm"; // 围栏报警
 
 	public static String TYPE_IN_AREA = "InArea"; // 进入区域

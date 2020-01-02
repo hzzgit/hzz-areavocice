@@ -192,7 +192,7 @@ public class AreaAlarmService implements IAreaAlarmService {
             }
             try {
                 if (continueAnalyze) {
-                    Thread.sleep(5000L);
+                    Thread.sleep(10000L);
                 }
             } catch (InterruptedException e1) {
             }
@@ -245,8 +245,13 @@ public class AreaAlarmService implements IAreaAlarmService {
                     }
                     integerList.add(areaId);
                     AreaConfigMap1.put(simNo, integerList);
+                    String key=simNo+"_"+areaId;
+                    if(!CrossMap.containsKey(key)){
+                        CrossMap.put(key, true);
+                    }
                 }
                 AreaConfigMap = AreaConfigMap1;
+
             }
             long e = System.currentTimeMillis(); //获取结束时间
             log.debug(alog.toString() + "用时：" + (e - s) + "ms");
@@ -567,7 +572,7 @@ public class AreaAlarmService implements IAreaAlarmService {
      * @param isInArea
      */
     private void CrossBorder(MapArea ec, GPSRealData rd, boolean isInArea) {
-        MapArea oldArea = getOldMapArea(rd.getPlateNo(), ec.getEntityId());
+       // MapArea oldArea = getOldMapArea(rd.getPlateNo(), ec.getEntityId());
 
 //        if (isInArea) {
 //            if (this.alarmConfigService.isAlarmEnabled(AlarmRecord.TYPE_IN_AREA, AlarmRecord.ALARM_FROM_PLATFORM))
@@ -577,29 +582,28 @@ public class AreaAlarmService implements IAreaAlarmService {
 //                rd.setMapAreaAlarm("离开区域:" + ec.getName());
 //        }
 
-        if (isInArea && oldArea == null&&checkisarea(ec.getAlarmType(),isInArea)) {
+        if (isInArea &&checkisarea(ec.getAlarmType(),isInArea)) {
 
             insertAlarm(AlarmRecord.ALARM_FROM_PLATFORM,
                     AlarmRecord.TYPE_IN_AREA, rd, ec.getName());
 
             //如果是第一次进入，则创建进入围栏记录
-            CreateAlarmRecord(AlarmRecord.ALARM_FROM_PLATFORM,
-                    AlarmRecord.TYPE_IN_AREA, TURN_ON, rd, ec);
+//            CreateAlarmRecord(AlarmRecord.ALARM_FROM_PLATFORM,
+//                    AlarmRecord.TYPE_IN_AREA, TURN_ON, rd, ec);
 
-            String key = rd.getPlateNo() + "_" + ec.getEntityId();
-            AlarmItem ai = new AlarmItem(rd, AlarmRecord.TYPE_IN_AREA, AlarmRecord.ALARM_FROM_PLATFORM, ec);
-            areaAlarmMap.put(key, ai);
+//            String key = rd.getPlateNo() + "_" + ec.getEntityId();
+//            AlarmItem ai = new AlarmItem(rd, AlarmRecord.TYPE_IN_AREA, AlarmRecord.ALARM_FROM_PLATFORM, ec);
+            //areaAlarmMap.put(key, ai);
         }
 
         //离开围栏
-        if (isInArea == false && oldArea != null&&checkisarea(ec.getAlarmType(),isInArea)) {
-
+        if (isInArea == false &&checkisarea(ec.getAlarmType(),isInArea)) {
             insertAlarm(AlarmRecord.ALARM_FROM_PLATFORM,
                     AlarmRecord.TYPE_CROSS_BORDER, rd, ec.getName());
-            CreateAlarmRecord(AlarmRecord.ALARM_FROM_PLATFORM,
-                    AlarmRecord.TYPE_IN_AREA, TURN_OFF, rd, ec);
+//            CreateAlarmRecord(AlarmRecord.ALARM_FROM_PLATFORM,
+//                    AlarmRecord.TYPE_IN_AREA, TURN_OFF, rd, ec);
             String key = rd.getPlateNo() + "_" + ec.getEntityId();
-            areaAlarmMap.remove(key);// 离开围栏时，从内存中移除记录
+         //   areaAlarmMap.remove(key);// 离开围栏时，从内存中移除记录
         }
 
     }
@@ -701,6 +705,7 @@ public class AreaAlarmService implements IAreaAlarmService {
         Alarm alarm=this.newAlarmService.insertAlarm(alarmSource, alarmType, rd, "AreaAlarmService");
         AreaAlarmEvent areaAlarmEvent = new AreaAlarmEvent();
         BeanUtils.copyProperties(alarm,areaAlarmEvent);
+        areaAlarmEvent.setDescr(areaAlarmEvent.getSimNo());
         EventMsg em = new EventMsg();
         em.setEventBody(areaAlarmEvent);
         em.loadDefaultDevMsgAttr();
@@ -761,6 +766,7 @@ public class AreaAlarmService implements IAreaAlarmService {
                     }
                     if (isbytime) {
                         String key = rd.getSimNo() + "_" + ec.getEntityId();
+
                         boolean arg = true;
                         boolean inArea = IsInArea(ec, mp);//这边进行计算是否在区域内
                         if (CrossMap.containsKey(key)) {
@@ -773,7 +779,10 @@ public class AreaAlarmService implements IAreaAlarmService {
                         if (arg) {
                                  CrossBorder(ec, rd, inArea);
                         }
+                        log.debug("当前车辆的围栏处理情况为，simno="+rd.getSimNo()+",sendTime="+rd.getSendTime()+",name="+ec.getName()+",之前是否在围栏内="+CrossMap.get(key)+",现在是否在围栏内="+inArea);
                         CrossMap.put(key, inArea);
+                    }else{
+                        log.debug("当前车辆的围栏处理情况为，simno="+rd.getSimNo()+",sendTime="+rd.getSendTime()+",name="+ec.getName()+",不在时间范围内="+TimeUtils.dateTodetailStr(ec.getStartDate())+"-"+TimeUtils.dateTodetailStr(ec.getEndDate()));
                     }
                 }
             }

@@ -31,6 +31,7 @@ public class MessageProcessService implements IMessageProcessService {
 	 */
 	public void processMsg(GPSRealData rd) {
 		try{
+			log.debug("收到kafka点位信息,simNO="+rd.getSimNo()+",sendTime="+rd.getSendTime());
 				process0200_realData.processData(rd.getSimNo(),rd);
 		} catch (Exception ex) {
 			log.error("MessageProcessService处理出错！", ex);
