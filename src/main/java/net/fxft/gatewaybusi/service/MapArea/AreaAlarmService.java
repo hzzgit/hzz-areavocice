@@ -93,37 +93,36 @@ public class AreaAlarmService implements IAreaAlarmService {
     private ConcurrentMap<String, Date> AreaTimeMap = new ConcurrentHashMap<>();//当前车辆点位的时间情况
 
 
-
     //添加到队列
     public void addAreaqueue(GPSRealData rd) {
 
 
         if (AreaConfigMap.containsKey(rd.getSimNo())) {//如果存在这个围栏配置就加入队列进行运算
             boolean isargTme = false;
-            if (TimeUtils.isdifferminute(rd.getSendTime(), new Date(),1200)) {//如果超过20小时直接干掉
+            if (TimeUtils.isdifferminute(rd.getSendTime(), new Date(), 1200)) {//如果超过20小时直接干掉
                 return;
             }
             if (AreaTimeMap.containsKey(rd.getSimNo())) {//如果存在那么就要去比对时间
                 Date areaTime = AreaTimeMap.get(rd.getSimNo());
-                if(rd.getSendTime().getTime()>areaTime.getTime()){//如果这个大于这个原来的时间
+                if (rd.getSendTime().getTime() > areaTime.getTime()) {//如果这个大于这个原来的时间
                     isargTme = true;
                     AreaTimeMap.put(rd.getSimNo(), rd.getSendTime());
-                }else{//如果小于这个时间，但是却没有差距很大，那么也
-                    if(TimeUtils.isdifferminute(rd.getSendTime(), areaTime,30)&&!TimeUtils.isdifferminute(rd.getSendTime(), new Date(),5)){//如果小于的和记录的差距在30分钟以上
+                } else {//如果小于这个时间，但是却没有差距很大，那么也
+                    if (TimeUtils.isdifferminute(rd.getSendTime(), areaTime, 30) && !TimeUtils.isdifferminute(rd.getSendTime(), new Date(), 5)) {//如果小于的和记录的差距在30分钟以上
                         isargTme = true;
                         AreaTimeMap.put(rd.getSimNo(), rd.getSendTime());
-                    }else{
-                        isargTme=false;
+                    } else {
+                        isargTme = false;
                     }
                 }
-            }else{//如果不存在，那么就直接算作第一个时间点，时间不存在
+            } else {//如果不存在，那么就直接算作第一个时间点，时间不存在
                 isargTme = true;
                 AreaTimeMap.put(rd.getSimNo(), rd.getSendTime());
             }
-            if(isargTme) {
+            if (isargTme) {
                 AreaQueue.add(rd);
             }
-        }else{
+        } else {
             AreaTimeMap.remove(rd.getSimNo());
         }
     }
@@ -131,17 +130,18 @@ public class AreaAlarmService implements IAreaAlarmService {
     @PostConstruct
     public void start() {
 
-            analyzeThread = new Thread(new Runnable() {
-                public void run() {
-                    analyzeThreadFunc();
-                }
-            });
-            analyzeThread.start();
-            for (int i = 0; i < areaQueueThreadco; i++) {//开三个线程处理有围栏报警的设备队列
-                new Thread(() -> {//处理围栏报警队列的线程
-                    processorAreaAlarm();
-                }).start();
+        analyzeThread = new Thread(new Runnable() {
+            public void run() {
+                analyzeThreadFunc();
             }
+        });
+        analyzeThread.start();
+//            for (int i = 0; i < areaQueueThreadco; i++) {//开三个线程处理有围栏报警的设备队列
+//
+//            }
+        new Thread(() -> {//处理围栏报警队列的线程
+            processorAreaAlarm();
+        }).start();
 
     }
 
@@ -186,7 +186,7 @@ public class AreaAlarmService implements IAreaAlarmService {
         while (continueAnalyze) {
             try {
                 AreaConfigThread();
-                log.debug("围栏处理队列剩余"+AreaQueue.size());
+                log.debug("围栏处理队列剩余" + AreaQueue.size());
             } catch (Exception ex) {
                 log.error(ex.getMessage(), ex);
             }
@@ -208,8 +208,8 @@ public class AreaAlarmService implements IAreaAlarmService {
         try {
             startKafkaComsumer.shutdownHook();
             analyzeThread.interrupt();
-            while(AreaQueue.size()>0){
-                log.debug("围栏处理队列中还有"+AreaQueue.size()+"条，等待处理完再关闭");
+            while (AreaQueue.size() > 0) {
+                log.debug("围栏处理队列中还有" + AreaQueue.size() + "条，等待处理完再关闭");
                 Thread.sleep(500);
             }
 //			analyzeThread.join(2000);
@@ -225,8 +225,8 @@ public class AreaAlarmService implements IAreaAlarmService {
         AttrLog alog = AttrLog.get("缓存围栏配置信息20191213版本");
         try {
             long s = System.currentTimeMillis();   //获取开始时间
-          //  Map<String, Integer> areaBindingMap = new HashMap<String, Integer>();
-            String sql="\t\tselect b.owner,b.areaId,v.simNo from MapAreaBinding b\n" +
+            //  Map<String, Integer> areaBindingMap = new HashMap<String, Integer>();
+            String sql = "\t\tselect b.owner,b.areaId,v.simNo from MapAreaBinding b\n" +
                     "\t\tleft join vehicle v  on b.vehicleId=v.vehicleId\n" +
                     "\t\twhere 1=1  and b.bindType = 'platform' and v.deleted=false\n" +
                     "\t\t\tand b.configType !=3";
@@ -235,19 +235,19 @@ public class AreaAlarmService implements IAreaAlarmService {
             ConcurrentMap<String, List<Integer>> AreaConfigMap1 = new ConcurrentHashMap<>();
             if (ConverterUtils.isList(bindings)) {
                 for (RowDataMap binding : bindings) {
-                  //  String plateNo = ConverterUtils.toString(binding.get("plateNo"));
+                    //  String plateNo = ConverterUtils.toString(binding.get("plateNo"));
                     String simNo = ConverterUtils.toString(binding.get("simNo"));
                     String owner = binding.getStringValue("owner");
                     int areaId = ConverterUtils.toInt(binding.get("areaId"));
-                   // areaBindingMap.put(plateNo + "_" + areaId, areaId);
+                    // areaBindingMap.put(plateNo + "_" + areaId, areaId);
                     List<Integer> integerList = new ArrayList<>();
                     if (AreaConfigMap1.containsKey(simNo)) {//如果存在就新增
                         integerList = AreaConfigMap1.get(simNo);
                     }
                     integerList.add(areaId);
                     AreaConfigMap1.put(simNo, integerList);
-                    String key=simNo+"_"+areaId;
-                    if(!StringUtil.isNullOrEmpty(owner)&&"clw".equalsIgnoreCase(owner)&&!CrossMap.containsKey(key)){
+                    String key = simNo + "_" + areaId;
+                    if (!StringUtil.isNullOrEmpty(owner) && "clw".equalsIgnoreCase(owner) && !CrossMap.containsKey(key)) {
                         CrossMap.put(key, true);
                     }
                 }
@@ -292,8 +292,10 @@ public class AreaAlarmService implements IAreaAlarmService {
                         String hql = "select * from MapArea where areaId = ? ";
                         MapArea ec = (MapArea) this.mapAreaService.find(hql, areaId);
                         if (ec != null) {
-                            ec.setStartDate(TimeUtils.todatetime(TimeUtils.dateTodetailStr(ec.getStartDate())));;
-                            ec.setEndDate(TimeUtils.todatetime(TimeUtils.dateTodetailStr(ec.getEndDate())));;
+                            ec.setStartDate(TimeUtils.todatetime(TimeUtils.dateTodetailStr(ec.getStartDate())));
+                            ;
+                            ec.setEndDate(TimeUtils.todatetime(TimeUtils.dateTodetailStr(ec.getEndDate())));
+                            ;
                             //areaMap.put(areaId, ec);
                             this.AnalyzeAreaAlarm(rd, ec);
                         }
@@ -431,7 +433,7 @@ public class AreaAlarmService implements IAreaAlarmService {
                             && offsetAlarm.getStatus().equals("")) {
                         offsetAlarm.setStatus(AlarmRecord.STATUS_NEW); //报警开始
                         this.insertAlarm(alarmSource, alarmType, rd, ec.getName());
-    //                    rd.setOffsetRouteAlarm("偏离路线:" + ec.getName());
+                        //                    rd.setOffsetRouteAlarm("偏离路线:" + ec.getName());
                         Date originTime = rd.getSendTime();
                         rd.setSendTime(offsetTime);
                         // 创建偏离报警
@@ -468,7 +470,7 @@ public class AreaAlarmService implements IAreaAlarmService {
                                 ec.getEntityId(), null);
                         offsetRouteWarn.remove(alarmKey);
                     }
-    //                rd.setOffsetRouteAlarm(null);
+                    //                rd.setOffsetRouteAlarm(null);
                     if (onRouteAlarm == null) {
                         onRouteAlarm = new AlarmItem(rd, AlarmRecord.TYPE_ON_ROUTE,
                                 alarmSource);
@@ -491,7 +493,7 @@ public class AreaAlarmService implements IAreaAlarmService {
             if (ts2 > 0.2)
                 log.info(rd.getPlateNo() + "," + ec.getName() + "路线偏移报警耗时:" + ts2);
         } catch (Exception e) {
-            log.error("线路报警处理错误",e);
+            log.error("线路报警处理错误", e);
         }
 
     }
@@ -573,7 +575,7 @@ public class AreaAlarmService implements IAreaAlarmService {
      * @param isInArea
      */
     private void CrossBorder(MapArea ec, GPSRealData rd, boolean isInArea) {
-       // MapArea oldArea = getOldMapArea(rd.getPlateNo(), ec.getEntityId());
+        // MapArea oldArea = getOldMapArea(rd.getPlateNo(), ec.getEntityId());
 
 //        if (isInArea) {
 //            if (this.alarmConfigService.isAlarmEnabled(AlarmRecord.TYPE_IN_AREA, AlarmRecord.ALARM_FROM_PLATFORM))
@@ -583,7 +585,7 @@ public class AreaAlarmService implements IAreaAlarmService {
 //                rd.setMapAreaAlarm("离开区域:" + ec.getName());
 //        }
 
-        if (isInArea &&checkisarea(ec.getAlarmType(),isInArea)) {
+        if (isInArea && checkisarea(ec.getAlarmType(), isInArea)) {
 
             insertAlarm(AlarmRecord.ALARM_FROM_PLATFORM,
                     AlarmRecord.TYPE_IN_AREA, rd, ec.getName());
@@ -598,26 +600,27 @@ public class AreaAlarmService implements IAreaAlarmService {
         }
 
         //离开围栏
-        if (isInArea == false &&checkisarea(ec.getAlarmType(),isInArea)) {
+        if (isInArea == false && checkisarea(ec.getAlarmType(), isInArea)) {
             insertAlarm(AlarmRecord.ALARM_FROM_PLATFORM,
                     AlarmRecord.TYPE_CROSS_BORDER, rd, ec.getName());
 //            CreateAlarmRecord(AlarmRecord.ALARM_FROM_PLATFORM,
 //                    AlarmRecord.TYPE_IN_AREA, TURN_OFF, rd, ec);
             String key = rd.getPlateNo() + "_" + ec.getEntityId();
-         //   areaAlarmMap.remove(key);// 离开围栏时，从内存中移除记录
+            //   areaAlarmMap.remove(key);// 离开围栏时，从内存中移除记录
         }
 
     }
+
     //用来判断配置的围栏是进去的还是出去的
-    private boolean checkisarea(String alarmtype,boolean isInArea){
+    private boolean checkisarea(String alarmtype, boolean isInArea) {
         boolean arg = false;
-        if(!StringUtil.isNullOrEmpty(alarmtype)){//这个地方是判断是进出围栏还是怎么的
-            if(isInArea){
-                if(alarmtype.indexOf("进区域报警给平台")>-1){
+        if (!StringUtil.isNullOrEmpty(alarmtype)) {//这个地方是判断是进出围栏还是怎么的
+            if (isInArea) {
+                if (alarmtype.indexOf("进区域报警给平台") > -1) {
                     arg = true;
                 }
-            }else{
-                if(alarmtype.indexOf("出区域报警给平台")>-1){
+            } else {
+                if (alarmtype.indexOf("出区域报警给平台") > -1) {
                     arg = true;
                 }
             }
@@ -628,6 +631,7 @@ public class AreaAlarmService implements IAreaAlarmService {
     public static void main(String[] args) {
         System.out.println(new AreaAlarmService().checkisarea("出区域报警给平台,", false));
     }
+
     /**
      * 创建围栏进出记录
      *
@@ -703,10 +707,10 @@ public class AreaAlarmService implements IAreaAlarmService {
     private void insertAlarm(String alarmSource, String alarmType,
                              GPSRealData rd, String areaName) {
         rd.setLocation("电子围栏:" + areaName);
-        Alarm alarm=this.newAlarmService.insertAlarm(alarmSource, alarmType, rd, "AreaAlarmService");
+        Alarm alarm = this.newAlarmService.insertAlarm(alarmSource, alarmType, rd, "AreaAlarmService");
         AreaAlarmEvent areaAlarmEvent = new AreaAlarmEvent();
-        BeanUtils.copyProperties(alarm,areaAlarmEvent);
-        areaAlarmEvent.setDescr(areaAlarmEvent.getSimNo());
+        BeanUtils.copyProperties(alarm, areaAlarmEvent);
+        areaAlarmEvent.setDescr(areaName);
         EventMsg em = new EventMsg();
         em.setEventBody(areaAlarmEvent);
         em.loadDefaultDevMsgAttr();
@@ -762,7 +766,7 @@ public class AreaAlarmService implements IAreaAlarmService {
                     boolean isbytime = true;
                     if (ec.getByTime()) {//时间范围，如果不在时间范围那么就不进行围栏判断
                         if (!TimeUtils.isEffectiveDate(rd.getSendTime(), ec.getStartDate(), ec.getEndDate())) {
-                            isbytime=false;
+                            isbytime = false;
                         }
                     }
                     if (isbytime) {
@@ -778,17 +782,17 @@ public class AreaAlarmService implements IAreaAlarmService {
                             arg = false;
                         }
                         if (arg) {
-                                 CrossBorder(ec, rd, inArea);
+                            CrossBorder(ec, rd, inArea);
                         }
-                        log.debug("当前车辆的围栏处理情况为，simno="+rd.getSimNo()+",sendTime="+rd.getSendTime()+",name="+ec.getName()+",之前是否在围栏内="+CrossMap.get(key)+",现在是否在围栏内="+inArea);
+                        log.debug("当前车辆的围栏处理情况为，simno=" + rd.getSimNo() + ",sendTime=" + rd.getSendTime() + ",name=" + ec.getName() + ",之前是否在围栏内=" + CrossMap.get(key) + ",现在是否在围栏内=" + inArea);
                         CrossMap.put(key, inArea);
-                    }else{
-                        log.debug("当前车辆的围栏处理情况为，simno="+rd.getSimNo()+",sendTime="+rd.getSendTime()+",name="+ec.getName()+",不在时间范围内="+TimeUtils.dateTodetailStr(ec.getStartDate())+"-"+TimeUtils.dateTodetailStr(ec.getEndDate()));
+                    } else {
+                        log.debug("当前车辆的围栏处理情况为，simno=" + rd.getSimNo() + ",sendTime=" + rd.getSendTime() + ",name=" + ec.getName() + ",不在时间范围内=" + TimeUtils.dateTodetailStr(ec.getStartDate()) + "-" + TimeUtils.dateTodetailStr(ec.getEndDate()));
                     }
                 }
             }
         } catch (Exception e) {
-            log.error("处理围栏报错"+rd.getSimNo()+"+"+ec.getName(),e);
+            log.error("处理围栏报错" + rd.getSimNo() + "+" + ec.getName(), e);
         }
     }
 
