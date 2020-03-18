@@ -5,7 +5,7 @@ public class AutoVoiceConfigPO {
 
     //语音播报配置的主键
     private int id;
-
+    //1、ACC开之后立即、2、ACC开之后等待
     private int type ;
 
     //时间间隔（分钟）
