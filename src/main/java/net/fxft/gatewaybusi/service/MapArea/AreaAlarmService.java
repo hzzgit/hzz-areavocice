@@ -206,13 +206,11 @@ public class AreaAlarmService implements IAreaAlarmService {
         if (analyzeThread == null)
             return;
         try {
-            startKafkaComsumer.shutdownHook();
             analyzeThread.interrupt();
             while (AreaQueue.size() > 0) {
                 log.debug("围栏处理队列中还有" + AreaQueue.size() + "条，等待处理完再关闭");
                 Thread.sleep(500);
             }
-//			analyzeThread.join(2000);
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
         }
@@ -714,7 +712,7 @@ public class AreaAlarmService implements IAreaAlarmService {
         EventMsg em = new EventMsg();
         em.setEventBody(areaAlarmEvent);
         em.loadDefaultDevMsgAttr();
-        kafkaMessageSender.sendAreaAlarmEventMsg(em);
+        kafkaMessageSender.sendAreaAlarmEventMsg(em,rd.getSimNo());
     }
 
 

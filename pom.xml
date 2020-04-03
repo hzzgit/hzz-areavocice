@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>net.fxft</groupId>
+        <artifactId>ascs-dependencies</artifactId>
+        <version>0.2.16-RELEASE</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
     <groupId>net.fxft</groupId>
     <artifactId>ascs-areavoice</artifactId>
     <version>0.0.1-SNAPSHOT</version>
@@ -13,7 +18,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
-        <ascs-dependencies.version>0.0.48_RELEASE</ascs-dependencies.version>
+        <ascs-gateway-protocol.version>0.7.27-RELEASE</ascs-gateway-protocol.version>
     </properties>
 
     <dependencies>
@@ -23,7 +28,12 @@
         </dependency>
         <dependency>
             <groupId>net.fxft</groupId>
+            <artifactId>module-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.fxft</groupId>
             <artifactId>ascs-gateway-protocol</artifactId>
+            <version>${ascs-gateway-protocol.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -85,18 +95,6 @@
     </dependencies>
 
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>net.fxft</groupId>
-                <artifactId>ascs-dependencies</artifactId>
-                <version>${ascs-dependencies.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <repositories>
         <repository>
             <id>nexus</id>
@@ -112,55 +110,20 @@
     </repositories>
 
     <build>
-        <finalName>ascs-areavoice</finalName>
+        <finalName>ascs-808transfer</finalName>
         <plugins>
             <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <layout>ZIP</layout>
-                    <includes>
-                        <include>
-                            <groupId>net.fxft</groupId>
-                            <artifactId>fxft-cloud</artifactId>
-                        </include>
-                        <include>
-                            <groupId>net.fxft</groupId>
-                            <artifactId>ascs-gateway-protocol</artifactId>
-                        </include>
-                    </includes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>repackage</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
             </plugin>
+            <!--            <plugin>-->
+            <!--                <groupId>org.apache.maven.plugins</groupId>-->
+            <!--                <artifactId>maven-source-plugin</artifactId>-->
+            <!--            </plugin>-->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <!--注意从编译结果目录开始算目录结构-->
-                        <exclude>application*.properties</exclude>
-                        <exclude>bootstrap.properties</exclude>
-                        <exclude>log4j2.xml</exclude>
-                        <exclude>log4j2-nacos.xml</exclude>
-                    </excludes>
-                </configuration>
+                <groupId>net.fxft</groupId>
+                <artifactId>http-deploy</artifactId>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>8</source>
-                    <target>8</target>
-                </configuration>
-            </plugin>
-
-
         </plugins>
     </build>
 
