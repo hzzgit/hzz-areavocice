@@ -203,6 +203,7 @@ public class AreaAlarmService implements IAreaAlarmService {
     public void stopService() {
         log.info("---begin stop AreaAlarmService---");
         continueAnalyze = false;
+        StartKafkaComsumer.ispausepool=true;
         if (analyzeThread == null)
             return;
         try {

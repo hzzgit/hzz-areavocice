@@ -54,9 +54,11 @@ public class StartKafkaComsumer implements IFromDeviceMsgProcessor {
     @Autowired
     private IMessageProcessService messageProcessService;
 
+    public static  boolean ispausepool=false;
+
     @Override
     public boolean isPausePoll() {
-        return false;
+        return ispausepool;
     }
 
     @Autowired
