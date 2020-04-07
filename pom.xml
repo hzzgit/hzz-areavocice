@@ -111,7 +111,7 @@
     </repositories>
 
     <build>
-        <finalName>ascs-808transfer</finalName>
+        <finalName>ascs-areavoice</finalName>
         <plugins>
             <plugin>
                 <groupId>pl.project13.maven</groupId>
