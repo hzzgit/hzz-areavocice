@@ -5,7 +5,7 @@
     <parent>
         <groupId>net.fxft</groupId>
         <artifactId>ascs-dependencies</artifactId>
-        <version>0.2.16-RELEASE</version>
+        <version>0.2.20-RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>net.fxft</groupId>
@@ -96,11 +96,24 @@
     </dependencies>
 
 
+
+    <distributionManagement>
+        <repository>
+            <id>nexus</id>
+            <url>http://125.77.23.196:8081/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>nexus</id>
+            <url>http://125.77.23.196:8081/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+
     <repositories>
         <repository>
             <id>nexus</id>
             <name>Nexus Repository</name>
-            <url>http://118.31.5.186:8081/repository/maven-public/</url>
+            <url>http://125.77.23.196:8081/repository/maven-public/</url>
             <releases>
                 <enabled>true</enabled>
             </releases>
