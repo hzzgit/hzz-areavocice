@@ -86,7 +86,7 @@ public class AutoVoiceService implements IAutoVoiceService {
                 autoRealMap.forEach((p, v) -> {
                     if (v.isIsacc()) {//acc是开的时候才判断是否关闭
                         GPSRealData rd = realDataService.getGpsRealData(p);
-                        if(rd!=null) {
+                        if (rd != null) {
                             if (rd.isOnline() == false) {//如果有一个下线了，这边也要变成false
                                 v.setIsacc(false);
                                 v.setConfigTime(new HashMap<>());
@@ -96,8 +96,8 @@ public class AutoVoiceService implements IAutoVoiceService {
                                     v.setConfigTime(new HashMap<>());
                                 }
                             }
-                        }else{
-                            log.debug("语音播报中移除缓存simno"+p);
+                        } else {
+                            log.debug("语音播报中移除缓存simno" + p);
                             v.setIsacc(false);
                             v.setConfigTime(new HashMap<>());
                         }
@@ -120,11 +120,11 @@ public class AutoVoiceService implements IAutoVoiceService {
             if (allconfig != null && allconfig.size() > 0) {
                 allconfig.forEach((p, v) -> {
                     if (!autoRealMap.containsKey(p)) {//不存在那么就写入一个离线
-                            AutoVoiceRealPO autoVoiceRealPO = new AutoVoiceRealPO();
-                            autoVoiceRealPO.setIsacc(false);
-                            autoVoiceRealPO.setOnlineDate(new Date());
-                            autoVoiceRealPO.setConfigTime(new HashMap<>());
-                            autoRealMap.put(p, autoVoiceRealPO);
+                        AutoVoiceRealPO autoVoiceRealPO = new AutoVoiceRealPO();
+                        autoVoiceRealPO.setIsacc(false);
+                        autoVoiceRealPO.setOnlineDate(new Date());
+                        autoVoiceRealPO.setConfigTime(new HashMap<>());
+                        autoRealMap.put(p, autoVoiceRealPO);
                     }
                 });
             }
@@ -140,7 +140,7 @@ public class AutoVoiceService implements IAutoVoiceService {
         if (autoVoice) {
             AttrLog alog = AttrLog.get("语音播报主方法")
                     .log("GPSRealData", rd.toString());
-            long s=System.currentTimeMillis();   //获取开始时间
+            long s = System.currentTimeMillis();   //获取开始时间
 
             try {
                 String simNo = rd.getSimNo();
@@ -148,52 +148,58 @@ public class AutoVoiceService implements IAutoVoiceService {
                     AutoVoicePO autoVoicePO = autoVoiceConfigService.getAutoVoice(simNo);//获取到这个设备的语音播报配置情况
                     Date startTime = autoVoicePO.getStartTime();//配置生效的开始时间
                     Date endTime = autoVoicePO.getEndTime();//配置生效的结束时间，
-                    if (autoVoicePO.getIsuse() == 1 && TimeUtils.isEffectiveDate(new Date(), startTime, endTime)) {//必须是启动了这个才能够生效
-                        List<AutoVoiceConfigPO> autoVoiceConfigPOS = autoVoicePO.getAutoVoiceConfigPOS();
-                        Date onlineDate = rd.getUpdateDate();//获取到定位的时间
-                        boolean online = rd.isOnline();
+                    //   if (autoVoicePO.getIsuse() == 1 && TimeUtils.isEffectiveDate(new Date(), startTime, endTime)) {//必须是启动了这个才能够生效
+                    List<AutoVoiceConfigPO> autoVoiceConfigPOS = autoVoicePO.getAutoVoiceConfigPOS();
+                    Date onlineDate = rd.getUpdateDate();//获取到定位的时间
+                    boolean online = rd.isOnline();
 
-                        String status = rd.getStatus();
-                        boolean isacc = false;
-                        if (online) {
-                            isacc = isacc(status);//获取到当前设备的acc状态，
-                        }
-                        if (autoRealMap.containsKey(simNo)) {//如果有存在，那么就要进行时间的对比并进行语音播报
-                            AutoVoiceRealPO autoVoiceRealPO = new AutoVoiceRealPO();
-                            autoVoiceRealPO = autoRealMap.get(simNo);
-                            if (isacc) {//如果这个点位的acc是开的
-                                boolean isaccold = autoVoiceRealPO.isIsacc();//原来的acc状态
-                                if (isaccold == false) {//如果原来的acc状态是关的，那么就代表是第一次点火
-                                    //因为这次acc是开，且上次acc是关，所以进行一次时间的更新，用于之后的持续时间判断
-                                    AutoVoiceRealPO autoVoiceRealPO2 = new AutoVoiceRealPO();
-                                    autoVoiceRealPO2.setIsacc(true);
-                                    autoVoiceRealPO2.setOnlineDate(onlineDate);
-                                    autoRealMap.put(simNo, autoVoiceRealPO2);
-                                    boolean arg = false;
-                                    if (ConverterUtils.isList(autoVoiceConfigPOS)) {
-                                        List<AutoVoiceConfigPO> autoVoiceConfigPOList=new ArrayList<>();
-                                        for (AutoVoiceConfigPO autoVoiceConfigPO : autoVoiceConfigPOS) {
+                    String status = rd.getStatus();
+                    boolean isacc = false;
+                    if (online) {
+                        isacc = isacc(status);//获取到当前设备的acc状态，
+                    }
+                    if (autoRealMap.containsKey(simNo)) {//如果有存在，那么就要进行时间的对比并进行语音播报
+                        AutoVoiceRealPO autoVoiceRealPO = new AutoVoiceRealPO();
+                        autoVoiceRealPO = autoRealMap.get(simNo);
+                        if (isacc) {//如果这个点位的acc是开的
+                            boolean isaccold = autoVoiceRealPO.isIsacc();//原来的acc状态
+                            if (isaccold == false) {//如果原来的acc状态是关的，那么就代表是第一次点火
+                                //因为这次acc是开，且上次acc是关，所以进行一次时间的更新，用于之后的持续时间判断
+                                AutoVoiceRealPO autoVoiceRealPO2 = new AutoVoiceRealPO();
+                                autoVoiceRealPO2.setIsacc(true);
+                                autoVoiceRealPO2.setOnlineDate(onlineDate);
+                                autoRealMap.put(simNo, autoVoiceRealPO2);
+                                boolean arg = false;
+                                if (ConverterUtils.isList(autoVoiceConfigPOS)) {
+                                    List<AutoVoiceConfigPO> autoVoiceConfigPOList = new ArrayList<>();
+                                    for (AutoVoiceConfigPO autoVoiceConfigPO : autoVoiceConfigPOS) {
+                                        if (autoVoiceConfigPO.getIsuse() == 1 && TimeUtils.isEffectiveDate(new Date(), autoVoiceConfigPO.getStartTime(),
+                                                autoVoiceConfigPO.getEndTime())) {
+
                                             if (autoVoiceConfigPO.getType() == 1) {
                                                 arg = true;
                                                 autoVoiceConfigPOList.add(autoVoiceConfigPO);
                                             }
                                         }
-                                        if (arg) {//如果有要求第一次生效，那么这个时候代表着判断通过，就进行语音播报
-                                            if(ConverterUtils.isList(autoVoiceConfigPOList)){
-                                                for (AutoVoiceConfigPO autoVoiceConfigPO : autoVoiceConfigPOList) {
-                                                    autoVoiceQueueService.addSendQueue(autoVoiceConfigPO.getSendContent(), simNo);
-                                                }
+                                    }
+                                    if (arg) {//如果有要求第一次生效，那么这个时候代表着判断通过，就进行语音播报
+                                        if (ConverterUtils.isList(autoVoiceConfigPOList)) {
+                                            for (AutoVoiceConfigPO autoVoiceConfigPO : autoVoiceConfigPOList) {
+                                                autoVoiceQueueService.addSendQueue(autoVoiceConfigPO.getSendContent(), simNo);
                                             }
                                         }
                                     }
-                                } else {//如果是开的。说明要进行计时操作，当多少时间之后才会进行一次判断是否达到了语音播报的情况
-                                    if (autoVoiceRealPO.isIsacc()) {//且上一次acc是开的情况下，才进行持续时间的播报操作
-                                        if (ConverterUtils.isList(autoVoiceConfigPOS)) {
-                                            AutoVoiceRealPO autoVoiceRealPO3 = autoRealMap.get(simNo);
-                                            Map<Integer, Date> configTime = autoVoiceRealPO3.getConfigTime();
-                                            List<Integer> cunzaiid = new ArrayList<>();
-                                            for (AutoVoiceConfigPO autoVoiceConfigPO : autoVoiceConfigPOS) {
-                                                if (autoVoiceConfigPO.getType() == 2) {
+                                }
+                            } else {//如果是开的。说明要进行计时操作，当多少时间之后才会进行一次判断是否达到了语音播报的情况
+                                if (autoVoiceRealPO.isIsacc()) {//且上一次acc是开的情况下，才进行持续时间的播报操作
+                                    if (ConverterUtils.isList(autoVoiceConfigPOS)) {
+                                        AutoVoiceRealPO autoVoiceRealPO3 = autoRealMap.get(simNo);
+                                        Map<Integer, Date> configTime = autoVoiceRealPO3.getConfigTime();
+                                        List<Integer> cunzaiid = new ArrayList<>();
+                                        for (AutoVoiceConfigPO autoVoiceConfigPO : autoVoiceConfigPOS) {
+                                            if (autoVoiceConfigPO.getType() == 2) {
+                                                if (autoVoiceConfigPO.getIsuse() == 1 && TimeUtils.isEffectiveDate(new Date(), autoVoiceConfigPO.getStartTime(),
+                                                        autoVoiceConfigPO.getEndTime())) {
                                                     int sendInterval = autoVoiceConfigPO.getSendInterval();//获取到时间间隔的分钟数
                                                     if (!configTime.containsKey(autoVoiceConfigPO.getId())) {//如果不存在这个时间播放的配置，那么就根据第一次上线时间判断
                                                         if (TimeUtils.isdifferminute(autoVoiceRealPO.getOnlineDate(), onlineDate, sendInterval)) {//如果时间间隔在配置的时间间隔之内，那么就下发语音播报
@@ -212,43 +218,53 @@ public class AutoVoiceService implements IAutoVoiceService {
                                                     cunzaiid.add(autoVoiceConfigPO.getId());
                                                 }
                                             }
-                                            if (configTime != null && configTime.size() > 0) {
-                                                List<Integer> removeId = new ArrayList<>();
-                                                configTime.forEach((p, v) -> {
-                                                    if (!cunzaiid.contains(p)) {
-                                                        removeId.add(p);
-                                                    }
-                                                });
-                                                if (ConverterUtils.isList(removeId)) {
-                                                    for (Integer integer : removeId) {
-                                                        configTime.remove(integer);
-                                                    }
+                                        }
+                                        if (configTime != null && configTime.size() > 0) {
+                                            List<Integer> removeId = new ArrayList<>();
+                                            configTime.forEach((p, v) -> {
+                                                if (!cunzaiid.contains(p)) {
+                                                    removeId.add(p);
+                                                }
+                                            });
+                                            if (ConverterUtils.isList(removeId)) {
+                                                for (Integer integer : removeId) {
+                                                    configTime.remove(integer);
                                                 }
                                             }
                                         }
                                     }
                                 }
-
-                            } else {//如果acc是关的，那么也进行更新记录
-                                autoVoiceRealPO = new AutoVoiceRealPO();
-                                autoVoiceRealPO.setIsacc(isacc);
-                                autoVoiceRealPO.setOnlineDate(new Date());
-                                autoVoiceRealPO.setConfigTime(new HashMap<>());
-                                autoRealMap.put(simNo, autoVoiceRealPO);
                             }
-                        } else {//如果不存在，说明这个设备是第一次进行记录这个语音播报
-                            if (isacc == false) {//acc关了才进行记录
-                                AutoVoiceRealPO autoVoiceRealPO = new AutoVoiceRealPO();
-                                autoVoiceRealPO.setIsacc(isacc);
-                                autoVoiceRealPO.setOnlineDate(new Date());
-                                autoRealMap.put(simNo, autoVoiceRealPO);
+
+                        } else {//如果acc是关的，那么也进行更新记录
+                            autoVoiceRealPO = new AutoVoiceRealPO();
+                            autoVoiceRealPO.setIsacc(isacc);
+                            autoVoiceRealPO.setOnlineDate(new Date());
+                            autoVoiceRealPO.setConfigTime(new HashMap<>());
+                            autoRealMap.put(simNo, autoVoiceRealPO);
+                        }
+                    } else {//如果不存在，说明这个设备是第一次进行记录这个语音播报
+                        if (isacc == false) {//acc关了才进行记录
+                            AutoVoiceRealPO autoVoiceRealPO = new AutoVoiceRealPO();
+                            autoVoiceRealPO.setIsacc(isacc);
+                            autoVoiceRealPO.setOnlineDate(new Date());
+                            autoRealMap.put(simNo, autoVoiceRealPO);
+                        }
+                    }
+                    //}
+                    //这边是都没有配置了再移除
+                    boolean arg = true;
+                    if (ConverterUtils.isList(autoVoiceConfigPOS)) {
+                        for (AutoVoiceConfigPO autoVoiceConfigPO : autoVoiceConfigPOS) {
+                            if (autoVoiceConfigPO.getIsuse() == 1) {
+                                arg = false;
                             }
                         }
                     }
-                    if(autoVoicePO.getIsuse() == 0){//如果没有启动也移除
+                    if (arg) {//如果没有启动的配置了那就移除
                         autoRealMap.remove(simNo);
                     }
-                }else{
+                } else {
                     autoRealMap.remove(simNo);
                 }
             } catch (Exception e) {
@@ -285,7 +301,7 @@ public class AutoVoiceService implements IAutoVoiceService {
 
     public static void main(String[] args) {
 
-        String status="513";
+        String status = "513";
         StringBuilder sb = new StringBuilder();
         boolean arg = false;
         if (StringUtil.isNullOrEmpty(status) == false) {

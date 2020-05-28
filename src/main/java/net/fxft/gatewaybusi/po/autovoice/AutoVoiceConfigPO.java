@@ -1,5 +1,7 @@
 package net.fxft.gatewaybusi.po.autovoice;
 
+import java.util.Date;
+
 //播报的配置，可能有多个配置
 public class AutoVoiceConfigPO {
 
@@ -14,6 +16,19 @@ public class AutoVoiceConfigPO {
     //语音播放的内容
     private String sendContent;
 
+    private Date startTime;
+    private Date endTime;
+
+    private int isuse;
+
+
+    public int getIsuse() {
+        return isuse;
+    }
+
+    public void setIsuse(int isuse) {
+        this.isuse = isuse;
+    }
 
     public int getId() {
         return id;
@@ -45,5 +60,21 @@ public class AutoVoiceConfigPO {
 
     public void setSendContent(String sendContent) {
         this.sendContent = sendContent;
+    }
+
+    public Date getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Date endTime) {
+        this.endTime = endTime;
+    }
+
+    public Date getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(Date startTime) {
+        this.startTime = startTime;
     }
 }

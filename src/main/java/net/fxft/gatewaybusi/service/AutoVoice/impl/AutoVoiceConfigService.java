@@ -167,6 +167,9 @@ public class AutoVoiceConfigService {
                             autoVoiceConfigPO.setSendInterval(sendInterval);
                             autoVoiceConfigPO.setType(type);
                             autoVoiceConfigPO.setId(configid);
+                            autoVoiceConfigPO.setStartTime(startTime);
+                            autoVoiceConfigPO.setEndTime(endTime);
+                            autoVoiceConfigPO.setIsuse(isuse);
                             autoVoiceConfigPOS.add(autoVoiceConfigPO);
                             autoVoicePO.setAutoVoiceConfigPOS(autoVoiceConfigPOS);
                         } else {
@@ -183,6 +186,9 @@ public class AutoVoiceConfigService {
                             autoVoiceConfigPO.setSendInterval(sendInterval);
                             autoVoiceConfigPO.setType(type);
                             autoVoiceConfigPO.setId(configid);
+                            autoVoiceConfigPO.setStartTime(startTime);
+                            autoVoiceConfigPO.setEndTime(endTime);
+                            autoVoiceConfigPO.setIsuse(isuse);
                             autoVoiceConfigPOS.add(autoVoiceConfigPO);
                             autoVoicePO.setAutoVoiceConfigPOS(autoVoiceConfigPOS);
                         }
