@@ -80,7 +80,7 @@ public class AutoVoiceService implements IAutoVoiceService {
 
     //用来检测是否有离线和熄火的情况
     private void checkoffline() {
-        AttrLog alog = AttrLog.get("检测在线设备缓存是否离线");
+        AttrLog alog = AttrLog.get("[语音播报]检测在线设备缓存是否离线");
         try {
             if (autoRealMap != null && autoRealMap.size() > 0) {
                 autoRealMap.forEach((p, v) -> {
@@ -139,7 +139,7 @@ public class AutoVoiceService implements IAutoVoiceService {
     public void autoVoiceMain(GPSRealData rd) {
         if (autoVoice) {
             AttrLog alog = AttrLog.get("语音播报主方法")
-                    .log("GPSRealData", rd);
+                    .log("GPSRealData", rd.toString());
             long s=System.currentTimeMillis();   //获取开始时间
 
             try {
@@ -150,7 +150,7 @@ public class AutoVoiceService implements IAutoVoiceService {
                     Date endTime = autoVoicePO.getEndTime();//配置生效的结束时间，
                     if (autoVoicePO.getIsuse() == 1 && TimeUtils.isEffectiveDate(new Date(), startTime, endTime)) {//必须是启动了这个才能够生效
                         List<AutoVoiceConfigPO> autoVoiceConfigPOS = autoVoicePO.getAutoVoiceConfigPOS();
-                        Date onlineDate = rd.getOnlineDate();//获取到定位的时间
+                        Date onlineDate = rd.getUpdateDate();//获取到定位的时间
                         boolean online = rd.isOnline();
 
                         String status = rd.getStatus();
@@ -254,7 +254,7 @@ public class AutoVoiceService implements IAutoVoiceService {
             } catch (Exception e) {
                 alog.log("出现异常", BasicUtil.exceptionMsg(e));
             } finally {
-
+                log.debug(alog.toString());
             }
         }
     }
@@ -281,6 +281,27 @@ public class AutoVoiceService implements IAutoVoiceService {
             }
         }
         return arg;
+    }
+
+    public static void main(String[] args) {
+
+        String status="513";
+        StringBuilder sb = new StringBuilder();
+        boolean arg = false;
+        if (StringUtil.isNullOrEmpty(status) == false) {
+            char[] ch = status.toCharArray();
+            if (ch.length == 32) {
+                int m = 31;
+                int c = ch[m - 0] - 48;
+                if (c == 1) {
+                    arg = true;
+                } else {
+                    arg = false;
+                }
+            }
+        }
+        System.out.println(arg);
+
     }
 
 
