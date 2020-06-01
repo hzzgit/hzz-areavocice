@@ -284,20 +284,20 @@ public class MapFixService {
 		double a = GetDistanceByMeter(p0.lng, p0.lat, p1.lng, p1.lat);
 		double b = GetDistanceByMeter(p0.lng, p0.lat, p2.lng, p2.lat);
 		double c = GetDistanceByMeter(p2.lng, p2.lat, p1.lng, p1.lat);
-		double p = (a + b +c) / 2;
-		double s = Math.sqrt(p * (p - a) * (p - b) * (p - c));
+		double p = (a + b +c) / 2;//这边是获取三角形的半周长
+		double s = Math.sqrt(p * (p - a) * (p - b) * (p - c));//(周长*(周长减去各边长的)的平方根,也就是这个点和这条线最近的点的距离,也就是线宽偏差值
 		
 		double h = 2 * s / c;
 		if (h > bufferLen)
 			return false;
-		double t1 =  b * b + c * c - a * a;
+		double t1 =  b * b + c * c - a * a;//两边平方之和大于第三边平方,才能判断为三角形
 		double t2 = a * a +  c * c - b * b;
 		if(t1 < 0 || t2 < 0)
 			return false;
 		return true;
 	}
 	
-	
+
 	
 	public static double  getDistanceFromLine(PointLatLng p1, PointLatLng p2,
                                               PointLatLng p0)
@@ -336,8 +336,12 @@ public class MapFixService {
 		//double d1 = MapFixService.GetDistanceByMeter(111.234567, 34.123456, 111.234578, 34.123456);
 
 		//double d2 = MapFixService.GetDistanceByMeter(111.234567, 34.12345, 111.234567, 34.12346);
-		System.out.println(d1 + "米");
-		System.out.println(d2 + "米");
+
+		PointLatLng p1=new PointLatLng(118.421619,24.756096);
+		PointLatLng p2=new PointLatLng(118.421399,24.756647);
+		PointLatLng mp=new PointLatLng(118.421399,24.756647);
+//		PointLatLng mp=new PointLatLng(118.42168259347842,24.756212193430752);
+		MapFixService.isPointOnRouteSegment(p1, p2, mp, 10);
 		/**
 		for (int m = 0; m < 100; m++) {
 			double wgLat = 32.178390 + m * 0.01;

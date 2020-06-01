@@ -152,6 +152,9 @@ public class StartKafkaComsumer implements IFromDeviceMsgProcessor {
             if (dm.getMsgType() == 0x0200) {
                 if (dm.getMsgBody() instanceof JT_0200) {
                     JT_0200 jt_0200 = (JT_0200) dm.getMsgBody();
+                    if("012805920003".equalsIgnoreCase(dm.getSimNo())){
+                        System.out.println(1);
+                    }
                     GPSRealData rd = getGPS(dm.getSimNo(), jt_0200);
                     messageProcessService.processMsg(rd);
 //                        autoVoiceService.autoVoiceMain(rd);

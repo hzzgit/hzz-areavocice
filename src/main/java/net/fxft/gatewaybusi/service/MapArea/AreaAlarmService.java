@@ -31,6 +31,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 电子围栏报警服务
@@ -70,9 +71,9 @@ public class AreaAlarmService implements IAreaAlarmService {
 
     private volatile boolean continueAnalyze = true;
 
-    private ConcurrentMap<String, AlarmItem> offsetRouteWarn = new ConcurrentHashMap();
+    private ConcurrentMap<String, AlarmItem> offsetRouteWarn = new ConcurrentHashMap(); //路线偏移缓存
 
-    private ConcurrentMap<String, AlarmItem> onRouteWarn = new ConcurrentHashMap();
+    private ConcurrentMap<String, AlarmItem> onRouteWarn = new ConcurrentHashMap();//在路线上的缓存
     // private Map routePointMap = new HashMap();
     /**
      * 当前的关键点报警
@@ -81,7 +82,7 @@ public class AreaAlarmService implements IAreaAlarmService {
 
     Map<String, GPSRealData> realDataMap = new HashMap<String, GPSRealData>();
     private ConcurrentMap<String, AlarmItem> areaAlarmMap = new ConcurrentHashMap<String, AlarmItem>();
-    private ConcurrentMap<String, AlarmItem> overSpeedAlarmMap = new ConcurrentHashMap<String, AlarmItem>();
+    private ConcurrentMap<String, AlarmItem> overSpeedAlarmMap = new ConcurrentHashMap<String, AlarmItem>();//分段限速报警
 
     private ConcurrentMap<String, Boolean> CrossMap = new ConcurrentHashMap<>();//用来判断进出围栏的情况，如果已经进入围栏则不再报警，直到出去之后
 
@@ -89,6 +90,9 @@ public class AreaAlarmService implements IAreaAlarmService {
 
     //处理实时数据的队列
     private ConcurrentLinkedQueue<GPSRealData> AreaQueue = new ConcurrentLinkedQueue();
+
+    private  ConcurrentMap<Integer, MapArea> AllArea = new ConcurrentHashMap<>();//用来缓存所有的围栏信息
+
 
     private ConcurrentMap<String, Date> AreaTimeMap = new ConcurrentHashMap<>();//当前车辆点位的时间情况
 
@@ -253,6 +257,19 @@ public class AreaAlarmService implements IAreaAlarmService {
                 AreaConfigMap = AreaConfigMap1;
 
             }
+
+            String hql = "select * from MapArea where deleted=false ";
+            List<MapArea> query =  JdbcUtil.getDefault().sql(hql).query(MapArea.class);
+            ConcurrentHashMap<Integer,MapArea> allMap =new ConcurrentHashMap<>();
+            if(ConverterUtils.isList(query)){
+                for (MapArea mapArea : query) {
+                    Integer AreaId= Math.toIntExact(mapArea.getEntityId());
+                    if(!allMap.containsKey(AreaId)){
+                        allMap.put(AreaId,mapArea);
+                    }
+                }
+                AllArea=allMap;
+            }
             long e = System.currentTimeMillis(); //获取结束时间
             log.debug(alog.toString() + "用时：" + (e - s) + "ms");
         } catch (Exception e) {
@@ -268,6 +285,9 @@ public class AreaAlarmService implements IAreaAlarmService {
         try {
             if (ConverterUtils.isList(AreaId)) {
                 for (Integer areaId : AreaId) {
+                    if("012805920003".equalsIgnoreCase(rd.getSimNo())){
+                        System.out.println(1);
+                    }
                     long s = System.currentTimeMillis();   //获取开始时间
                     String key = areaId + rd.getSimNo();
                     if (rd != null) {
@@ -280,7 +300,8 @@ public class AreaAlarmService implements IAreaAlarmService {
                         if (oldRd != null) {
                             if (oldRd.getLatitude() == rd.getLatitude()
                                     && oldRd.getLongitude() == rd.getLongitude()) {
-                                return;
+                                //TODO 这个地方是为了判断是否一直在一个地方
+                               // return;
                             }
                         } else {
                             oldRd = new GPSRealData();
@@ -288,13 +309,12 @@ public class AreaAlarmService implements IAreaAlarmService {
                         oldRd.setLatitude(rd.getLatitude());
                         oldRd.setLongitude(rd.getLongitude());
                         realDataMap.put(key, oldRd);
-                        String hql = "select * from MapArea where areaId = ? ";
-                        MapArea ec = (MapArea) this.mapAreaService.find(hql, areaId);
+                        MapArea ec = AllArea.get(areaId);
                         if (ec != null) {
-                            ec.setStartDate(TimeUtils.todatetime(TimeUtils.dateTodetailStr(ec.getStartDate())));
-                            ;
-                            ec.setEndDate(TimeUtils.todatetime(TimeUtils.dateTodetailStr(ec.getEndDate())));
-                            ;
+//                            ec.setStartDate(TimeUtils.todatetime(TimeUtils.dateTodetailStr(ec.getStartDate())));
+//                            ;
+//                            ec.setEndDate(TimeUtils.todatetime(TimeUtils.dateTodetailStr(ec.getEndDate())));
+//                            ;
                             //areaMap.put(areaId, ec);
                             this.AnalyzeAreaAlarm(rd, ec);
                         }
@@ -329,7 +349,7 @@ public class AreaAlarmService implements IAreaAlarmService {
      */
     private void AnalyzeOverSpeed(GPSRealData rd, LineSegment seg, MapArea ec) {
 
-        String key = rd.getPlateNo();
+        String key = rd.getSimNo();
         AlarmItem alarmItem = overSpeedAlarmMap.get(key);
 
         if (seg == null) {
@@ -412,8 +432,8 @@ public class AreaAlarmService implements IAreaAlarmService {
                 // 是否在线路的某一段上
                 LineSegment seg = IsInLineSegment(mp, ec);
                 boolean isOnRoute = seg != null;
-                log.error(rd.getPlateNo() + ",线路名称" + ec.getName() + "," + (seg == null ? "偏离" : "行驶在线路上") + rd.getSendTime());
-                String alarmKey = rd.getPlateNo() + "_" + ec.getEntityId();
+                log.error(rd.getSimNo() + ",线路名称" + ec.getName() + "," + (seg == null ? "偏离" : "行驶在线路上") +",时间:"+ TimeUtils.dateTodetailStr(rd.getSendTime()) );
+                String alarmKey = rd.getSimNo() + "_" + ec.getEntityId();
                 AlarmItem offsetAlarm = (AlarmItem) offsetRouteWarn.get(alarmKey);
                 AlarmItem onRouteAlarm = (AlarmItem) onRouteWarn.get(alarmKey);
                 if (isOnRoute == false) {
@@ -475,15 +495,15 @@ public class AreaAlarmService implements IAreaAlarmService {
                                 alarmSource);
 
                         onRouteWarn.put(alarmKey, onRouteAlarm);
-                        AlarmRecord sr = CreateRecord(
-                                AlarmRecord.ALARM_FROM_PLATFORM,
-                                AlarmRecord.TYPE_ON_ROUTE, TURN_ON, rd,
-                                ec.getEntityId());
-                        if (sr != null) {
-                            sr.setStation(ec.getEntityId());
-                            sr.setLocation(ec.getName());
-                            alarmRecordService.saveOrUpdate(sr);
-                        }
+//                        AlarmRecord sr = CreateRecord(
+//                                AlarmRecord.ALARM_FROM_PLATFORM,
+//                                AlarmRecord.TYPE_ON_ROUTE, TURN_ON, rd,
+//                                ec.getEntityId());
+//                        if (sr != null) {
+//                            sr.setStation(ec.getEntityId());
+//                            sr.setLocation(ec.getName());
+//                            alarmRecordService.saveOrUpdate(sr);
+//                        }
                     }
                 }
             }
@@ -532,8 +552,10 @@ public class AreaAlarmService implements IAreaAlarmService {
                 PointLatLng p2 = new PointLatLng(seg.getLongitude1(),
                         seg.getLatitude1());
 
+//                boolean result = MapFixService.isPointOnRouteSegment(p1, p2,
+//                        mp, seg.getLineWidth());
                 boolean result = MapFixService.isPointOnRouteSegment(p1, p2,
-                        mp, seg.getLineWidth());
+                        mp, ec.getLineWidth());
                 if (result)
                     return seg;
             }
@@ -551,8 +573,9 @@ public class AreaAlarmService implements IAreaAlarmService {
      * @return
      */
     private List<LineSegment> GetLineSegments(long routeId) {
-        String hsql = "from LineSegment where routeId = ? order by pointId ";
-        List ls = lineSegmentService.query(hsql, new Object[]{routeId});
+        String hsql = "select * from LineSegment where routeId = ? order by pointId ";
+
+        List<LineSegment> ls=JdbcUtil.getDefault().sql(hsql).addIndexParam(routeId).query(LineSegment.class);
         return ls;
     }
 
@@ -764,8 +787,12 @@ public class AreaAlarmService implements IAreaAlarmService {
                 } else {//这边计算进区域
                     boolean isbytime = true;
                     if (ec.getByTime()) {//时间范围，如果不在时间范围那么就不进行围栏判断
-                        if (!TimeUtils.isEffectiveDate(rd.getSendTime(), ec.getStartDate(), ec.getEndDate())) {
-                            isbytime = false;
+                        try {
+                            if (!TimeUtils.isEffectiveDate(rd.getSendTime(), ec.getStartDate(), ec.getEndDate())) {
+                                isbytime = false;
+                            }
+                        } catch (Exception e) {
+                            isbytime=false;
                         }
                     }
                     if (isbytime) {
