@@ -534,7 +534,7 @@ public class AreaAlarmService implements IAreaAlarmService {
     //获取分段信息
     private RouteSegment isInLimitSpeedRouteSegment(long pointId, MapArea route) {
         long routeId = route.getEntityId();
-        String hql = "from RouteSegment where routeId = ? and startSegId <= ? and endSegId >= ? ";
+        String hql = "select * from RouteSegment where routeId = ? and startSegId <= ? and endSegId >= ? ";
 
         RouteSegment rs = this.routeSegmentService.find(hql, new Object[]{
                 routeId, pointId, pointId + 1});
