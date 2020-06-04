@@ -378,7 +378,7 @@ public class AreaAlarmService implements IAreaAlarmService {
                     + seg.getName() + "速度:" + rd.getVelocity());
             insertAlarm(AlarmRecord.ALARM_FROM_PLATFORM,
                     AlarmRecord.TYPE_OVER_SPEED_ON_ROUTE, rd,
-                    "路线:" + ec.getName() + ",分段名称:" + seg.getName());
+                    getAreaType(ec.getAreaType())+ ec.getName() + ",分段名称:" + seg.getName());
             //   if (AlarmRecord.STATUS_NEW.equals(alarmItem.getStatus())) {
             //创建分段超速报警
 //                    CreateWarnRecord(AlarmRecord.ALARM_FROM_PLATFORM,
@@ -440,7 +440,9 @@ public class AreaAlarmService implements IAreaAlarmService {
                     if (ts >= maxAllowedOffsetTime
                             && offsetAlarm.getStatus().equals("")) {
                         offsetAlarm.setStatus(AlarmRecord.STATUS_NEW); //报警开始
-                        this.insertAlarm(alarmSource, AlarmRecord.TYPE_CROSS_BORDER, rd, "线路:" + ec.getName());
+                        if(checkisarea(ec.getAlarmType(),isOnRoute)) {
+                            this.insertAlarm(alarmSource, AlarmRecord.TYPE_CROSS_BORDER, rd, getAreaType(ec.getAreaType())+ ec.getName());
+                        }
                         //                    rd.setOffsetRouteAlarm("偏离路线:" + ec.getName());
                         //这下面是创建报警记录
 //                        Date originTime = rd.getSendTime();
@@ -481,7 +483,10 @@ public class AreaAlarmService implements IAreaAlarmService {
                     if (onRouteAlarm == null) {
                         onRouteAlarm = new AlarmItem(rd, AlarmRecord.TYPE_IN_AREA,
                                 alarmSource);
-                        this.insertAlarm(alarmSource, AlarmRecord.TYPE_IN_AREA, rd, "线路:" + ec.getName());
+                        if(checkisarea(ec.getAlarmType(),isOnRoute)) {
+                            this.insertAlarm(alarmSource, AlarmRecord.TYPE_IN_AREA, rd,
+                                    getAreaType(ec.getAreaType())+ ec.getName()+",路段:"+seg.getName());
+                        }
                         onRouteWarn.put(alarmKey, onRouteAlarm);
 
                     }
@@ -591,7 +596,7 @@ public class AreaAlarmService implements IAreaAlarmService {
         if (isInArea && checkisarea(ec.getAlarmType(), isInArea)) {
 
             insertAlarm(AlarmRecord.ALARM_FROM_PLATFORM,
-                    AlarmRecord.TYPE_IN_AREA, rd, ec.getName());
+                    AlarmRecord.TYPE_IN_AREA, rd, getAreaType(ec.getAreaType())+ec.getName());
 
             //如果是第一次进入，则创建进入围栏记录
 //            CreateAlarmRecord(AlarmRecord.ALARM_FROM_PLATFORM,
@@ -605,13 +610,30 @@ public class AreaAlarmService implements IAreaAlarmService {
         //离开围栏
         if (isInArea == false && checkisarea(ec.getAlarmType(), isInArea)) {
             insertAlarm(AlarmRecord.ALARM_FROM_PLATFORM,
-                    AlarmRecord.TYPE_CROSS_BORDER, rd, ec.getName());
+                    AlarmRecord.TYPE_CROSS_BORDER, rd, getAreaType(ec.getAreaType())+ec.getName());
 //            CreateAlarmRecord(AlarmRecord.ALARM_FROM_PLATFORM,
 //                    AlarmRecord.TYPE_IN_AREA, TURN_OFF, rd, ec);
             String key = rd.getPlateNo() + "_" + ec.getEntityId();
             //   areaAlarmMap.remove(key);// 离开围栏时，从内存中移除记录
         }
 
+    }
+
+    private String getAreaType(String areaType){
+        String name="";
+        if(MapArea.POLYGON.equalsIgnoreCase(areaType)){
+            name="多边形:";
+        } else  if(MapArea.RECT.equalsIgnoreCase(areaType)){
+            name="矩形:";
+        }else  if(MapArea.CIRCLE.equalsIgnoreCase(areaType)){
+            name="圆形:";
+        }else  if(MapArea.ROUTE.equalsIgnoreCase(areaType)){
+            name="线路:";
+        }else  if(MapArea.MARKER.equalsIgnoreCase(areaType)){
+            name="标记:";
+        }
+
+        return name;
     }
 
     //用来判断配置的围栏是进去的还是出去的
@@ -825,7 +847,7 @@ public class AreaAlarmService implements IAreaAlarmService {
             if (item == null) {
                 boolean inEnclosure = IsInArea(ec, mp);
                 if (inEnclosure == false) {
-                    this.insertAlarm(alarmSource, alarmType, rd, ec.getName());
+                    this.insertAlarm(alarmSource, alarmType, rd, getAreaType(ec.getAreaType())+ec.getName());
 //                    rd.setArriveKeyPlaceAlarm("关键点:" + ec.getName());
                 } else {
                     item = new AlarmItem(rd, alarmType, alarmSource);
