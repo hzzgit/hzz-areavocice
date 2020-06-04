@@ -33,6 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * 电子围栏报警服务
@@ -94,6 +95,7 @@ public class AreaAlarmService implements IAreaAlarmService {
 
     private ConcurrentMap<Integer, MapArea> AllArea = new ConcurrentHashMap<>();//用来缓存所有的围栏信息
 
+    private ConcurrentMap<Long, List<LineSegment>> linesMap = new ConcurrentHashMap<>();//用来缓存线路对应的拐点信息
 
     private ConcurrentMap<String, Date> AreaTimeMap = new ConcurrentHashMap<>();//当前车辆点位的时间情况
 
@@ -275,6 +277,16 @@ public class AreaAlarmService implements IAreaAlarmService {
                 }
                 AllArea = allMap;
             }
+
+            String hsql = "select * from LineSegment where 1=1 order by pointId ";
+
+            List<LineSegment> ls = JdbcUtil.getDefault().sql(hsql).query(LineSegment.class);
+            ConcurrentMap<Long, List<LineSegment>> linesMap1 = new ConcurrentHashMap<>();
+            if (ConverterUtils.isList(ls)) {
+                linesMap1 = ls.stream().sorted(Comparator.comparing(LineSegment::getPointId)).collect(Collectors.groupingByConcurrent(LineSegment::getRouteId));
+                linesMap = linesMap1;
+            }
+
             long e = System.currentTimeMillis(); //获取结束时间
             log.debug(alog.toString() + "用时：" + (e - s) + "ms");
         } catch (Exception e) {
@@ -383,7 +395,7 @@ public class AreaAlarmService implements IAreaAlarmService {
                     + seg.getName() + "速度:" + rd.getVelocity());
             insertAlarm(AlarmRecord.ALARM_FROM_PLATFORM,
                     AlarmRecord.TYPE_OVER_SPEED_ON_ROUTE, rd,
-                    getAreaType(ec.getAreaType())+ ec.getName() + ",分段名称:" + seg.getName());
+                    getAreaType(ec.getAreaType()) + ec.getName() + ",分段名称:" + seg.getName());
             //   if (AlarmRecord.STATUS_NEW.equals(alarmItem.getStatus())) {
             //创建分段超速报警
 //                    CreateWarnRecord(AlarmRecord.ALARM_FROM_PLATFORM,
@@ -445,8 +457,8 @@ public class AreaAlarmService implements IAreaAlarmService {
                     if (ts >= maxAllowedOffsetTime
                             && offsetAlarm.getStatus().equals("")) {
                         offsetAlarm.setStatus(AlarmRecord.STATUS_NEW); //报警开始
-                        if(checkisarea(ec.getAlarmType(),isOnRoute)) {
-                            this.insertAlarm(alarmSource, AlarmRecord.TYPE_CROSS_BORDER, rd, getAreaType(ec.getAreaType())+ ec.getName());
+                        if (checkisarea(ec.getAlarmType(), isOnRoute)) {
+                            this.insertAlarm(alarmSource, AlarmRecord.TYPE_CROSS_BORDER, rd, getAreaType(ec.getAreaType()) + ec.getName());
                         }
                         //                    rd.setOffsetRouteAlarm("偏离路线:" + ec.getName());
                         //这下面是创建报警记录
@@ -488,9 +500,9 @@ public class AreaAlarmService implements IAreaAlarmService {
                     if (onRouteAlarm == null) {
                         onRouteAlarm = new AlarmItem(rd, AlarmRecord.TYPE_IN_AREA,
                                 alarmSource);
-                        if(checkisarea(ec.getAlarmType(),isOnRoute)) {
+                        if (checkisarea(ec.getAlarmType(), isOnRoute)) {
                             this.insertAlarm(alarmSource, AlarmRecord.TYPE_IN_AREA, rd,
-                                    getAreaType(ec.getAreaType())+ ec.getName()+",路段:"+seg.getName());
+                                    getAreaType(ec.getAreaType()) + ec.getName() + ",路段:" + seg.getName());
                         }
                         onRouteWarn.put(alarmKey, onRouteAlarm);
 
@@ -535,23 +547,24 @@ public class AreaAlarmService implements IAreaAlarmService {
     private LineSegment IsInLineSegment(PointLatLng mp, MapArea ec) {
         List<LineSegment> segments = GetLineSegments(ec.getEntityId());
         LineSegment prevSegment = null;
-        for (LineSegment seg : segments) {
-            if (prevSegment != null) {
-                PointLatLng p1 = new PointLatLng(prevSegment.getLongitude1(),
-                        prevSegment.getLatitude1());
-                PointLatLng p2 = new PointLatLng(seg.getLongitude1(),
-                        seg.getLatitude1());
+        if (segments != null) {
+            for (LineSegment seg : segments) {
+                if (prevSegment != null) {
+                    PointLatLng p1 = new PointLatLng(prevSegment.getLongitude1(),
+                            prevSegment.getLatitude1());
+                    PointLatLng p2 = new PointLatLng(seg.getLongitude1(),
+                            seg.getLatitude1());
 
 //                boolean result = MapFixService.isPointOnRouteSegment(p1, p2,
 //                        mp, seg.getLineWidth());
-                boolean result = MapFixService.isPointOnRouteSegment(p1, p2,
-                        mp, ec.getLineWidth());
-                if (result)
-                    return prevSegment;
+                    boolean result = MapFixService.isPointOnRouteSegment(p1, p2,
+                            mp, ec.getLineWidth());
+                    if (result)
+                        return prevSegment;
+                }
+                prevSegment = seg;
             }
-            prevSegment = seg;
         }
-
         return null;
     }
 
@@ -563,11 +576,12 @@ public class AreaAlarmService implements IAreaAlarmService {
      * @return
      */
     private List<LineSegment> GetLineSegments(long routeId) {
-        String hsql = "select * from LineSegment where routeId = ? order by pointId ";
-
-        List<LineSegment> ls = JdbcUtil.getDefault().sql(hsql).addIndexParam(routeId).query(LineSegment.class);
-
-        return ls;
+        if (linesMap.containsKey(routeId)) {
+            List<LineSegment> ls = linesMap.get(routeId);
+            return ls;
+        } else {
+            return null;
+        }
     }
 
     private MapArea getOldMapArea(String plateNo, long areaId) {
@@ -601,7 +615,7 @@ public class AreaAlarmService implements IAreaAlarmService {
         if (isInArea && checkisarea(ec.getAlarmType(), isInArea)) {
 
             insertAlarm(AlarmRecord.ALARM_FROM_PLATFORM,
-                    AlarmRecord.TYPE_IN_AREA, rd, getAreaType(ec.getAreaType())+ec.getName());
+                    AlarmRecord.TYPE_IN_AREA, rd, getAreaType(ec.getAreaType()) + ec.getName());
 
             //如果是第一次进入，则创建进入围栏记录
 //            CreateAlarmRecord(AlarmRecord.ALARM_FROM_PLATFORM,
@@ -615,7 +629,7 @@ public class AreaAlarmService implements IAreaAlarmService {
         //离开围栏
         if (isInArea == false && checkisarea(ec.getAlarmType(), isInArea)) {
             insertAlarm(AlarmRecord.ALARM_FROM_PLATFORM,
-                    AlarmRecord.TYPE_CROSS_BORDER, rd, getAreaType(ec.getAreaType())+ec.getName());
+                    AlarmRecord.TYPE_CROSS_BORDER, rd, getAreaType(ec.getAreaType()) + ec.getName());
 //            CreateAlarmRecord(AlarmRecord.ALARM_FROM_PLATFORM,
 //                    AlarmRecord.TYPE_IN_AREA, TURN_OFF, rd, ec);
             String key = rd.getPlateNo() + "_" + ec.getEntityId();
@@ -624,18 +638,18 @@ public class AreaAlarmService implements IAreaAlarmService {
 
     }
 
-    private String getAreaType(String areaType){
-        String name="";
-        if(MapArea.POLYGON.equalsIgnoreCase(areaType)){
-            name="多边形:";
-        } else  if(MapArea.RECT.equalsIgnoreCase(areaType)){
-            name="矩形:";
-        }else  if(MapArea.CIRCLE.equalsIgnoreCase(areaType)){
-            name="圆形:";
-        }else  if(MapArea.ROUTE.equalsIgnoreCase(areaType)){
-            name="线路:";
-        }else  if(MapArea.MARKER.equalsIgnoreCase(areaType)){
-            name="标记:";
+    private String getAreaType(String areaType) {
+        String name = "";
+        if (MapArea.POLYGON.equalsIgnoreCase(areaType)) {
+            name = "多边形:";
+        } else if (MapArea.RECT.equalsIgnoreCase(areaType)) {
+            name = "矩形:";
+        } else if (MapArea.CIRCLE.equalsIgnoreCase(areaType)) {
+            name = "圆形:";
+        } else if (MapArea.ROUTE.equalsIgnoreCase(areaType)) {
+            name = "线路:";
+        } else if (MapArea.MARKER.equalsIgnoreCase(areaType)) {
+            name = "标记:";
         }
 
         return name;
@@ -852,7 +866,7 @@ public class AreaAlarmService implements IAreaAlarmService {
             if (item == null) {
                 boolean inEnclosure = IsInArea(ec, mp);
                 if (inEnclosure == false) {
-                    this.insertAlarm(alarmSource, alarmType, rd, getAreaType(ec.getAreaType())+ec.getName());
+                    this.insertAlarm(alarmSource, alarmType, rd, getAreaType(ec.getAreaType()) + ec.getName());
 //                    rd.setArriveKeyPlaceAlarm("关键点:" + ec.getName());
                 } else {
                     item = new AlarmItem(rd, alarmType, alarmSource);
