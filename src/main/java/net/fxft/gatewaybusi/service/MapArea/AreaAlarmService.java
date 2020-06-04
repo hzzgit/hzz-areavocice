@@ -412,7 +412,7 @@ public class AreaAlarmService implements IAreaAlarmService {
     private void AnalyzeOffsetRoute(GPSRealData rd, MapArea ec, PointLatLng mp) {
         try {
             Date start = new Date();
-            String alarmType = AlarmRecord.TYPE_OFFSET_ROUTE;
+            String alarmType = AlarmRecord.TYPE_CROSS_BORDER;
             String alarmSource = AlarmRecord.ALARM_FROM_PLATFORM;
             int maxAllowedOffsetTime = ec.getOffsetDelay(); // 获得延时报警的延时值
             if (IsInTimeSpan(ec)) {
@@ -428,7 +428,7 @@ public class AreaAlarmService implements IAreaAlarmService {
                 if (isOnRoute == false) {//如果离开了线路,那么就报警,并且移除进入线路的缓存,加入到离开线路的缓存
                     if (offsetAlarm == null) {
                         this.AnalyzeOverSpeed(rd, null, ec);
-                        offsetAlarm = new AlarmItem(rd, alarmType, alarmSource);
+                        offsetAlarm = new AlarmItem(rd, AlarmRecord.TYPE_CROSS_BORDER, alarmSource);
                         // 开始报警
                         offsetRouteWarn.put(alarmKey, offsetAlarm);
                         offsetAlarm.setStatus("");
@@ -440,7 +440,7 @@ public class AreaAlarmService implements IAreaAlarmService {
                     if (ts >= maxAllowedOffsetTime
                             && offsetAlarm.getStatus().equals("")) {
                         offsetAlarm.setStatus(AlarmRecord.STATUS_NEW); //报警开始
-                        this.insertAlarm(alarmSource, alarmType, rd, ec.getName());
+                        this.insertAlarm(alarmSource, AlarmRecord.TYPE_CROSS_BORDER, rd, "线路:" + ec.getName());
                         //                    rd.setOffsetRouteAlarm("偏离路线:" + ec.getName());
                         //这下面是创建报警记录
 //                        Date originTime = rd.getSendTime();
@@ -479,9 +479,9 @@ public class AreaAlarmService implements IAreaAlarmService {
                         offsetRouteWarn.remove(alarmKey);
                     }
                     if (onRouteAlarm == null) {
-                        onRouteAlarm = new AlarmItem(rd, AlarmRecord.TYPE_ON_ROUTE,
+                        onRouteAlarm = new AlarmItem(rd, AlarmRecord.TYPE_IN_AREA,
                                 alarmSource);
-
+                        this.insertAlarm(alarmSource, AlarmRecord.TYPE_IN_AREA, rd, "线路:" + ec.getName());
                         onRouteWarn.put(alarmKey, onRouteAlarm);
 
                     }
@@ -815,7 +815,7 @@ public class AreaAlarmService implements IAreaAlarmService {
             if (item == null) {
                 boolean isInArea = IsInArea(ec, mp);
                 if (isInArea) {
-                    log.error("到达关键点:" + ec.getName());
+                    log.debug("到达关键点:" + ec.getName());
                     item = new AlarmItem(rd, alarmType, alarmSource);
                     keyPlaceAlarmMap.put(key, item);
                 }
