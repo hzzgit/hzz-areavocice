@@ -15,6 +15,7 @@ import net.fxft.gateway.event.alarm.AreaAlarmEvent;
 import net.fxft.gateway.event.everyunit.UpdateCacheEvent;
 import net.fxft.gatewaybusi.kafka.KafkaMessageSender;
 import net.fxft.gatewaybusi.kafka.StartKafkaComsumer;
+import net.fxft.gatewaybusi.service.AutoVoice.impl.AutoVoiceQueueService;
 import net.fxft.gatewaybusi.service.IRealDataService;
 
 import org.slf4j.Logger;
@@ -95,6 +96,10 @@ public class AreaAlarmService implements IAreaAlarmService {
 
 
     private ConcurrentMap<String, Date> AreaTimeMap = new ConcurrentHashMap<>();//当前车辆点位的时间情况
+
+    //这边是下发给终端
+    @Autowired
+    private AutoVoiceQueueService autoVoiceQueueService;
 
 
     //添加到队列
