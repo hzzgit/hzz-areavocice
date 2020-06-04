@@ -15,7 +15,7 @@ import java.util.Date;
 //@Table(name="LineSegment")
 //@org.hibernate.annotations.Proxy(lazy = false)
 //@Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
-@DbTable(value = "LineSegment", camelToUnderline = false)
+@DbTable(value = "LineSegment")
 public class LineSegment extends TenantEntity implements Serializable {
     public static String InDriver = "进区域报警给驾驶员";
     public static String InPlatform = "进区域报警给平台";
@@ -53,19 +53,19 @@ public class LineSegment extends TenantEntity implements Serializable {
     private double maxSpeed;
     //超速持续时间
     private int overSpeedTime;
-    private boolean byTime;
-    private boolean limitSpeed;
+    private int byTime;
+    private int limitSpeed;
 
-    public LineSegment() {
-        setCreateDate(new Date());
-        this.lineWidth = 100;
-        this.limitSpeed = true;
-        this.byTime = true;
-        this.maxSpeed = 100;
-        this.overSpeedTime = 10;
-        this.maxTimeLimit = 600;
-        this.minTimeLimit = 10;
-    }
+//    public LineSegment() {
+//        setCreateDate(new Date());
+////        this.lineWidth = 100;
+////        this.limitSpeed = true;
+////        this.byTime = true;
+////        this.maxSpeed = 100;
+////        this.overSpeedTime = 10;
+////        this.maxTimeLimit = 600;
+////        this.minTimeLimit = 10;
+//    }
 
     public long getEntityId() {
         return entityId;
@@ -172,18 +172,18 @@ public class LineSegment extends TenantEntity implements Serializable {
     }
 
     public boolean getByTime() {
-        return byTime;
+        return byTime==1?true:false;
     }
 
-    public void setByTime(boolean value) {
+    public void setByTime(int value) {
         byTime = value;
     }
 
     public boolean getLimitSpeed() {
-        return limitSpeed;
+        return limitSpeed==1?true:false;
     }
 
-    public void setLimitSpeed(boolean value) {
+    public void setLimitSpeed(int value) {
         limitSpeed = value;
     }
 

@@ -82,7 +82,7 @@ public class AreaAlarmService implements IAreaAlarmService {
 
     Map<String, GPSRealData> realDataMap = new HashMap<String, GPSRealData>();
     private ConcurrentMap<String, AlarmItem> areaAlarmMap = new ConcurrentHashMap<String, AlarmItem>();
-    private ConcurrentMap<String, AlarmItem> overSpeedAlarmMap = new ConcurrentHashMap<String, AlarmItem>();//分段限速报警
+    // private ConcurrentMap<String, AlarmItem> overSpeedAlarmMap = new ConcurrentHashMap<String, AlarmItem>();//分段限速报警
 
     private ConcurrentMap<String, Boolean> CrossMap = new ConcurrentHashMap<>();//用来判断进出围栏的情况，如果已经进入围栏则不再报警，直到出去之后
 
@@ -91,7 +91,7 @@ public class AreaAlarmService implements IAreaAlarmService {
     //处理实时数据的队列
     private ConcurrentLinkedQueue<GPSRealData> AreaQueue = new ConcurrentLinkedQueue();
 
-    private  ConcurrentMap<Integer, MapArea> AllArea = new ConcurrentHashMap<>();//用来缓存所有的围栏信息
+    private ConcurrentMap<Integer, MapArea> AllArea = new ConcurrentHashMap<>();//用来缓存所有的围栏信息
 
 
     private ConcurrentMap<String, Date> AreaTimeMap = new ConcurrentHashMap<>();//当前车辆点位的时间情况
@@ -207,7 +207,7 @@ public class AreaAlarmService implements IAreaAlarmService {
     public void stopService() {
         log.info("---begin stop AreaAlarmService---");
         continueAnalyze = false;
-        StartKafkaComsumer.ispausepool=true;
+        StartKafkaComsumer.ispausepool = true;
         if (analyzeThread == null)
             return;
         try {
@@ -259,16 +259,16 @@ public class AreaAlarmService implements IAreaAlarmService {
             }
 
             String hql = "select * from MapArea where deleted=false ";
-            List<MapArea> query =  JdbcUtil.getDefault().sql(hql).query(MapArea.class);
-            ConcurrentHashMap<Integer,MapArea> allMap =new ConcurrentHashMap<>();
-            if(ConverterUtils.isList(query)){
+            List<MapArea> query = JdbcUtil.getDefault().sql(hql).query(MapArea.class);
+            ConcurrentHashMap<Integer, MapArea> allMap = new ConcurrentHashMap<>();
+            if (ConverterUtils.isList(query)) {
                 for (MapArea mapArea : query) {
-                    Integer AreaId= Math.toIntExact(mapArea.getEntityId());
-                    if(!allMap.containsKey(AreaId)){
-                        allMap.put(AreaId,mapArea);
+                    Integer AreaId = Math.toIntExact(mapArea.getEntityId());
+                    if (!allMap.containsKey(AreaId)) {
+                        allMap.put(AreaId, mapArea);
                     }
                 }
-                AllArea=allMap;
+                AllArea = allMap;
             }
             long e = System.currentTimeMillis(); //获取结束时间
             log.debug(alog.toString() + "用时：" + (e - s) + "ms");
@@ -285,7 +285,7 @@ public class AreaAlarmService implements IAreaAlarmService {
         try {
             if (ConverterUtils.isList(AreaId)) {
                 for (Integer areaId : AreaId) {
-                    if("012805920003".equalsIgnoreCase(rd.getSimNo())){
+                    if ("012345678911".equalsIgnoreCase(rd.getSimNo())) {
                         System.out.println(1);
                     }
                     long s = System.currentTimeMillis();   //获取开始时间
@@ -301,7 +301,7 @@ public class AreaAlarmService implements IAreaAlarmService {
                             if (oldRd.getLatitude() == rd.getLatitude()
                                     && oldRd.getLongitude() == rd.getLongitude()) {
                                 //TODO 这个地方是为了判断是否一直在一个地方
-                               // return;
+                                // return;
                             }
                         } else {
                             oldRd = new GPSRealData();
@@ -349,70 +349,57 @@ public class AreaAlarmService implements IAreaAlarmService {
      */
     private void AnalyzeOverSpeed(GPSRealData rd, LineSegment seg, MapArea ec) {
 
-        String key = rd.getSimNo();
-        AlarmItem alarmItem = overSpeedAlarmMap.get(key);
+        //  String key = rd.getSimNo();
+        // AlarmItem alarmItem = overSpeedAlarmMap.get(key);
 
-        if (seg == null) {
-            //如果没在线路上，则不再分析分段超速
-            if (alarmItem != null) {
-                this.overSpeedAlarmMap.remove(key);
-                CreateWarnRecord(AlarmRecord.ALARM_FROM_PLATFORM,
-                        AlarmRecord.TYPE_OVER_SPEED_ON_ROUTE, TURN_OFF, rd,
-                        alarmItem.getAlarmId(), null);
-                //关闭分段超速报警
-//                rd.setOverSpeedAlarm(null);
-            }
-            return;
-        }
-        log.error("路线名称:" + ec.getName() + ",线段Id:" + seg.getPointId());
-        RouteSegment rs = this.isInLimitSpeedRouteSegment(seg.getPointId(), ec);
-        if (rs == null)
-            return;
+//        if (seg == null) {
+//            //如果没在线路上，则不再分析分段超速
+//            if (alarmItem != null) {
+//                this.overSpeedAlarmMap.remove(key);
+//                CreateWarnRecord(AlarmRecord.ALARM_FROM_PLATFORM,
+//                        AlarmRecord.TYPE_OVER_SPEED_ON_ROUTE, TURN_OFF, rd,
+//                        alarmItem.getAlarmId(), null);
+//                //关闭分段超速报警
+////                rd.setOverSpeedAlarm(null);
+//            }
+//            return;
+//        }
+        log.debug("路线名称:" + ec.getName() + ",线段Id:" + seg.getPointId());
+        double maxSpeed = seg.getMaxSpeed();
+//        RouteSegment rs = this.isInLimitSpeedRouteSegment(seg.getPointId(), ec);
+//        if (rs == null)
+//            return;
 
-        log.error("路线名称·:" + ec.getName() + ",分段:" + rs.getName() + "速度:"
+        log.debug("路线名称·:" + ec.getName() + ",分段:" + seg.getName() + "速度:"
                 + rd.getVelocity());
         // 超速
-        if (rd.getVelocity() > rs.getMaxSpeed()) {
-            double alarmDelay = 0;
-            if (alarmItem != null) {
-                Date offsetTime = alarmItem.getAlarmTime();
-                alarmDelay = DateUtil.getSeconds(offsetTime, rd.getSendTime());
+        if (seg.getLimitSpeed() && rd.getVelocity() > maxSpeed) {
+            log.debug("开始分段超速报警，路线名称:" + ec.getName() + ",分段:"
+                    + seg.getName() + "速度:" + rd.getVelocity());
+            insertAlarm(AlarmRecord.ALARM_FROM_PLATFORM,
+                    AlarmRecord.TYPE_OVER_SPEED_ON_ROUTE, rd,
+                    "路线:" + ec.getName() + ",分段名称:" + seg.getName());
+            //   if (AlarmRecord.STATUS_NEW.equals(alarmItem.getStatus())) {
+            //创建分段超速报警
+//                    CreateWarnRecord(AlarmRecord.ALARM_FROM_PLATFORM,
+//                            AlarmRecord.TYPE_OVER_SPEED_ON_ROUTE, TURN_ON, rd,
+//                            seg.getEntityId(),
+//                            ec.getName() + ",分段名称:" + seg.getName());
+            //   alarmItem.setStatus(AlarmRecord.STATUS_OLD);
+            // this.overSpeedAlarmMap.put(key, rs);
+            //   }
 
-            } else {
-                alarmItem = new AlarmItem(rd, AlarmRecord.ALARM_FROM_PLATFORM,
-                        AlarmRecord.TYPE_OVER_SPEED_ON_ROUTE);
-                alarmItem.setStatus(AlarmRecord.STATUS_NEW);
-                this.overSpeedAlarmMap.put(key, alarmItem);
-            }
-            if (alarmDelay >= rs.getDelay()) {
-                log.error("开始分段超速报警，路线名称:" + ec.getName() + ",分段:"
-                        + rs.getName() + "速度:" + rd.getVelocity());
-                insertAlarm(AlarmRecord.ALARM_FROM_PLATFORM,
-                        AlarmRecord.TYPE_OVER_SPEED_ON_ROUTE, rd, ec.getName()
-                                + ",分段名称:" + rs.getName());
-//                rd.setOverSpeedAlarm("路线名称:" + ec.getName() + ",分段:"
-//                        + rs.getName() + "速度:" + rd.getVelocity());
-                if (AlarmRecord.STATUS_NEW.equals(alarmItem.getStatus())) {
-                    //创建分段超速报警
-                    CreateWarnRecord(AlarmRecord.ALARM_FROM_PLATFORM,
-                            AlarmRecord.TYPE_OVER_SPEED_ON_ROUTE, TURN_ON, rd,
-                            seg.getEntityId(),
-                            ec.getName() + ",分段名称:" + seg.getName());
-                    alarmItem.setStatus(AlarmRecord.STATUS_OLD);
-                    // this.overSpeedAlarmMap.put(key, rs);
-                }
-            }
-
-        } else {
-            if (alarmItem != null) {
-                // 报警结束时，更新报警状态，移除内存
-                this.overSpeedAlarmMap.remove(key);
-                CreateWarnRecord(AlarmRecord.ALARM_FROM_PLATFORM,
-                        AlarmRecord.TYPE_OVER_SPEED_ON_ROUTE, TURN_OFF, rd,
-                        seg.getEntityId(), null);
-            }
-//            rd.setOverSpeedAlarm(null);
         }
+        //    else {
+        //    if (alarmItem != null) {
+        // 报警结束时，更新报警状态，移除内存
+        //      this.overSpeedAlarmMap.remove(key);
+        //      CreateWarnRecord(AlarmRecord.ALARM_FROM_PLATFORM,
+        //      AlarmRecord.TYPE_OVER_SPEED_ON_ROUTE, TURN_OFF, rd,
+        //      seg.getEntityId(), null);
+        //     }
+        //     rd.setOverSpeedAlarm(null);
+        //   }
     }
 
     /**
@@ -432,11 +419,13 @@ public class AreaAlarmService implements IAreaAlarmService {
                 // 是否在线路的某一段上
                 LineSegment seg = IsInLineSegment(mp, ec);
                 boolean isOnRoute = seg != null;
-                log.error(rd.getSimNo() + ",线路名称" + ec.getName() + "," + (seg == null ? "偏离" : "行驶在线路上") +",时间:"+ TimeUtils.dateTodetailStr(rd.getSendTime()) );
+                log.debug(rd.getSimNo() + ",线路名称" + ec.getName() + "," +
+                        (seg == null ? "偏离" : "行驶在线路上") +
+                        ",时间:" + TimeUtils.dateTodetailStr(rd.getSendTime()));
                 String alarmKey = rd.getSimNo() + "_" + ec.getEntityId();
                 AlarmItem offsetAlarm = (AlarmItem) offsetRouteWarn.get(alarmKey);
                 AlarmItem onRouteAlarm = (AlarmItem) onRouteWarn.get(alarmKey);
-                if (isOnRoute == false) {
+                if (isOnRoute == false) {//如果离开了线路,那么就报警,并且移除进入线路的缓存,加入到离开线路的缓存
                     if (offsetAlarm == null) {
                         this.AnalyzeOverSpeed(rd, null, ec);
                         offsetAlarm = new AlarmItem(rd, alarmType, alarmSource);
@@ -453,66 +442,57 @@ public class AreaAlarmService implements IAreaAlarmService {
                         offsetAlarm.setStatus(AlarmRecord.STATUS_NEW); //报警开始
                         this.insertAlarm(alarmSource, alarmType, rd, ec.getName());
                         //                    rd.setOffsetRouteAlarm("偏离路线:" + ec.getName());
-                        Date originTime = rd.getSendTime();
-                        rd.setSendTime(offsetTime);
-                        // 创建偏离报警
-                        AlarmRecord sr = CreateRecord(
-                                AlarmRecord.ALARM_FROM_PLATFORM,
-                                AlarmRecord.TYPE_OFFSET_ROUTE, TURN_ON, rd,
-                                ec.getEntityId());
-                        if (sr != null) {
-                            sr.setStation(ec.getEntityId());
-                            sr.setLocation(ec.getName());
-                            alarmRecordService.saveOrUpdate(sr);
-                        }
-                        // 创建行驶在指定的线路上的记录
-                        sr = CreateRecord(AlarmRecord.ALARM_FROM_PLATFORM,
-                                AlarmRecord.TYPE_ON_ROUTE, TURN_OFF, rd,
-                                ec.getEntityId());
-                        if (sr != null) {
-                            sr.setStation(ec.getEntityId());
-                            sr.setLocation(ec.getName());
-                            alarmRecordService.saveOrUpdate(sr);
-                        }
-                        rd.setSendTime(originTime);
-                        onRouteWarn.remove(alarmKey);
-                    }
-
-                } else {
-
-                    AnalyzeOverSpeed(rd, seg, ec);//如果在线路上，就开始分析分段限速报警
-                    if (offsetAlarm != null) {
-                        offsetAlarm.setStatus(AlarmRecord.STATUS_OLD);// 如果在线路上，说明偏离线路报警结束
-                        log.info(rd.getPlateNo() + "回到线路上," + rd.getSendTime());
-                        CreateWarnRecord(AlarmRecord.ALARM_FROM_PLATFORM,
-                                AlarmRecord.TYPE_OFFSET_ROUTE, TURN_OFF, rd,
-                                ec.getEntityId(), null);
-                        offsetRouteWarn.remove(alarmKey);
-                    }
-                    //                rd.setOffsetRouteAlarm(null);
-                    if (onRouteAlarm == null) {
-                        onRouteAlarm = new AlarmItem(rd, AlarmRecord.TYPE_ON_ROUTE,
-                                alarmSource);
-
-                        onRouteWarn.put(alarmKey, onRouteAlarm);
+                        //这下面是创建报警记录
+//                        Date originTime = rd.getSendTime();
+//                        rd.setSendTime(offsetTime);
+//                        // 创建偏离报警
 //                        AlarmRecord sr = CreateRecord(
 //                                AlarmRecord.ALARM_FROM_PLATFORM,
-//                                AlarmRecord.TYPE_ON_ROUTE, TURN_ON, rd,
+//                                AlarmRecord.TYPE_OFFSET_ROUTE, TURN_ON, rd,
 //                                ec.getEntityId());
 //                        if (sr != null) {
 //                            sr.setStation(ec.getEntityId());
 //                            sr.setLocation(ec.getName());
 //                            alarmRecordService.saveOrUpdate(sr);
 //                        }
+//                        // 创建行驶在指定的线路上的记录
+//                        sr = CreateRecord(AlarmRecord.ALARM_FROM_PLATFORM,
+//                                AlarmRecord.TYPE_ON_ROUTE, TURN_OFF, rd,
+//                                ec.getEntityId());
+//                        if (sr != null) {
+//                            sr.setStation(ec.getEntityId());
+//                            sr.setLocation(ec.getName());
+//                            alarmRecordService.saveOrUpdate(sr);
+//                        }
+//                        rd.setSendTime(originTime);
+                        onRouteWarn.remove(alarmKey);
+                    }
+
+                } else {//如果进入了线路,
+                    AnalyzeOverSpeed(rd, seg, ec);//如果在线路上，就开始分析分段限速报警
+                    if (offsetAlarm != null) {
+                        offsetAlarm.setStatus(AlarmRecord.STATUS_OLD);// 如果在线路上，说明偏离线路报警结束
+                        log.debug(rd.getSimNo() + "回到线路上," + rd.getSendTime());
+                        CreateWarnRecord(AlarmRecord.ALARM_FROM_PLATFORM,
+                                AlarmRecord.TYPE_OFFSET_ROUTE, TURN_OFF, rd,
+                                ec.getEntityId(), null);
+                        offsetRouteWarn.remove(alarmKey);
+                    }
+                    if (onRouteAlarm == null) {
+                        onRouteAlarm = new AlarmItem(rd, AlarmRecord.TYPE_ON_ROUTE,
+                                alarmSource);
+
+                        onRouteWarn.put(alarmKey, onRouteAlarm);
+
                     }
                 }
             }
 
             double ts2 = DateUtil.getSeconds(start, new Date());
             if (ts2 > 0.2)
-                log.info(rd.getPlateNo() + "," + ec.getName() + "路线偏移报警耗时:" + ts2);
+                log.debug(rd.getPlateNo() + "," + ec.getName() + "路线偏移报警耗时:" + ts2);
         } catch (Exception e) {
-            log.error("线路报警处理错误", e);
+            log.error("平台线路报警处理错误", e);
         }
 
     }
@@ -557,7 +537,7 @@ public class AreaAlarmService implements IAreaAlarmService {
                 boolean result = MapFixService.isPointOnRouteSegment(p1, p2,
                         mp, ec.getLineWidth());
                 if (result)
-                    return seg;
+                    return prevSegment;
             }
             prevSegment = seg;
         }
@@ -575,7 +555,8 @@ public class AreaAlarmService implements IAreaAlarmService {
     private List<LineSegment> GetLineSegments(long routeId) {
         String hsql = "select * from LineSegment where routeId = ? order by pointId ";
 
-        List<LineSegment> ls=JdbcUtil.getDefault().sql(hsql).addIndexParam(routeId).query(LineSegment.class);
+        List<LineSegment> ls = JdbcUtil.getDefault().sql(hsql).addIndexParam(routeId).query(LineSegment.class);
+
         return ls;
     }
 
@@ -736,7 +717,7 @@ public class AreaAlarmService implements IAreaAlarmService {
         EventMsg em = new EventMsg();
         em.setEventBody(areaAlarmEvent);
         em.loadDefaultDevMsgAttr();
-        kafkaMessageSender.sendAreaAlarmEventMsg(em,rd.getSimNo());
+        kafkaMessageSender.sendAreaAlarmEventMsg(em, rd.getSimNo());
     }
 
 
@@ -776,28 +757,27 @@ public class AreaAlarmService implements IAreaAlarmService {
                 mp = pointForGoogle;
             }
 
-            if (MapArea.ROUTE.equals(ec.getAreaType())) {
-                AnalyzeOffsetRoute(rd, ec, mp);
-            } else {
-                if (ec.getKeyPoint() == 1) {//这边计算关键点，但是不准确而且和圆是一样的
-                    if (ec.getByTime())
-                        monitorKeyPointArrvie(rd, ec, mp);// 进入指定的关键点报警
-                    else
-                        monitorKeyPointLeave(rd, ec, mp); // 离开指定的关键点报警
-                } else {//这边计算进区域
-                    boolean isbytime = true;
-                    if (ec.getByTime()) {//时间范围，如果不在时间范围那么就不进行围栏判断
-                        try {
-                            if (!TimeUtils.isEffectiveDate(rd.getSendTime(), ec.getStartDate(), ec.getEndDate())) {
-                                isbytime = false;
-                            }
-                        } catch (Exception e) {
-                            isbytime=false;
-                        }
+            boolean isbytime = true;
+            if (ec.getByTime()) {//时间范围，如果不在时间范围那么就不进行围栏判断
+                try {
+                    if (!TimeUtils.isEffectiveDate(rd.getSendTime(), ec.getStartDate(), ec.getEndDate())) {
+                        isbytime = false;
                     }
-                    if (isbytime) {
+                } catch (Exception e) {
+                    isbytime = false;
+                }
+            }
+            if (isbytime) {
+                if (MapArea.ROUTE.equals(ec.getAreaType())) {
+                    AnalyzeOffsetRoute(rd, ec, mp);
+                } else {
+                    if (ec.getKeyPoint() == 1) {//这边计算关键点，但是不准确而且和圆是一样的
+                        if (ec.getByTime())
+                            monitorKeyPointArrvie(rd, ec, mp);// 进入指定的关键点报警
+                        else
+                            monitorKeyPointLeave(rd, ec, mp); // 离开指定的关键点报警
+                    } else {//这边计算进区域
                         String key = rd.getSimNo() + "_" + ec.getEntityId();
-
                         boolean arg = true;
                         boolean inArea = IsInArea(ec, mp);//这边进行计算是否在区域内
                         if (CrossMap.containsKey(key)) {
@@ -812,10 +792,10 @@ public class AreaAlarmService implements IAreaAlarmService {
                         }
                         log.debug("当前车辆的围栏处理情况为，simno=" + rd.getSimNo() + ",sendTime=" + rd.getSendTime() + ",name=" + ec.getName() + ",之前是否在围栏内=" + CrossMap.get(key) + ",现在是否在围栏内=" + inArea);
                         CrossMap.put(key, inArea);
-                    } else {
-                        log.debug("当前车辆的围栏处理情况为，simno=" + rd.getSimNo() + ",sendTime=" + rd.getSendTime() + ",name=" + ec.getName() + ",不在时间范围内=" + TimeUtils.dateTodetailStr(ec.getStartDate()) + "-" + TimeUtils.dateTodetailStr(ec.getEndDate()));
                     }
                 }
+            } else {
+                log.debug("当前车辆的围栏处理情况为，simno=" + rd.getSimNo() + ",sendTime=" + rd.getSendTime() + ",name=" + ec.getName() + ",不在时间范围内=" + TimeUtils.dateTodetailStr(ec.getStartDate()) + "-" + TimeUtils.dateTodetailStr(ec.getEndDate()));
             }
         } catch (Exception e) {
             log.error("处理围栏报错" + rd.getSimNo() + "+" + ec.getName(), e);
