@@ -302,9 +302,9 @@ public class AreaAlarmService implements IAreaAlarmService {
         try {
             if (ConverterUtils.isList(AreaId)) {
                 for (Integer areaId : AreaId) {
-                    if ("012345678911".equalsIgnoreCase(rd.getSimNo())) {
-                        System.out.println(1);
-                    }
+//                    if ("012345678911".equalsIgnoreCase(rd.getSimNo())) {
+//                        System.out.println(1);
+//                    }
                     long s = System.currentTimeMillis();   //获取开始时间
                     String key = areaId + rd.getSimNo();
                     if (rd != null) {

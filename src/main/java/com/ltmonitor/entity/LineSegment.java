@@ -48,12 +48,15 @@ public class LineSegment extends TenantEntity implements Serializable {
     private String alarmType;
     //路段行驶时间限制
     private int maxTimeLimit;
+    //路段最低行驶时间限制
     private int minTimeLimit;
     //超速限制
     private double maxSpeed;
     //超速持续时间
     private int overSpeedTime;
+    //是否根据道路行驶时间
     private int byTime;
+    //是否根据限速值
     private int limitSpeed;
 
 //    public LineSegment() {
