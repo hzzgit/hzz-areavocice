@@ -557,6 +557,7 @@ public class AreaAlarmService implements IAreaAlarmService {
 
 //                boolean result = MapFixService.isPointOnRouteSegment(p1, p2,
 //                        mp, seg.getLineWidth());
+                    //TODO 这边改成使用整条路线的线宽
                     boolean result = MapFixService.isPointOnRouteSegment(p1, p2,
                             mp, ec.getLineWidth());
                     if (result)
