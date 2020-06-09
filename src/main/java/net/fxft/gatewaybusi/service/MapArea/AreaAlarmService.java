@@ -1,7 +1,6 @@
 package net.fxft.gatewaybusi.service.MapArea;
 
 import com.ltmonitor.entity.*;
-
 import com.ltmonitor.service.*;
 import com.ltmonitor.util.*;
 import com.ltmonitor.vo.PointLatLng;
@@ -9,15 +8,11 @@ import net.fxft.common.jdbc.JdbcUtil;
 import net.fxft.common.jdbc.RowDataMap;
 import net.fxft.common.log.AttrLog;
 import net.fxft.common.util.BasicUtil;
-import net.fxft.common.util.JacksonUtil;
 import net.fxft.gateway.event.EventMsg;
 import net.fxft.gateway.event.alarm.AreaAlarmEvent;
-import net.fxft.gateway.event.everyunit.UpdateCacheEvent;
 import net.fxft.gatewaybusi.kafka.KafkaMessageSender;
 import net.fxft.gatewaybusi.kafka.StartKafkaComsumer;
 import net.fxft.gatewaybusi.service.AutoVoice.impl.AutoVoiceQueueService;
-import net.fxft.gatewaybusi.service.IRealDataService;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -27,12 +22,10 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -460,6 +453,9 @@ public class AreaAlarmService implements IAreaAlarmService {
                         if (checkisarea(ec.getAlarmType(), isOnRoute)) {
                             this.insertAlarm(alarmSource, AlarmRecord.TYPE_CROSS_BORDER, rd, getAreaType(ec.getAreaType()) + ec.getName());
                         }
+                        if(checkisareatodriver(ec.getAlarmType(),isOnRoute)){//是否下发给驾驶员
+                            autoVoiceQueueService.addSendQueue("您已离开线路:"+ ec.getName(),rd.getSimNo());
+                        }
                         //                    rd.setOffsetRouteAlarm("偏离路线:" + ec.getName());
                         //这下面是创建报警记录
 //                        Date originTime = rd.getSendTime();
@@ -500,9 +496,12 @@ public class AreaAlarmService implements IAreaAlarmService {
                     if (onRouteAlarm == null) {
                         onRouteAlarm = new AlarmItem(rd, AlarmRecord.TYPE_IN_AREA,
                                 alarmSource);
-                        if (checkisarea(ec.getAlarmType(), isOnRoute)) {
+                        if (checkisarea(ec.getAlarmType(), isOnRoute)) {//这边判断下发给平台
                             this.insertAlarm(alarmSource, AlarmRecord.TYPE_IN_AREA, rd,
                                     getAreaType(ec.getAreaType()) + ec.getName() + ",路段:" + seg.getName());
+                        }
+                        if(checkisareatodriver(ec.getAlarmType(),isOnRoute)){//是否下发给驾驶员
+                            autoVoiceQueueService.addSendQueue("您已进入线路:"+ ec.getName() + ",路段:" + seg.getName(),rd.getSimNo());
                         }
                         onRouteWarn.put(alarmKey, onRouteAlarm);
 
@@ -672,6 +671,24 @@ public class AreaAlarmService implements IAreaAlarmService {
         }
         return arg;
     }
+
+    //用来判断配置的围栏是进去的还是出去的,是否下发给驾驶员
+    private boolean checkisareatodriver(String alarmtype, boolean isInArea) {
+        boolean arg = false;
+        if (!StringUtil.isNullOrEmpty(alarmtype)) {//这个地方是判断是进出围栏还是怎么的
+            if (isInArea) {
+                if (alarmtype.indexOf("进区域报警给驾驶员") > -1) {
+                    arg = true;
+                }
+            } else {
+                if (alarmtype.indexOf("出区域报警给驾驶员") > -1) {
+                    arg = true;
+                }
+            }
+        }
+        return arg;
+    }
+
 
     public static void main(String[] args) {
         System.out.println(new AreaAlarmService().checkisarea("出区域报警给平台,", false));
