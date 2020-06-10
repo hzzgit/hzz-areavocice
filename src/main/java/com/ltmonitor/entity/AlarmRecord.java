@@ -18,8 +18,8 @@ public class AlarmRecord extends TenantEntity {
 	public static String TYPE_PARKING = "Parking"; // 停车记录
 	public static String TYPE_ONLINE = "GpsOnline"; // 在线记录
 	public static String TYPE_OFFLINE = "GpsOffline"; // 离线记录
-	public static String TYPE_OFFSET_ROUTE = "OffsetRoute"; // 路线偏移
-	public static String TYPE_ON_ROUTE = "OnRoute"; // 路线偏移
+	public static String TYPE_OFFSET_ROUTE = "OffsetRoute"; // 路线出偏移
+	public static String TYPE_ON_ROUTE = "OnRoute"; // 路线进入
 	public static String TYPE_OVER_SPEED_ON_ROUTE = "OverSpeedOnRoute"; // 分段限速
 	public static String TYPE_ARRIVE_NOT_ON_TIME = "ArriveNotOnTime"; // 规定时间到达
 	public static String TYPE_LEAVE_NOT_ON_TIME = "LeaveNotOnTime"; // 规定时间离开

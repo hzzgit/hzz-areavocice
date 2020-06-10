@@ -422,10 +422,10 @@ public class AreaAlarmService implements IAreaAlarmService {
     private void AnalyzeOffsetRoute(GPSRealData rd, MapArea ec, PointLatLng mp) {
         try {
             Date start = new Date();
-            String alarmType = AlarmRecord.TYPE_CROSS_BORDER;
+           // String alarmType = AlarmRecord.TYPE_CROSS_BORDER;
             String alarmSource = AlarmRecord.ALARM_FROM_PLATFORM;
             int maxAllowedOffsetTime = ec.getOffsetDelay(); // 获得延时报警的延时值
-            if (IsInTimeSpan(ec)) {
+
                 // 是否在线路的某一段上
                 LineSegment seg = IsInLineSegment(mp, ec);
                 boolean isOnRoute = seg != null;
@@ -438,7 +438,7 @@ public class AreaAlarmService implements IAreaAlarmService {
                 if (isOnRoute == false) {//如果离开了线路,那么就报警,并且移除进入线路的缓存,加入到离开线路的缓存
                     if (offsetAlarm == null) {
                         this.AnalyzeOverSpeed(rd, null, ec);
-                        offsetAlarm = new AlarmItem(rd, AlarmRecord.TYPE_CROSS_BORDER, alarmSource);
+                        offsetAlarm = new AlarmItem(rd, AlarmRecord.TYPE_OFFSET_ROUTE, alarmSource);
                         // 开始报警
                         offsetRouteWarn.put(alarmKey, offsetAlarm);
                         offsetAlarm.setStatus("");
@@ -451,7 +451,7 @@ public class AreaAlarmService implements IAreaAlarmService {
                             && offsetAlarm.getStatus().equals("")) {
                         offsetAlarm.setStatus(AlarmRecord.STATUS_NEW); //报警开始
                         if (checkisarea(ec.getAlarmType(), isOnRoute)) {
-                            this.insertAlarm(alarmSource, AlarmRecord.TYPE_CROSS_BORDER, rd, getAreaType(ec.getAreaType()) + ec.getName());
+                            this.insertAlarm(alarmSource, AlarmRecord.TYPE_OFFSET_ROUTE, rd, getAreaType(ec.getAreaType()) + ec.getName());
                         }
                         if(checkisareatodriver(ec.getAlarmType(),isOnRoute)){//是否下发给驾驶员
                             autoVoiceQueueService.addSendQueue("您已离开线路:"+ ec.getName(),rd.getSimNo());
@@ -489,25 +489,25 @@ public class AreaAlarmService implements IAreaAlarmService {
                         offsetAlarm.setStatus(AlarmRecord.STATUS_OLD);// 如果在线路上，说明偏离线路报警结束
                         log.debug(rd.getSimNo() + "回到线路上," + rd.getSendTime());
                         CreateWarnRecord(AlarmRecord.ALARM_FROM_PLATFORM,
-                                AlarmRecord.TYPE_OFFSET_ROUTE, TURN_OFF, rd,
+                                AlarmRecord.TYPE_ON_ROUTE, TURN_OFF, rd,
                                 ec.getEntityId(), null);
                         offsetRouteWarn.remove(alarmKey);
                     }
                     if (onRouteAlarm == null) {
-                        onRouteAlarm = new AlarmItem(rd, AlarmRecord.TYPE_IN_AREA,
+                        onRouteAlarm = new AlarmItem(rd, AlarmRecord.TYPE_ON_ROUTE,
                                 alarmSource);
-                        if (checkisarea(ec.getAlarmType(), isOnRoute)) {//这边判断下发给平台
-                            this.insertAlarm(alarmSource, AlarmRecord.TYPE_IN_AREA, rd,
-                                    getAreaType(ec.getAreaType()) + ec.getName() + ",路段:" + seg.getName());
-                        }
-                        if(checkisareatodriver(ec.getAlarmType(),isOnRoute)){//是否下发给驾驶员
-                            autoVoiceQueueService.addSendQueue("您已进入线路:"+ ec.getName() + ",路段:" + seg.getName(),rd.getSimNo());
-                        }
+//                        if (checkisarea(ec.getAlarmType(), isOnRoute)) {//这边判断下发给平台
+//                            this.insertAlarm(alarmSource, AlarmRecord.TYPE_ON_ROUTE, rd,
+//                                    getAreaType(ec.getAreaType()) + ec.getName() + ",路段:" + seg.getName());
+//                        }
+//                        if(checkisareatodriver(ec.getAlarmType(),isOnRoute)){//是否下发给驾驶员
+//                            autoVoiceQueueService.addSendQueue("您已进入线路:"+ ec.getName() + ",路段:" + seg.getName(),rd.getSimNo());
+//                        }
                         onRouteWarn.put(alarmKey, onRouteAlarm);
 
                     }
                 }
-            }
+
 
             double ts2 = DateUtil.getSeconds(start, new Date());
             if (ts2 > 0.2)
