@@ -1,4 +1,4 @@
-package net.fxft.gatewaybusi.service;
+package net.fxft.ascsareavoice.service;
 
 import com.ltmonitor.entity.GPSRealData;
 import com.ltmonitor.entity.VehicleData;

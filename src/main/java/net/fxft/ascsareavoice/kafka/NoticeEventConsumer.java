@@ -1,23 +1,13 @@
-package net.fxft.gatewaybusi.kafka;
+package net.fxft.ascsareavoice.kafka;
 
-import com.ltmonitor.entity.TerminalCommand;
-import net.fxft.cloud.kafka.BaseKafkaConsumer;
-import net.fxft.cloud.spring.AfterStartedRunner;
 import net.fxft.gateway.event.EventMsg;
 import net.fxft.gateway.event.IEventBody;
 import net.fxft.gateway.event.everyunit.UpdateCacheEvent;
-import net.fxft.gateway.event.notice.CmdNotFoundChannleEvent;
-import net.fxft.gateway.event.notice.CmdWriteFinishEvent;
-import net.fxft.gateway.kafka.UnitConfig;
 import net.fxft.gateway.kafka.eventmsg.IEveryUnitMsgProcessor;
-import net.fxft.gateway.protocol.TransferMsgBuilder;
-import net.fxft.gateway.util.KryoUtil;
-import net.fxft.gatewaybusi.service.impl.RealDataService;
+import net.fxft.ascsareavoice.service.impl.RealDataService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service

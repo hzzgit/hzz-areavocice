@@ -1,4 +1,4 @@
-package net.fxft.gatewaybusi.service.impl;
+package net.fxft.ascsareavoice.service.impl;
 
 import com.ltmonitor.entity.GPSRealData;
 import com.ltmonitor.entity.VehicleData;
@@ -6,7 +6,7 @@ import com.ltmonitor.util.ConverterUtils;
 import net.fxft.cloud.redis.RedisUtil;
 import net.fxft.common.jdbc.JdbcUtil;
 import net.fxft.gateway.util.KryoUtil;
-import net.fxft.gatewaybusi.service.IRealDataService;
+import net.fxft.ascsareavoice.service.IRealDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

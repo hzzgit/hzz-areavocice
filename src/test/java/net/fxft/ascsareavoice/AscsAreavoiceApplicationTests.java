@@ -1,4 +1,4 @@
-package net.fxft.gatewaybusi;
+package net.fxft.ascsareavoice;
 
 import com.ltmonitor.entity.MapArea;
 import com.ltmonitor.service.IMapAreaService;

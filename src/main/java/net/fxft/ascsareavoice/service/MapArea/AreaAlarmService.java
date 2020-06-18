@@ -1,4 +1,4 @@
-package net.fxft.gatewaybusi.service.MapArea;
+package net.fxft.ascsareavoice.service.MapArea;
 
 import com.ltmonitor.entity.*;
 import com.ltmonitor.service.*;
@@ -10,9 +10,9 @@ import net.fxft.common.log.AttrLog;
 import net.fxft.common.util.BasicUtil;
 import net.fxft.gateway.event.EventMsg;
 import net.fxft.gateway.event.alarm.AreaAlarmEvent;
-import net.fxft.gatewaybusi.kafka.KafkaMessageSender;
-import net.fxft.gatewaybusi.kafka.StartKafkaComsumer;
-import net.fxft.gatewaybusi.service.AutoVoice.impl.AutoVoiceQueueService;
+import net.fxft.ascsareavoice.kafka.KafkaMessageSender;
+import net.fxft.ascsareavoice.kafka.StartKafkaComsumer;
+import net.fxft.ascsareavoice.service.AutoVoice.impl.AutoVoiceQueueService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;

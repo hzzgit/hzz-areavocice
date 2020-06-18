@@ -1,51 +1,28 @@
-package net.fxft.gatewaybusi.kafka;
+package net.fxft.ascsareavoice.kafka;
 
 import com.ltmonitor.entity.GPSRealData;
 import com.ltmonitor.entity.VehicleData;
 import com.ltmonitor.jt808.protocol.JT_0200;
 import com.ltmonitor.jt808.protocol.JT_0704;
-import com.ltmonitor.jt808.protocol.T808Message;
 import com.ltmonitor.util.ConverterUtils;
 import com.ltmonitor.util.DateUtil;
 import com.ltmonitor.util.StringUtil;
 import com.ltmonitor.util.TimeUtils;
-import net.fxft.cloud.metrics.Tps;
-import net.fxft.common.tpool.BlockedThreadPoolExecutor;
-import net.fxft.common.util.ByteUtil;
-import net.fxft.gateway.kafka.UnitConfig;
 import net.fxft.gateway.kafka.UnitConfigManager;
 import net.fxft.gateway.kafka.devicemsg.IFromDeviceMsgProcessor;
 import net.fxft.gateway.protocol.DeviceMsg;
-import net.fxft.gateway.protocol.DeviceMsgBuilder;
-import net.fxft.gateway.protocol.TransferMsg;
-import net.fxft.gateway.protocol.TransferMsgBuilder;
 import net.fxft.gateway.protocol.gps.LocationMsg;
-import net.fxft.gateway.util.KryoUtil;
-import net.fxft.gateway.util.SimNoUtil;
-import net.fxft.gatewaybusi.GatewayBusiApplicationStart;
-import net.fxft.gatewaybusi.IShutdownHook;
-import net.fxft.gatewaybusi.service.AutoVoice.IAutoVoiceService;
-import net.fxft.gatewaybusi.service.IMessageProcessService;
-import net.fxft.gatewaybusi.service.MapArea.AreaAlarmService;
-import net.fxft.gatewaybusi.service.impl.RealDataService;
-import org.apache.kafka.clients.consumer.Consumer;
+import net.fxft.ascsareavoice.AscsAreaVoiceApplicationStart;
+import net.fxft.ascsareavoice.service.IMessageProcessService;
+import net.fxft.ascsareavoice.service.impl.RealDataService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
-import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PreDestroy;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.LongAdder;
 
 @Component
 public class StartKafkaComsumer implements IFromDeviceMsgProcessor {
@@ -185,7 +162,7 @@ public class StartKafkaComsumer implements IFromDeviceMsgProcessor {
 
     @Override
     public String getConsumerGroupId(UnitConfigManager unitConfigManager) {
-        return unitConfigManager.getUnitConfig(GatewayBusiApplicationStart.class).getConsumerGroupId();
+        return unitConfigManager.getUnitConfig(AscsAreaVoiceApplicationStart.class).getConsumerGroupId();
     }
 
     @Override

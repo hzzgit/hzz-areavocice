@@ -1,4 +1,4 @@
-package net.fxft.gatewaybusi.service.AutoVoice.impl;
+package net.fxft.ascsareavoice.service.AutoVoice.impl;
 
 
 import com.ltmonitor.entity.TerminalCommand;
@@ -13,9 +13,9 @@ import net.fxft.common.jdbc.RowDataMap;
 import net.fxft.common.log.AttrLog;
 import net.fxft.common.util.BasicUtil;
 import net.fxft.gateway.util.SimNoUtil;
-import net.fxft.gatewaybusi.po.autovoice.AutoVoiceConfigPO;
-import net.fxft.gatewaybusi.po.autovoice.AutoVoicePO;
-import net.fxft.gatewaybusi.service.impl.RealDataService;
+import net.fxft.ascsareavoice.po.autovoice.AutoVoiceConfigPO;
+import net.fxft.ascsareavoice.po.autovoice.AutoVoicePO;
+import net.fxft.ascsareavoice.service.impl.RealDataService;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;

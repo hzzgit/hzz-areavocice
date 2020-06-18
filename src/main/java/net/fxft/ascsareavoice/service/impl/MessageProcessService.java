@@ -1,17 +1,12 @@
-package net.fxft.gatewaybusi.service.impl;
+package net.fxft.ascsareavoice.service.impl;
 
 import com.ltmonitor.entity.GPSRealData;
-import com.ltmonitor.jt808.protocol.JT_0200;
-import com.ltmonitor.jt808.protocol.JT_0704;
-import com.ltmonitor.jt808.protocol.T808Message;
-import net.fxft.gatewaybusi.dataprocess.Process0200_RealData;
-import net.fxft.gatewaybusi.service.IMessageProcessService;
+import net.fxft.ascsareavoice.dataprocess.Process0200_RealData;
+import net.fxft.ascsareavoice.service.IMessageProcessService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * 消息分发类

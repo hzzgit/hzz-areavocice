@@ -1,4 +1,4 @@
-package net.fxft.gatewaybusi.service.AutoVoice.impl;
+package net.fxft.ascsareavoice.service.AutoVoice.impl;
 
 import com.ltmonitor.entity.GPSRealData;
 import com.ltmonitor.util.ConverterUtils;
@@ -6,11 +6,11 @@ import com.ltmonitor.util.StringUtil;
 import com.ltmonitor.util.TimeUtils;
 import net.fxft.common.log.AttrLog;
 import net.fxft.common.util.BasicUtil;
-import net.fxft.gatewaybusi.po.autovoice.AutoVoiceConfigPO;
-import net.fxft.gatewaybusi.po.autovoice.AutoVoicePO;
-import net.fxft.gatewaybusi.po.autovoice.AutoVoiceRealPO;
-import net.fxft.gatewaybusi.service.AutoVoice.IAutoVoiceService;
-import net.fxft.gatewaybusi.service.impl.RealDataService;
+import net.fxft.ascsareavoice.po.autovoice.AutoVoiceConfigPO;
+import net.fxft.ascsareavoice.po.autovoice.AutoVoicePO;
+import net.fxft.ascsareavoice.po.autovoice.AutoVoiceRealPO;
+import net.fxft.ascsareavoice.service.AutoVoice.IAutoVoiceService;
+import net.fxft.ascsareavoice.service.impl.RealDataService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

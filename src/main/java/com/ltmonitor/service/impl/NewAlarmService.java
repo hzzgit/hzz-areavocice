@@ -11,7 +11,7 @@ import net.fxft.cloud.streamdata.StreamDataBufferProcessor;
 import net.fxft.common.jdbc.ColumnSet;
 import net.fxft.common.jdbc.JdbcUtil;
 import net.fxft.common.util.BasicUtil;
-import net.fxft.gatewaybusi.service.IRealDataService;
+import net.fxft.ascsareavoice.service.IRealDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
