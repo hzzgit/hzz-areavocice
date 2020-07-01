@@ -5,7 +5,7 @@
     <parent>
         <groupId>net.fxft</groupId>
         <artifactId>ascs-dependencies</artifactId>
-        <version>0.2.20-RELEASE</version>
+        <version>0.2.24-RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>net.fxft</groupId>
@@ -137,6 +137,9 @@
             <plugin>
                 <groupId>net.fxft</groupId>
                 <artifactId>http-deploy</artifactId>
+                <configuration>
+                    <autoDeployIds>ascs-dev@dev96</autoDeployIds>
+                </configuration>
             </plugin>
         </plugins>
     </build>
