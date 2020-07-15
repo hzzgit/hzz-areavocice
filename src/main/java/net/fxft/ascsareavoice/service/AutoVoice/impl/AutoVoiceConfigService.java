@@ -149,8 +149,14 @@ public class AutoVoiceConfigService {
                     for (RowDataMap rowDataMap : result) {
                         Long vehicleId = rowDataMap.getLongValue("vehicleId");
                         String simNo = rowDataMap.getStringValue("simNo");
-                        Date startTime = TimeUtils.date(rowDataMap.getStringValue("startTime"));
-                        Date endTime = TimeUtils.date(rowDataMap.getStringValue("endTime"));
+                        Date startTime = TimeUtils.todatetime(rowDataMap.getStringValue("startTime"));
+                        Date endTime = TimeUtils.todatetime(rowDataMap.getStringValue("endTime"));
+                        if(startTime==null) {
+                            startTime = TimeUtils.date(rowDataMap.getStringValue("startTime"));
+                        }
+                        if(endTime==null) {
+                            endTime = TimeUtils.date(rowDataMap.getStringValue("endTime"));
+                        }
                         String plateNo = rowDataMap.getStringValue("plateNo");
                         int configid = rowDataMap.getIntegerValue("configid");
                         Long depId = rowDataMap.getLongValue("depId");
