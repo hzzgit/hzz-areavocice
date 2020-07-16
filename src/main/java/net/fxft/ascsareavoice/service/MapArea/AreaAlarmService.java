@@ -57,8 +57,8 @@ public class AreaAlarmService implements IAreaAlarmService {
     @Autowired
     private INewAlarmService newAlarmService;
 
-    @Autowired
-    private StartKafkaComsumer startKafkaComsumer;
+    @Value("${areaalarm}")
+    private boolean areaalarm;
     /**
      * 报警分析线程，单独开辟一个线程进行分析
      */
@@ -99,54 +99,55 @@ public class AreaAlarmService implements IAreaAlarmService {
 
     //添加到队列
     public void addAreaqueue(GPSRealData rd) {
+        if (areaalarm) {
 
-
-        if (AreaConfigMap.containsKey(rd.getSimNo())) {//如果存在这个围栏配置就加入队列进行运算
-            boolean isargTme = false;
-            if (TimeUtils.isdifferminute(rd.getSendTime(), new Date(), 1200)) {//如果超过20小时直接干掉
-                return;
-            }
-            if (AreaTimeMap.containsKey(rd.getSimNo())) {//如果存在那么就要去比对时间
-                Date areaTime = AreaTimeMap.get(rd.getSimNo());
-                if (rd.getSendTime().getTime() > areaTime.getTime()) {//如果这个大于这个原来的时间
-                    isargTme = true;
-                    AreaTimeMap.put(rd.getSimNo(), rd.getSendTime());
-                } else {//如果小于这个时间，但是却没有差距很大，那么也
-                    if (TimeUtils.isdifferminute(rd.getSendTime(), areaTime, 30) && !TimeUtils.isdifferminute(rd.getSendTime(), new Date(), 5)) {//如果小于的和记录的差距在30分钟以上
+            if (AreaConfigMap.containsKey(rd.getSimNo())) {//如果存在这个围栏配置就加入队列进行运算
+                boolean isargTme = false;
+                if (TimeUtils.isdifferminute(rd.getSendTime(), new Date(), 1200)) {//如果超过20小时直接干掉
+                    return;
+                }
+                if (AreaTimeMap.containsKey(rd.getSimNo())) {//如果存在那么就要去比对时间
+                    Date areaTime = AreaTimeMap.get(rd.getSimNo());
+                    if (rd.getSendTime().getTime() > areaTime.getTime()) {//如果这个大于这个原来的时间
                         isargTme = true;
                         AreaTimeMap.put(rd.getSimNo(), rd.getSendTime());
-                    } else {
-                        isargTme = false;
+                    } else {//如果小于这个时间，但是却没有差距很大，那么也
+                        if (TimeUtils.isdifferminute(rd.getSendTime(), areaTime, 30) && !TimeUtils.isdifferminute(rd.getSendTime(), new Date(), 5)) {//如果小于的和记录的差距在30分钟以上
+                            isargTme = true;
+                            AreaTimeMap.put(rd.getSimNo(), rd.getSendTime());
+                        } else {
+                            isargTme = false;
+                        }
                     }
+                } else {//如果不存在，那么就直接算作第一个时间点，时间不存在
+                    isargTme = true;
+                    AreaTimeMap.put(rd.getSimNo(), rd.getSendTime());
                 }
-            } else {//如果不存在，那么就直接算作第一个时间点，时间不存在
-                isargTme = true;
-                AreaTimeMap.put(rd.getSimNo(), rd.getSendTime());
+                if (isargTme) {
+                    AreaQueue.add(rd);
+                }
+            } else {
+                AreaTimeMap.remove(rd.getSimNo());
             }
-            if (isargTme) {
-                AreaQueue.add(rd);
-            }
-        } else {
-            AreaTimeMap.remove(rd.getSimNo());
         }
     }
 
     @PostConstruct
     public void start() {
-
-        analyzeThread = new Thread(new Runnable() {
-            public void run() {
-                analyzeThreadFunc();
-            }
-        });
-        analyzeThread.start();
+        if (areaalarm) {
+            analyzeThread = new Thread(new Runnable() {
+                public void run() {
+                    analyzeThreadFunc();
+                }
+            });
+            analyzeThread.start();
 //            for (int i = 0; i < areaQueueThreadco; i++) {//开三个线程处理有围栏报警的设备队列
 //
 //            }
-        new Thread(() -> {//处理围栏报警队列的线程
-            processorAreaAlarm();
-        }).start();
-
+            new Thread(() -> {//处理围栏报警队列的线程
+                processorAreaAlarm();
+            }).start();
+        }
     }
 
     //处理围栏报警判断
@@ -422,42 +423,42 @@ public class AreaAlarmService implements IAreaAlarmService {
     private void AnalyzeOffsetRoute(GPSRealData rd, MapArea ec, PointLatLng mp) {
         try {
             Date start = new Date();
-           // String alarmType = AlarmRecord.TYPE_CROSS_BORDER;
+            // String alarmType = AlarmRecord.TYPE_CROSS_BORDER;
             String alarmSource = AlarmRecord.ALARM_FROM_PLATFORM;
             int maxAllowedOffsetTime = ec.getOffsetDelay(); // 获得延时报警的延时值
 
-                // 是否在线路的某一段上
-                LineSegment seg = IsInLineSegment(mp, ec);
-                boolean isOnRoute = seg != null;
-                log.debug(rd.getSimNo() + ",线路名称" + ec.getName() + "," +
-                        (seg == null ? "偏离" : "行驶在线路上") +
-                        ",时间:" + TimeUtils.dateTodetailStr(rd.getSendTime()));
-                String alarmKey = rd.getSimNo() + "_" + ec.getEntityId();
-                AlarmItem offsetAlarm = (AlarmItem) offsetRouteWarn.get(alarmKey);
-                AlarmItem onRouteAlarm = (AlarmItem) onRouteWarn.get(alarmKey);
-                if (isOnRoute == false) {//如果离开了线路,那么就报警,并且移除进入线路的缓存,加入到离开线路的缓存
-                    if (offsetAlarm == null) {
-                        this.AnalyzeOverSpeed(rd, null, ec);
-                        offsetAlarm = new AlarmItem(rd, AlarmRecord.TYPE_OFFSET_ROUTE, alarmSource);
-                        // 开始报警
-                        offsetRouteWarn.put(alarmKey, offsetAlarm);
-                        offsetAlarm.setStatus("");
+            // 是否在线路的某一段上
+            LineSegment seg = IsInLineSegment(mp, ec);
+            boolean isOnRoute = seg != null;
+            log.debug(rd.getSimNo() + ",线路名称" + ec.getName() + "," +
+                    (seg == null ? "偏离" : "行驶在线路上") +
+                    ",时间:" + TimeUtils.dateTodetailStr(rd.getSendTime()));
+            String alarmKey = rd.getSimNo() + "_" + ec.getEntityId();
+            AlarmItem offsetAlarm = (AlarmItem) offsetRouteWarn.get(alarmKey);
+            AlarmItem onRouteAlarm = (AlarmItem) onRouteWarn.get(alarmKey);
+            if (isOnRoute == false) {//如果离开了线路,那么就报警,并且移除进入线路的缓存,加入到离开线路的缓存
+                if (offsetAlarm == null) {
+                    this.AnalyzeOverSpeed(rd, null, ec);
+                    offsetAlarm = new AlarmItem(rd, AlarmRecord.TYPE_OFFSET_ROUTE, alarmSource);
+                    // 开始报警
+                    offsetRouteWarn.put(alarmKey, offsetAlarm);
+                    offsetAlarm.setStatus("");
 
+                }
+                Date offsetTime = offsetAlarm.getAlarmTime();
+                double ts = DateUtil.getSeconds(offsetTime, rd.getSendTime());
+                //判断是否超过延时允许值
+                if (ts >= maxAllowedOffsetTime
+                        && offsetAlarm.getStatus().equals("")) {
+                    offsetAlarm.setStatus(AlarmRecord.STATUS_NEW); //报警开始
+                    if (checkisarea(ec.getAlarmType(), isOnRoute)) {
+                        this.insertAlarm(alarmSource, AlarmRecord.TYPE_OFFSET_ROUTE, rd, getAreaType(ec.getAreaType()) + ec.getName());
                     }
-                    Date offsetTime = offsetAlarm.getAlarmTime();
-                    double ts = DateUtil.getSeconds(offsetTime, rd.getSendTime());
-                    //判断是否超过延时允许值
-                    if (ts >= maxAllowedOffsetTime
-                            && offsetAlarm.getStatus().equals("")) {
-                        offsetAlarm.setStatus(AlarmRecord.STATUS_NEW); //报警开始
-                        if (checkisarea(ec.getAlarmType(), isOnRoute)) {
-                            this.insertAlarm(alarmSource, AlarmRecord.TYPE_OFFSET_ROUTE, rd, getAreaType(ec.getAreaType()) + ec.getName());
-                        }
-                        if(checkisareatodriver(ec.getAlarmType(),isOnRoute)){//是否下发给驾驶员
-                            autoVoiceQueueService.addSendQueue("您已离开线路:"+ ec.getName(),rd.getSimNo());
-                        }
-                        //                    rd.setOffsetRouteAlarm("偏离路线:" + ec.getName());
-                        //这下面是创建报警记录
+                    if (checkisareatodriver(ec.getAlarmType(), isOnRoute)) {//是否下发给驾驶员
+                        autoVoiceQueueService.addSendQueue("您已离开线路:" + ec.getName(), rd.getSimNo());
+                    }
+                    //                    rd.setOffsetRouteAlarm("偏离路线:" + ec.getName());
+                    //这下面是创建报警记录
 //                        Date originTime = rd.getSendTime();
 //                        rd.setSendTime(offsetTime);
 //                        // 创建偏离报警
@@ -480,22 +481,22 @@ public class AreaAlarmService implements IAreaAlarmService {
 //                            alarmRecordService.saveOrUpdate(sr);
 //                        }
 //                        rd.setSendTime(originTime);
-                        onRouteWarn.remove(alarmKey);
-                    }
+                    onRouteWarn.remove(alarmKey);
+                }
 
-                } else {//如果进入了线路,
-                    AnalyzeOverSpeed(rd, seg, ec);//如果在线路上，就开始分析分段限速报警
-                    if (offsetAlarm != null) {
-                        offsetAlarm.setStatus(AlarmRecord.STATUS_OLD);// 如果在线路上，说明偏离线路报警结束
-                        log.debug(rd.getSimNo() + "回到线路上," + rd.getSendTime());
-                        CreateWarnRecord(AlarmRecord.ALARM_FROM_PLATFORM,
-                                AlarmRecord.TYPE_ON_ROUTE, TURN_OFF, rd,
-                                ec.getEntityId(), null);
-                        offsetRouteWarn.remove(alarmKey);
-                    }
-                    if (onRouteAlarm == null) {
-                        onRouteAlarm = new AlarmItem(rd, AlarmRecord.TYPE_ON_ROUTE,
-                                alarmSource);
+            } else {//如果进入了线路,
+                AnalyzeOverSpeed(rd, seg, ec);//如果在线路上，就开始分析分段限速报警
+                if (offsetAlarm != null) {
+                    offsetAlarm.setStatus(AlarmRecord.STATUS_OLD);// 如果在线路上，说明偏离线路报警结束
+                    log.debug(rd.getSimNo() + "回到线路上," + rd.getSendTime());
+                    CreateWarnRecord(AlarmRecord.ALARM_FROM_PLATFORM,
+                            AlarmRecord.TYPE_ON_ROUTE, TURN_OFF, rd,
+                            ec.getEntityId(), null);
+                    offsetRouteWarn.remove(alarmKey);
+                }
+                if (onRouteAlarm == null) {
+                    onRouteAlarm = new AlarmItem(rd, AlarmRecord.TYPE_ON_ROUTE,
+                            alarmSource);
 //                        if (checkisarea(ec.getAlarmType(), isOnRoute)) {//这边判断下发给平台
 //                            this.insertAlarm(alarmSource, AlarmRecord.TYPE_ON_ROUTE, rd,
 //                                    getAreaType(ec.getAreaType()) + ec.getName() + ",路段:" + seg.getName());
@@ -503,10 +504,10 @@ public class AreaAlarmService implements IAreaAlarmService {
 //                        if(checkisareatodriver(ec.getAlarmType(),isOnRoute)){//是否下发给驾驶员
 //                            autoVoiceQueueService.addSendQueue("您已进入线路:"+ ec.getName() + ",路段:" + seg.getName(),rd.getSimNo());
 //                        }
-                        onRouteWarn.put(alarmKey, onRouteAlarm);
+                    onRouteWarn.put(alarmKey, onRouteAlarm);
 
-                    }
                 }
+            }
 
 
             double ts2 = DateUtil.getSeconds(start, new Date());
