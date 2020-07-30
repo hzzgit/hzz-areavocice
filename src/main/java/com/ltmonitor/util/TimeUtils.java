@@ -421,13 +421,13 @@ public final class TimeUtils {
         Date sendTime = new Date();
         Date startTime = new Date();
         Date endTime = new Date();
-        sendTime = TimeUtils.todatetime("2019-10-29 23:22:11");
-        startTime = TimeUtils.todatetime("2019-10-28 00:00:00");
+        sendTime = TimeUtils.todatetime("2019-10-29 01:00:00");
+        startTime = TimeUtils.todatetime("2019-10-29 00:00:00");
         endTime = TimeUtils.todatetime("2019-10-29 00:00:00");
         boolean arg = isEffectiveDate(sendTime, startTime, endTime);
 
-        Date a=TimeUtils.date("2020-06-12 02:02:11");
-        Date todatetime = TimeUtils.todatetime("2020-06-12");
+     //   Date a=TimeUtils.date("2020-06-12 02:02:11");
+      //  Date todatetime = TimeUtils.todatetime("2020-06-12");
         System.out.println(arg);
     }
 
