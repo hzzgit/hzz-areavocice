@@ -10,11 +10,6 @@ import com.ltmonitor.entity.GPSRealData;
  */
 public interface INewAlarmService  {
 
-//	public abstract void start();
-//
-//	public abstract void stopService();
-
-	void enQueue(Alarm newAlarm, String remark);
 
 	/**
 	 * 插入最新的报警到数据库

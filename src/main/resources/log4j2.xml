@@ -81,7 +81,7 @@
             <!--<AppenderRef ref="binaryfile"/>-->
             <!--<AppenderRef ref="infoFile"/>-->
         <!--</AsyncLogger>-->
-        <!--<AsyncLogger name="com.ltmonitor.jt808.service.impl.StatisticService" level="info" additivity="false"-->
+        <!--<AsyncLogger name="com.ltmonitor.jt808.common.impl.StatisticService" level="info" additivity="false"-->
                      <!--includeLocation="true">-->
             <!--<AppenderRef ref="console"/>-->
             <!--<AppenderRef ref="stfile"/>-->

@@ -3,6 +3,7 @@ package net.fxft.ascsareavoice.dataprocess;
 import com.ltmonitor.entity.GPSRealData;
 import net.fxft.ascsareavoice.service.AutoVoice.IAutoVoiceService;
 import net.fxft.ascsareavoice.service.MapArea.AreaAlarmService;
+import net.fxft.ascsareavoice.service.WaybillArea.WaybillAreaCache;
 import net.fxft.ascsareavoice.service.impl.RealDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,10 @@ public class Process0200_RealData{
     //语音播报服务层
     @Autowired
     private IAutoVoiceService autoVoiceService;
+
+    //运单围栏报警
+    @Autowired
+    private WaybillAreaCache waybillAreaService;
 
     //注入围栏报警的类
     @Autowired

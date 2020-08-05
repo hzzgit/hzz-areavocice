@@ -1,0 +1,78 @@
+package net.fxft.ascsareavoice.service.WaybillArea;
+
+import lombok.extern.slf4j.Slf4j;
+import net.fxft.ascsareavoice.vo.WaybillAreaMainVo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * @author ：hzz
+ * @description：TODO
+ * @date ：2020/8/5 14:26
+ */
+@Slf4j
+@Service
+public class WaybillAreaCache {
+
+
+    private ConcurrentHashMap<String, WaybillAreaMainVo> waybillareacache = new ConcurrentHashMap<>();
+
+    /**
+     * 是否开启运单围栏报警
+     */
+    @Value("${isWaybillArea:false}")
+    private boolean isWaybillArea;
+
+
+    @Autowired
+    private WaybillAreaDao waybillAreaDao;
+
+    /**
+     * 是否有这辆车的运单围栏配置
+     *
+     * @return
+     */
+    public boolean isWaybillArea(String simNo) {
+        return waybillareacache.containsKey(simNo);
+    }
+
+    /**
+     * 返回这辆车对应的运单围栏配置
+     *
+     * @param simNo
+     * @return
+     */
+    public WaybillAreaMainVo searchbysimNo(String simNo) {
+        WaybillAreaMainVo waybillAreaMainVo = null;
+        if (waybillareacache.containsKey(simNo)) {
+            waybillAreaMainVo = waybillareacache.get(simNo);
+        }
+        return waybillAreaMainVo;
+    }
+
+
+    @PostConstruct
+    private void init() {
+        while (true) {
+            try {
+                ConcurrentHashMap<String, WaybillAreaMainVo> searchwaybillarea = waybillAreaDao.searchwaybillarea();
+                waybillAreaDao.searchwaybillareapoint(searchwaybillarea);
+                waybillareacache = searchwaybillarea;
+                log.error("缓存运单围栏成功");
+            } catch (Exception e) {
+                log.error("进行运单围栏缓存异常", e);
+            }
+            try {
+                Thread.sleep(20000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+}

@@ -3,18 +3,16 @@ package net.fxft.ascsareavoice.kafka;
 import com.ltmonitor.entity.GPSRealData;
 import com.ltmonitor.entity.VehicleData;
 import com.ltmonitor.jt808.protocol.JT_0200;
-import com.ltmonitor.jt808.protocol.JT_0704;
-import com.ltmonitor.util.ConverterUtils;
 import com.ltmonitor.util.DateUtil;
 import com.ltmonitor.util.StringUtil;
 import com.ltmonitor.util.TimeUtils;
+import net.fxft.ascsareavoice.AscsAreaVoiceApplicationStart;
+import net.fxft.ascsareavoice.service.IMessageProcessService;
+import net.fxft.ascsareavoice.service.impl.RealDataService;
 import net.fxft.gateway.kafka.UnitConfigManager;
 import net.fxft.gateway.kafka.devicemsg.IFromDeviceMsgProcessor;
 import net.fxft.gateway.protocol.DeviceMsg;
 import net.fxft.gateway.protocol.gps.LocationMsg;
-import net.fxft.ascsareavoice.AscsAreaVoiceApplicationStart;
-import net.fxft.ascsareavoice.service.IMessageProcessService;
-import net.fxft.ascsareavoice.service.impl.RealDataService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.List;
 
 @Component
 public class StartKafkaComsumer implements IFromDeviceMsgProcessor {
@@ -141,19 +138,20 @@ public class StartKafkaComsumer implements IFromDeviceMsgProcessor {
                     GPSRealData rd = getGPS(dm.getSimNo(), lm);
                     messageProcessService.processMsg(rd);
                 }
-            } else if (dm.getMsgType() == 0x0704) {
-                if (dm.getMsgBody() instanceof JT_0704) {
-                    JT_0704 jt0704 = (JT_0704) dm.getMsgBody();
-                    List<JT_0200> positionReportList = jt0704.getPositionReportList();
-                    if (ConverterUtils.isList(positionReportList)) {
-                        for (JT_0200 jt_0200 : positionReportList) {
-                            GPSRealData rd = getGPS(dm.getSimNo(), jt_0200);
-                            messageProcessService.processMsg(rd);
-                        }
-                    }
-
-                }
             }
+//            else if (dm.getMsgType() == 0x0704) {
+//                if (dm.getMsgBody() instanceof JT_0704) {
+//                    JT_0704 jt0704 = (JT_0704) dm.getMsgBody();
+//                    List<JT_0200> positionReportList = jt0704.getPositionReportList();
+//                    if (ConverterUtils.isList(positionReportList)) {
+//                        for (JT_0200 jt_0200 : positionReportList) {
+//                            GPSRealData rd = getGPS(dm.getSimNo(), jt_0200);
+//                            messageProcessService.processMsg(rd);
+//                        }
+//                    }
+//
+//                }
+//            }
 
         } catch (Exception e) {
             log.error("kafka接收fromDeviceMsg处理出错！" , e);

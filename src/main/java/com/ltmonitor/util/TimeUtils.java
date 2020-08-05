@@ -186,7 +186,6 @@ public final class TimeUtils {
         } catch (NullPointerException e) {
             return null;
         } catch (ParseException e) {
-            e.printStackTrace();
         }
         return null;
     }
