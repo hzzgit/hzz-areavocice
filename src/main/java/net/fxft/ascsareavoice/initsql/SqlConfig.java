@@ -1,6 +1,6 @@
 package net.fxft.ascsareavoice.initsql;
 
-import com.ltmonitor.util.ConverterUtils;
+import net.fxft.ascsareavoice.ltmonitor.util.ConverterUtils;
 import lombok.extern.slf4j.Slf4j;
 import net.fxft.common.jdbc.JdbcUtil;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -6,16 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 //@SpringBootApplication(exclude = {JpaRepositoriesAutoConfiguration.class, MybatisAutoConfiguration.class})
 @SpringBootApplication
 @EnableScheduling
-@EnableDiscoveryClient
-@ComponentScan(basePackages = {"com.ltmonitor", "net.fxft.ascsareavoice"})
 public class AscsAreaVoiceApplicationStart {
 
     private static final Logger log = LoggerFactory.getLogger(AscsAreaVoiceApplicationStart.class);

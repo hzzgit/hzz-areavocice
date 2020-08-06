@@ -1,13 +1,13 @@
 package net.fxft.ascsareavoice.service.WaybillArea;
 
-import com.ltmonitor.entity.Alarm;
+import net.fxft.ascsareavoice.ltmonitor.entity.Alarm;
 import com.ltmonitor.entity.GPSRealData;
-import com.ltmonitor.service.INewAlarmService;
-import com.ltmonitor.service.MapFixService;
-import com.ltmonitor.util.Constants;
-import com.ltmonitor.util.ConverterUtils;
-import com.ltmonitor.util.TimeUtils;
-import com.ltmonitor.vo.PointLatLng;
+import net.fxft.ascsareavoice.ltmonitor.service.INewAlarmService;
+import net.fxft.ascsareavoice.ltmonitor.service.MapFixService;
+import net.fxft.ascsareavoice.ltmonitor.util.Constants;
+import net.fxft.ascsareavoice.ltmonitor.util.ConverterUtils;
+import net.fxft.ascsareavoice.ltmonitor.util.TimeUtils;
+import net.fxft.ascsareavoice.ltmonitor.vo.PointLatLng;
 import lombok.extern.slf4j.Slf4j;
 import net.fxft.ascsareavoice.kafka.KafkaMessageSender;
 import net.fxft.ascsareavoice.vo.WaybillAreaMainVo;

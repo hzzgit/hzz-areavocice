@@ -1,8 +1,8 @@
 package net.fxft.ascsareavoice.service.impl;
 
 import com.ltmonitor.entity.GPSRealData;
-import com.ltmonitor.entity.VehicleData;
-import com.ltmonitor.util.ConverterUtils;
+import net.fxft.ascsareavoice.ltmonitor.entity.VehicleData;
+import net.fxft.ascsareavoice.ltmonitor.util.ConverterUtils;
 import net.fxft.cloud.redis.RedisUtil;
 import net.fxft.common.jdbc.JdbcUtil;
 import net.fxft.gateway.util.KryoUtil;

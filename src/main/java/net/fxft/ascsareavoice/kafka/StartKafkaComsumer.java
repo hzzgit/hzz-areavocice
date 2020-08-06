@@ -1,11 +1,11 @@
 package net.fxft.ascsareavoice.kafka;
 
 import com.ltmonitor.entity.GPSRealData;
-import com.ltmonitor.entity.VehicleData;
+import net.fxft.ascsareavoice.ltmonitor.entity.VehicleData;
 import com.ltmonitor.jt808.protocol.JT_0200;
 import com.ltmonitor.util.DateUtil;
 import com.ltmonitor.util.StringUtil;
-import com.ltmonitor.util.TimeUtils;
+import net.fxft.ascsareavoice.ltmonitor.util.TimeUtils;
 import net.fxft.ascsareavoice.AscsAreaVoiceApplicationStart;
 import net.fxft.ascsareavoice.service.IMessageProcessService;
 import net.fxft.ascsareavoice.service.impl.RealDataService;

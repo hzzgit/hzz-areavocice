@@ -1,12 +1,12 @@
 package net.fxft.ascsareavoice.service.AutoVoice.impl;
 
 
-import com.ltmonitor.entity.TerminalCommand;
-import com.ltmonitor.entity.VehicleData;
-import com.ltmonitor.service.ITerminalCommandService;
-import com.ltmonitor.service.JT808Constants;
-import com.ltmonitor.util.ConverterUtils;
-import com.ltmonitor.util.TimeUtils;
+import net.fxft.ascsareavoice.ltmonitor.entity.TerminalCommand;
+import net.fxft.ascsareavoice.ltmonitor.entity.VehicleData;
+import net.fxft.ascsareavoice.ltmonitor.service.ITerminalCommandService;
+import net.fxft.ascsareavoice.ltmonitor.service.JT808Constants;
+import net.fxft.ascsareavoice.ltmonitor.util.ConverterUtils;
+import net.fxft.ascsareavoice.ltmonitor.util.TimeUtils;
 import net.fxft.cloud.redis.RedisUtil;
 import net.fxft.common.jdbc.JdbcUtil;
 import net.fxft.common.jdbc.RowDataMap;

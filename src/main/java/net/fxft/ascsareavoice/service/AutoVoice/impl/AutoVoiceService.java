@@ -1,9 +1,9 @@
 package net.fxft.ascsareavoice.service.AutoVoice.impl;
 
 import com.ltmonitor.entity.GPSRealData;
-import com.ltmonitor.util.ConverterUtils;
+import net.fxft.ascsareavoice.ltmonitor.util.ConverterUtils;
 import com.ltmonitor.util.StringUtil;
-import com.ltmonitor.util.TimeUtils;
+import net.fxft.ascsareavoice.ltmonitor.util.TimeUtils;
 import net.fxft.common.log.AttrLog;
 import net.fxft.common.util.BasicUtil;
 import net.fxft.ascsareavoice.po.autovoice.AutoVoiceConfigPO;

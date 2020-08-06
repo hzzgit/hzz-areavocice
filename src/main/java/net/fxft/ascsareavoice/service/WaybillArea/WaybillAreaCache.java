@@ -57,21 +57,24 @@ public class WaybillAreaCache {
 
     @PostConstruct
     private void init() {
-        while (true) {
-            try {
-                ConcurrentHashMap<String, WaybillAreaMainVo> searchwaybillarea = waybillAreaDao.searchwaybillarea();
-                waybillAreaDao.searchwaybillareapoint(searchwaybillarea);
-                waybillareacache = searchwaybillarea;
-                log.error("缓存运单围栏成功");
-            } catch (Exception e) {
-                log.error("进行运单围栏缓存异常", e);
+        new Thread(() -> {
+            while (true) {
+                try {
+                    ConcurrentHashMap<String, WaybillAreaMainVo> searchwaybillarea = waybillAreaDao.searchwaybillarea();
+                    waybillAreaDao.searchwaybillareapoint(searchwaybillarea);
+                    waybillareacache = searchwaybillarea;
+                    log.error("缓存运单围栏成功");
+                } catch (Exception e) {
+                    log.error("进行运单围栏缓存异常", e);
+                }
+                try {
+                    Thread.sleep(20000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-            try {
-                Thread.sleep(20000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+        }).start();
+
     }
 
 

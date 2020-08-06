@@ -1,7 +1,7 @@
 package net.fxft.ascsareavoice;
 
-import com.ltmonitor.entity.MapArea;
-import com.ltmonitor.service.IMapAreaService;
+import net.fxft.ascsareavoice.ltmonitor.entity.MapArea;
+import net.fxft.ascsareavoice.ltmonitor.service.IMapAreaService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,7 +1,7 @@
 package net.fxft.ascsareavoice.service;
 
 import com.ltmonitor.entity.GPSRealData;
-import com.ltmonitor.entity.VehicleData;
+import net.fxft.ascsareavoice.ltmonitor.entity.VehicleData;
 
 public interface IRealDataService {
 

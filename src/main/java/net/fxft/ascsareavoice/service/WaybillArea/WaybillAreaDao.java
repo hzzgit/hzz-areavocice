@@ -1,6 +1,6 @@
 package net.fxft.ascsareavoice.service.WaybillArea;
 
-import com.ltmonitor.util.ConverterUtils;
+import net.fxft.ascsareavoice.ltmonitor.util.ConverterUtils;
 import net.fxft.ascsareavoice.vo.WaybillAreaMainVo;
 import net.fxft.ascsareavoice.vo.WaybillAreaPointVo;
 import net.fxft.ascsareavoice.vo.WaybillAreaVo;
