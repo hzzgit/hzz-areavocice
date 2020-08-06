@@ -222,6 +222,7 @@ public class WaybillAreaService {
                         alarmsource = WaybillAreaEnum.离开运单围栏报警.getAlarmSource();
                         alarmType = WaybillAreaEnum.离开运单围栏报警.getAlarmType();
                     }
+                    //用户id+订单id+点位id+点位类型
                     String descr = userid + ";" + orderid + ";" + pointid + ";" + pointtype + ";";
                     insertAlarm(alarmsource, alarmType, rd, name, descr);
                 }
