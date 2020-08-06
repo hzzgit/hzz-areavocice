@@ -13,7 +13,7 @@ import java.util.List;
  */
 @Data
 public class WaybillAreaMainVo {
-    private long id;
+    private String id;
     private Date startTime,endTime;
     private String SimNo;
     private long userid;

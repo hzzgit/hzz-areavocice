@@ -11,7 +11,7 @@ import java.util.Date;
  */
 @Data
 public class WaybillAreaVo {
-    private long id;
+    private String id;
     private Date startTime,endTime;
     private String SimNo;
     private long userid;

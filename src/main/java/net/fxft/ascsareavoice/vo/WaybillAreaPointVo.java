@@ -13,7 +13,7 @@ public class WaybillAreaPointVo {
     /** simNo **/
     private String simNo;
     /**  主键  */
-    private Long  id;
+    private String  id;
     /**  点位类型,1，开始点，2，途经点，3，结束点  */
     private Long  pointtype;
     /**  经度  */
@@ -23,5 +23,5 @@ public class WaybillAreaPointVo {
     /**  地图类型 gps:天地图坐标，baidu:百度坐标，google:谷歌地图  */
     private String  maptype;
     /**  和orderareamanage表主键绑定  */
-    private Long  orderid;
+    private String  orderid;
 }

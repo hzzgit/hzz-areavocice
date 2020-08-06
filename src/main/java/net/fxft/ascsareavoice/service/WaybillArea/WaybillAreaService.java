@@ -72,7 +72,11 @@ public class WaybillAreaService {
      */
     @PostConstruct
     private void checkfilecache() {
-        CrossMap = WaybillAreaautoCache.loadCache();
+        ConcurrentMap<String, Boolean> stringBooleanConcurrentMap = WaybillAreaautoCache.loadCache();
+        if (stringBooleanConcurrentMap!=null) {
+            CrossMap =stringBooleanConcurrentMap;
+        }
+
         new Thread(() -> {
             while (true) {
                 WaybillAreaautoCache.saveCache(CrossMap);
@@ -154,7 +158,7 @@ public class WaybillAreaService {
     private void analyze(GPSRealData rd) throws Exception {
         String simNo = rd.getSimNo();
         WaybillAreaMainVo waybillAreaMainVo = waybillAreaCache.searchbysimNo(simNo);
-        long orderid = waybillAreaMainVo.getId();//订单的主键
+        String orderid = waybillAreaMainVo.getId();//订单的主键
 
 
         Date startTime = waybillAreaMainVo.getStartTime();//开始时间
@@ -170,7 +174,7 @@ public class WaybillAreaService {
         List<WaybillAreaPointVo> waybillAreaPointVos = waybillAreaMainVo.getWaybillAreaPointVos();
         if (ConverterUtils.isList(waybillAreaPointVos)) {
             for (WaybillAreaPointVo waybillAreaPointVo : waybillAreaPointVos) {
-                Long pointid = waybillAreaPointVo.getId();
+                String pointid = waybillAreaPointVo.getId();
                 double latitude = ConverterUtils.toDouble(waybillAreaPointVo.getLatitude());
                 double longitude = ConverterUtils.toDouble(waybillAreaPointVo.getLongitude());
                 String maptype = waybillAreaPointVo.getMaptype();//地图类型 gps:天地图坐标，baidu:百度坐标，google:谷歌地图
@@ -206,7 +210,7 @@ public class WaybillAreaService {
 
                     }
                 }
-                if (isalarm) {//如果触发了报警
+                if (true) {//如果触发了报警
                     String alarmsource = WaybillAreaEnum.进入运单围栏报警.getAlarmSource();
                     String alarmType = WaybillAreaEnum.进入运单围栏报警.getAlarmType();
                     if (!inArea) {
