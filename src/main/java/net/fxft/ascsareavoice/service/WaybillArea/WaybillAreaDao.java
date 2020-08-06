@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * @author ：hzz
@@ -27,7 +26,6 @@ public class WaybillAreaDao {
     private WaybillAreaService waybillAreaService;
 
     public ConcurrentHashMap<String, WaybillAreaMainVo> searchwaybillarea(){
-        ConcurrentMap<String, Boolean> crossMap =new ConcurrentHashMap<>();
         ConcurrentHashMap<String, WaybillAreaMainVo> data=new ConcurrentHashMap<String, WaybillAreaMainVo>();
         String sql="select id,startTime,endTime,SimNo,bytime,userid,name from orderareamanage a  where 1=1 \n" +
                 "and a.state=1 and a.endTime > SYSDATE()";
@@ -45,7 +43,6 @@ public class WaybillAreaDao {
                 data.put(waybillAreaVo.getSimNo(),waybillAreaMainVo );
             }
         }
-        waybillAreaService.setCrossMap(crossMap);
         return data;
     }
 

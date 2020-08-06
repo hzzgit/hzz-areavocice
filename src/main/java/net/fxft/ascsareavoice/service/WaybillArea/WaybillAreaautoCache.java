@@ -10,8 +10,10 @@ public class WaybillAreaautoCache {
 
 
     private static final Logger log = LoggerFactory.getLogger(WaybillAreaautoCache.class);
+    private static final   String cachename="WaybillAreaautoCache.cache";
 
-    private static final String cachename="WaybillAreaautoCache.cache";
+
+
 
     //这边是读取文件的缓存
     public static  ConcurrentMap<String, Boolean> loadCache() {
@@ -61,8 +63,9 @@ public class WaybillAreaautoCache {
         }
     }
 
-    public static void main(String[] args) {
-        WaybillAreaautoCache.deletecache();
+    public static void main(String[] args){
+
+
     }
 
 

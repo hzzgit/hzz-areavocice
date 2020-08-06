@@ -1,15 +1,15 @@
 package net.fxft.ascsareavoice.service.WaybillArea;
 
-import net.fxft.ascsareavoice.ltmonitor.entity.Alarm;
 import com.ltmonitor.entity.GPSRealData;
+import lombok.extern.slf4j.Slf4j;
+import net.fxft.ascsareavoice.kafka.KafkaMessageSender;
+import net.fxft.ascsareavoice.ltmonitor.entity.Alarm;
 import net.fxft.ascsareavoice.ltmonitor.service.INewAlarmService;
 import net.fxft.ascsareavoice.ltmonitor.service.MapFixService;
 import net.fxft.ascsareavoice.ltmonitor.util.Constants;
 import net.fxft.ascsareavoice.ltmonitor.util.ConverterUtils;
 import net.fxft.ascsareavoice.ltmonitor.util.TimeUtils;
 import net.fxft.ascsareavoice.ltmonitor.vo.PointLatLng;
-import lombok.extern.slf4j.Slf4j;
-import net.fxft.ascsareavoice.kafka.KafkaMessageSender;
 import net.fxft.ascsareavoice.vo.WaybillAreaMainVo;
 import net.fxft.ascsareavoice.vo.WaybillAreaPointVo;
 import net.fxft.gateway.event.EventMsg;
@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
@@ -65,17 +66,6 @@ public class WaybillAreaService {
     @Autowired
     private INewAlarmService newAlarmService;
 
-
-    public Boolean getcrosstype(String key) {
-        if (CrossMap.containsKey(key)) {
-            return CrossMap.get(key);
-        }
-        return false;
-    }
-
-    public void setCrossMap(ConcurrentMap<String, Boolean> crossMap) {
-        CrossMap = crossMap;
-    }
 
     /**
      * 定时写入缓存，初始化读取缓存
@@ -206,15 +196,16 @@ public class WaybillAreaService {
 
                 String crosskey = rd.getSimNo() + "-" + pointid;
 
+                synchronized (CrossMap) {
+                    if (CrossMap.containsKey(crosskey)) {//存在之前的是否在围栏里，默认是不在
+                        beforecrosstype = CrossMap.get(crosskey);
+                    }
+                    if (inArea != beforecrosstype) {//当前是否在围栏里和上一个点进行比较
+                        isalarm = true;//触发了报警
+                        CrossMap.put(crosskey, inArea);
 
-                if (CrossMap.containsKey(crosskey)) {//存在之前的是否在围栏里，默认是不在
-                    beforecrosstype = CrossMap.get(crosskey);
+                    }
                 }
-                if (inArea != beforecrosstype) {//当前是否在围栏里和上一个点进行比较
-                    isalarm = true;//触发了报警
-                }
-                CrossMap.put(crosskey, inArea);
-
                 if (isalarm) {//如果触发了报警
                     String alarmsource = WaybillAreaEnum.进入运单围栏报警.getAlarmSource();
                     String alarmType = WaybillAreaEnum.进入运单围栏报警.getAlarmType();
@@ -254,7 +245,17 @@ public class WaybillAreaService {
         EventMsg em = new EventMsg();
         em.setEventBody(areaAlarmEvent);
         em.loadDefaultDevMsgAttr();
-        kafkaMessageSender.sendAreaAlarmEventMsg(em, rd.getSimNo());
+         kafkaMessageSender.sendAreaAlarmEventMsg(em, rd.getSimNo());
     }
 
+    public static void main(String[] args) {
+        /**
+         * 获得一个UUID
+         * @return String UUID
+         */
+            String uuid = UUID.randomUUID().toString();
+            //去掉“-”符号
+           String a=  uuid.replaceAll("-", "");
+        System.out.println(a);
+    }
 }
