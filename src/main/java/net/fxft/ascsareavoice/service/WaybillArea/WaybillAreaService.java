@@ -223,7 +223,7 @@ public class WaybillAreaService {
                 }
 
                 log.debug("当前车辆的运单围栏处理情况为，simno=" + rd.getSimNo() + ",sendTime=" + rd.getSendTime() + "" +
-                        "运单名称为=" + name + ",之前是否在围栏内=" + CrossMap.get(crosskey) + ",现在是否在围栏内=" + inArea);
+                        "运单名称为=" + name + ",userid:"+userid+",orderid:"+orderid+",pointid:"+pointid+"之前是否在围栏内=" + CrossMap.get(crosskey) + ",现在是否在围栏内=" + inArea);
 
 
             }
@@ -241,6 +241,8 @@ public class WaybillAreaService {
      */
     private void insertAlarm(String alarmSource, String alarmType,
                              GPSRealData rd, String areaName, String descr) {
+        log.debug("发送运单围栏,simNo:"+rd.getSimNo());
+
         rd.setLocation("运单围栏:" + areaName);
         Alarm alarm = this.newAlarmService.insertAlarm(alarmSource, alarmType, rd, "AreaAlarmService");
         AreaAlarmEvent areaAlarmEvent = new AreaAlarmEvent();

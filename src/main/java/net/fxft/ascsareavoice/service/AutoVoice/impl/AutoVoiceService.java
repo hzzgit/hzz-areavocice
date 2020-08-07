@@ -264,13 +264,12 @@ public class AutoVoiceService implements IAutoVoiceService {
                     if (arg) {//如果没有启动的配置了那就移除
                         autoRealMap.remove(simNo);
                     }
+                    log.debug(alog.toString());
                 } else {
                     autoRealMap.remove(simNo);
                 }
             } catch (Exception e) {
                 alog.log("出现异常", BasicUtil.exceptionMsg(e));
-            } finally {
-                log.debug(alog.toString());
             }
         }
     }
