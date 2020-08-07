@@ -210,7 +210,7 @@ public class WaybillAreaService {
 
                     }
                 }
-                if (true) {//如果触发了报警
+                if (isalarm) {//如果触发了报警
                     String alarmsource = WaybillAreaEnum.进入运单围栏报警.getAlarmSource();
                     String alarmType = WaybillAreaEnum.进入运单围栏报警.getAlarmType();
                     if (!inArea) {
@@ -218,7 +218,7 @@ public class WaybillAreaService {
                         alarmType = WaybillAreaEnum.离开运单围栏报警.getAlarmType();
                     }
                     //用户id+订单id+点位id+点位类型
-                    String descr = userid + ";" + orderid + ";" + pointid + ";" + pointtype + ";";
+                    String descr = userid + ";" + orderid + ";" + pointid + ";" + pointtype + ";"+name;
                     insertAlarm(alarmsource, alarmType, rd, name, descr);
                 }
 
