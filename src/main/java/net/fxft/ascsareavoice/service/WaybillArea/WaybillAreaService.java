@@ -222,6 +222,7 @@ public class WaybillAreaService {
                     insertAlarm(alarmsource, alarmType, rd, name, descr);
                 }
 
+
                 log.debug("当前车辆的运单围栏处理情况为，simno=" + rd.getSimNo() + ",sendTime=" + rd.getSendTime() + "" +
                         "运单名称为=" + name + ",userid:"+userid+",orderid:"+orderid+",pointid:"+pointid+"之前是否在围栏内=" + CrossMap.get(crosskey) + ",现在是否在围栏内=" + inArea);
 
