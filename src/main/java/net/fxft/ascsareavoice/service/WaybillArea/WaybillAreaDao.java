@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -28,13 +29,14 @@ public class WaybillAreaDao {
     public ConcurrentHashMap<String, List<WaybillAreaMainVo>> searchwaybillarea() {
         ConcurrentHashMap<String, List<WaybillAreaMainVo>> data = new ConcurrentHashMap<String, List<WaybillAreaMainVo>>();
         String sql = "select id,startTime,endTime,SimNo,bytime,userid,name from orderareamanage a  where 1=1 \n" +
-                "and a.state=1 and a.endTime > SYSDATE()";
+                "and a.state=1 ";
         List<WaybillAreaVo> query = jdbcUtil.sql(sql).query(WaybillAreaVo.class);
         if (ConverterUtils.isList(query)) {
             for (WaybillAreaVo waybillAreaVo : query) {
                 List<WaybillAreaMainVo> datas = new ArrayList<>();
                 WaybillAreaMainVo waybillAreaMainVo = new WaybillAreaMainVo();
-                waybillAreaMainVo.setEndTime(waybillAreaVo.getEndTime());
+                Date endTime = waybillAreaVo.getEndTime();
+                waybillAreaMainVo.setEndTime(endTime);
                 waybillAreaMainVo.setId(waybillAreaVo.getId());
                 waybillAreaMainVo.setSimNo(waybillAreaVo.getSimNo());
                 waybillAreaMainVo.setStartTime(waybillAreaVo.getStartTime());
@@ -44,6 +46,11 @@ public class WaybillAreaDao {
                 if (data.containsKey(waybillAreaVo.getSimNo())) {
                     datas = data.get(waybillAreaMainVo.getSimNo());
                 }
+                if (waybillAreaVo.getBytime() == 1) {//如果要根据时间
+                    if (endTime.getTime() > new Date().getTime()) {//如果大于了当前时间，就算他过了
+                        continue;
+                    }
+                }
                 datas.add(waybillAreaMainVo);
                 data.put(waybillAreaVo.getSimNo(), datas);
             }
@@ -51,10 +58,10 @@ public class WaybillAreaDao {
         return data;
     }
 
-    public void searchwaybillareapoint( ConcurrentHashMap<String, List<WaybillAreaMainVo>> data) {
+    public void searchwaybillareapoint(ConcurrentHashMap<String, List<WaybillAreaMainVo>> data) {
         String sql = "select a.simNo,b.id,b.longitude,b.latitude,b.maptype,b.pointtype,b.orderid from orderareapoint b,orderareamanage a" +
                 " where b.orderid=a.id " +
-                " and a.state=1 and a.endTime > SYSDATE()  ";
+                " and a.state=1  ";
         List<WaybillAreaPointVo> query = jdbcUtil.sql(sql).query(WaybillAreaPointVo.class);
         if (ConverterUtils.isList(query)) {
             for (WaybillAreaPointVo waybillAreaPointVo : query) {
@@ -63,7 +70,7 @@ public class WaybillAreaDao {
                 if (data.containsKey(simNo)) {
                     List<WaybillAreaMainVo> waybillAreaMainVos = data.get(simNo);
                     for (WaybillAreaMainVo waybillAreaMainVo : waybillAreaMainVos) {
-                        if(waybillAreaPointVo.getOrderid().equals(waybillAreaMainVo.getId())){
+                        if (waybillAreaPointVo.getOrderid().equals(waybillAreaMainVo.getId())) {
                             waybillAreaPointVos = waybillAreaMainVo.getWaybillAreaPointVos();
                             waybillAreaPointVos.add(waybillAreaPointVo);
                         }
