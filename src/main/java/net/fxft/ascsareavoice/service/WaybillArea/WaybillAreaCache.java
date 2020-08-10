@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -19,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class WaybillAreaCache {
 
 
-    private ConcurrentHashMap<String, WaybillAreaMainVo> waybillareacache = new ConcurrentHashMap<>();
+    private  ConcurrentHashMap<String, List<WaybillAreaMainVo>> waybillareacache = new ConcurrentHashMap<>();
 
     /**
      * 是否开启运单围栏报警
@@ -46,8 +47,8 @@ public class WaybillAreaCache {
      * @param simNo
      * @return
      */
-    public WaybillAreaMainVo searchbysimNo(String simNo) {
-        WaybillAreaMainVo waybillAreaMainVo = null;
+    public  List<WaybillAreaMainVo> searchbysimNo(String simNo) {
+        List<WaybillAreaMainVo> waybillAreaMainVo = null;
         if (waybillareacache.containsKey(simNo)) {
             waybillAreaMainVo = waybillareacache.get(simNo);
         }
@@ -60,7 +61,7 @@ public class WaybillAreaCache {
         new Thread(() -> {
             while (true) {
                 try {
-                    ConcurrentHashMap<String, WaybillAreaMainVo> searchwaybillarea = waybillAreaDao.searchwaybillarea();
+                    ConcurrentHashMap<String, List<WaybillAreaMainVo>> searchwaybillarea = waybillAreaDao.searchwaybillarea();
                     waybillAreaDao.searchwaybillareapoint(searchwaybillarea);
                     waybillareacache = searchwaybillarea;
                     log.error("缓存运单围栏成功");

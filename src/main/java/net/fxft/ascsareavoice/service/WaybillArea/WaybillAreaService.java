@@ -73,8 +73,8 @@ public class WaybillAreaService {
     @PostConstruct
     private void checkfilecache() {
         ConcurrentMap<String, Boolean> stringBooleanConcurrentMap = WaybillAreaautoCache.loadCache();
-        if (stringBooleanConcurrentMap!=null) {
-            CrossMap =stringBooleanConcurrentMap;
+        if (stringBooleanConcurrentMap != null) {
+            CrossMap = stringBooleanConcurrentMap;
         }
 
         new Thread(() -> {
@@ -157,76 +157,84 @@ public class WaybillAreaService {
      */
     private void analyze(GPSRealData rd) throws Exception {
         String simNo = rd.getSimNo();
-        WaybillAreaMainVo waybillAreaMainVo = waybillAreaCache.searchbysimNo(simNo);
-        String orderid = waybillAreaMainVo.getId();//订单的主键
-
-
-        Date startTime = waybillAreaMainVo.getStartTime();//开始时间
-        Date endTime = waybillAreaMainVo.getEndTime();//结束时间
-        long userid = waybillAreaMainVo.getUserid();//用户id
-        String name = waybillAreaMainVo.getName();//订单名称
-        int bytime = waybillAreaMainVo.getBytime();//是否根据时间
-        if (bytime == 1) {//判断是否根据时间进行执行订单
-            if (!TimeUtils.isEffectiveDate(rd.getSendTime(), startTime, endTime)) {//如果不在时间范围内
-                return;
-            }
+        List<WaybillAreaMainVo> waybillAreaMainVos = waybillAreaCache.searchbysimNo(simNo);
+        if (waybillAreaMainVos == null) {
+            return;
         }
-        List<WaybillAreaPointVo> waybillAreaPointVos = waybillAreaMainVo.getWaybillAreaPointVos();
-        if (ConverterUtils.isList(waybillAreaPointVos)) {
-            for (WaybillAreaPointVo waybillAreaPointVo : waybillAreaPointVos) {
-                String pointid = waybillAreaPointVo.getId();
-                double latitude = ConverterUtils.toDouble(waybillAreaPointVo.getLatitude());
-                double longitude = ConverterUtils.toDouble(waybillAreaPointVo.getLongitude());
-                String maptype = waybillAreaPointVo.getMaptype();//地图类型 gps:天地图坐标，baidu:百度坐标，google:谷歌地图
-                Long pointtype = waybillAreaPointVo.getPointtype();//点位类型,1，开始点，2，途经点，3，结束点
 
-                PointLatLng mp = new PointLatLng();
-                //根据区域的地图类型，将GPS终端的坐标转成对应的地图类型，进行比对判断
-                if (Constants.MAP_BAIDU.equals(maptype)) {
-                    mp = MapFixService.fix(rd.getLatitude(), rd.getLongitude(), Constants.MAP_BAIDU);
-                } else if (Constants.MAP_GPS.equals(maptype)) {
-                    mp = new PointLatLng(rd.getLongitude(), rd.getLatitude());
-                } else {
-                    mp = MapFixService.fix(rd.getLatitude(), rd.getLongitude(),
-                            Constants.MAP_GOOGLE);
+        for (WaybillAreaMainVo waybillAreaMainVo : waybillAreaMainVos) {
+
+
+            String orderid = waybillAreaMainVo.getId();//订单的主键
+
+
+            Date startTime = waybillAreaMainVo.getStartTime();//开始时间
+            Date endTime = waybillAreaMainVo.getEndTime();//结束时间
+            long userid = waybillAreaMainVo.getUserid();//用户id
+            String name = waybillAreaMainVo.getName();//订单名称
+            int bytime = waybillAreaMainVo.getBytime();//是否根据时间
+            if (bytime == 1) {//判断是否根据时间进行执行订单
+                if (!TimeUtils.isEffectiveDate(rd.getSendTime(), startTime, endTime)) {//如果不在时间范围内
+                    return;
                 }
+            }
+            List<WaybillAreaPointVo> waybillAreaPointVos = waybillAreaMainVo.getWaybillAreaPointVos();
+            if (ConverterUtils.isList(waybillAreaPointVos)) {
+                for (WaybillAreaPointVo waybillAreaPointVo : waybillAreaPointVos) {
+                    String pointid = waybillAreaPointVo.getId();
+                    double latitude = ConverterUtils.toDouble(waybillAreaPointVo.getLatitude());
+                    double longitude = ConverterUtils.toDouble(waybillAreaPointVo.getLongitude());
+                    String maptype = waybillAreaPointVo.getMaptype();//地图类型 gps:天地图坐标，baidu:百度坐标，google:谷歌地图
+                    Long pointtype = waybillAreaPointVo.getPointtype();//点位类型,1，开始点，2，途经点，3，结束点
 
-                PointLatLng pl = new PointLatLng(longitude, latitude);
-                Boolean inArea = MapFixService.IsInCircle(mp, pl, WaybillArearadius);//判断是否进入了点位的半径圆
-
-                boolean isalarm = false;//是否触发报警
-
-                boolean beforecrosstype = false;//当前点位是否在某个
-
-                String crosskey = rd.getSimNo() + "-" + pointid;
-
-                synchronized (CrossMap) {
-                    if (CrossMap.containsKey(crosskey)) {//存在之前的是否在围栏里，默认是不在
-                        beforecrosstype = CrossMap.get(crosskey);
+                    PointLatLng mp = new PointLatLng();
+                    //根据区域的地图类型，将GPS终端的坐标转成对应的地图类型，进行比对判断
+                    if (Constants.MAP_BAIDU.equals(maptype)) {
+                        mp = MapFixService.fix(rd.getLatitude(), rd.getLongitude(), Constants.MAP_BAIDU);
+                    } else if (Constants.MAP_GPS.equals(maptype)) {
+                        mp = new PointLatLng(rd.getLongitude(), rd.getLatitude());
+                    } else {
+                        mp = MapFixService.fix(rd.getLatitude(), rd.getLongitude(),
+                                Constants.MAP_GOOGLE);
                     }
-                    if (inArea != beforecrosstype) {//当前是否在围栏里和上一个点进行比较
-                        isalarm = true;//触发了报警
-                        CrossMap.put(crosskey, inArea);
 
+                    PointLatLng pl = new PointLatLng(longitude, latitude);
+                    Boolean inArea = MapFixService.IsInCircle(mp, pl, WaybillArearadius);//判断是否进入了点位的半径圆
+
+                    boolean isalarm = false;//是否触发报警
+
+                    boolean beforecrosstype = false;//当前点位是否在某个
+
+                    String crosskey = rd.getSimNo() + "-" + pointid;
+
+                    synchronized (CrossMap) {
+                        if (CrossMap.containsKey(crosskey)) {//存在之前的是否在围栏里，默认是不在
+                            beforecrosstype = CrossMap.get(crosskey);
+                        }
+                        if (inArea != beforecrosstype) {//当前是否在围栏里和上一个点进行比较
+                            isalarm = true;//触发了报警
+                            CrossMap.put(crosskey, inArea);
+
+                        }
                     }
+                    if (isalarm) {//如果触发了报警
+                        String alarmsource = WaybillAreaEnum.进入运单围栏报警.getAlarmSource();
+                        String alarmType = WaybillAreaEnum.进入运单围栏报警.getAlarmType();
+                        if (!inArea) {
+                            alarmsource = WaybillAreaEnum.离开运单围栏报警.getAlarmSource();
+                            alarmType = WaybillAreaEnum.离开运单围栏报警.getAlarmType();
+                        }
+                        //用户id+订单id+点位id+点位类型
+                        String descr = userid + ";" + orderid + ";" + pointid + ";" + pointtype + ";" + name;
+                        insertAlarm(alarmsource, alarmType, rd, name, descr);
+                    }
+
+
+                    log.debug("当前车辆的运单围栏处理情况为，simno=" + rd.getSimNo() + ",sendTime=" + rd.getSendTime() + "" +
+                            "运单名称为=" + name + ",userid:" + userid + ",orderid:" + orderid + ",pointid:" + pointid + "之前是否在围栏内=" + CrossMap.get(crosskey) + ",现在是否在围栏内=" + inArea);
+
+
                 }
-                if (isalarm) {//如果触发了报警
-                    String alarmsource = WaybillAreaEnum.进入运单围栏报警.getAlarmSource();
-                    String alarmType = WaybillAreaEnum.进入运单围栏报警.getAlarmType();
-                    if (!inArea) {
-                        alarmsource = WaybillAreaEnum.离开运单围栏报警.getAlarmSource();
-                        alarmType = WaybillAreaEnum.离开运单围栏报警.getAlarmType();
-                    }
-                    //用户id+订单id+点位id+点位类型
-                    String descr = userid + ";" + orderid + ";" + pointid + ";" + pointtype + ";"+name;
-                    insertAlarm(alarmsource, alarmType, rd, name, descr);
-                }
-
-
-                log.debug("当前车辆的运单围栏处理情况为，simno=" + rd.getSimNo() + ",sendTime=" + rd.getSendTime() + "" +
-                        "运单名称为=" + name + ",userid:"+userid+",orderid:"+orderid+",pointid:"+pointid+"之前是否在围栏内=" + CrossMap.get(crosskey) + ",现在是否在围栏内=" + inArea);
-
-
             }
         }
     }
@@ -242,7 +250,7 @@ public class WaybillAreaService {
      */
     private void insertAlarm(String alarmSource, String alarmType,
                              GPSRealData rd, String areaName, String descr) {
-        log.debug("发送运单围栏,simNo:"+rd.getSimNo());
+        log.info("发送运单围栏,simNo:" + rd.getSimNo() + ",desc:" + descr);
 
         rd.setLocation("运单围栏:" + areaName);
         Alarm alarm = this.newAlarmService.insertAlarm(alarmSource, alarmType, rd, "AreaAlarmService");
@@ -252,7 +260,7 @@ public class WaybillAreaService {
         EventMsg em = new EventMsg();
         em.setEventBody(areaAlarmEvent);
         em.loadDefaultDevMsgAttr();
-         kafkaMessageSender.sendAreaAlarmEventMsg(em, rd.getSimNo());
+        kafkaMessageSender.sendAreaAlarmEventMsg(em, rd.getSimNo());
     }
 
     public static void main(String[] args) {
@@ -260,9 +268,15 @@ public class WaybillAreaService {
          * 获得一个UUID
          * @return String UUID
          */
-            String uuid = UUID.randomUUID().toString();
-            //去掉“-”符号
-           String a=  uuid.replaceAll("-", "");
+        String uuid = UUID.randomUUID().toString();
+        //去掉“-”符号
+        String a = uuid.replaceAll("-", "");
         System.out.println(a);
+
+        if (1 == 1) {
+            return;
+        }
+
+        System.out.println("测试return");
     }
 }
