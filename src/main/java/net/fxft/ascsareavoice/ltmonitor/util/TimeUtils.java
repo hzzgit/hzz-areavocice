@@ -422,9 +422,9 @@ public final class TimeUtils {
         Date sendTime = new Date();
         Date startTime = new Date();
         Date endTime = new Date();
-        sendTime = TimeUtils.todatetime("2019-10-29 01:00:00");
-        startTime = TimeUtils.todatetime("2019-10-29 00:00:00");
-        endTime = TimeUtils.todatetime("2019-10-29 00:00:00");
+        sendTime = TimeUtils.todatetime("2020-08-11 15:00:31");
+        startTime = TimeUtils.todatetime("2020-08-11 10:00:00");
+        endTime = TimeUtils.todatetime("2020-08-11 23:25:54");
         boolean arg = isEffectiveDate(sendTime, startTime, endTime);
 
      //   Date a=TimeUtils.date("2020-06-12 02:02:11");

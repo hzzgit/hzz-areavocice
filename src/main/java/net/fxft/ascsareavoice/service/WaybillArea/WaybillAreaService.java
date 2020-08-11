@@ -72,21 +72,23 @@ public class WaybillAreaService {
      */
     @PostConstruct
     private void checkfilecache() {
-        ConcurrentMap<String, Boolean> stringBooleanConcurrentMap = WaybillAreaautoCache.loadCache();
-        if (stringBooleanConcurrentMap != null) {
-            CrossMap = stringBooleanConcurrentMap;
-        }
-
-        new Thread(() -> {
-            while (true) {
-                WaybillAreaautoCache.saveCache(CrossMap);
-                try {
-                    Thread.sleep(30000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+        if(isWaybillArea) {
+            ConcurrentMap<String, Boolean> stringBooleanConcurrentMap = WaybillAreaautoCache.loadCache();
+            if (stringBooleanConcurrentMap != null) {
+                CrossMap = stringBooleanConcurrentMap;
             }
-        }).start();
+
+            new Thread(() -> {
+                while (true) {
+                    WaybillAreaautoCache.saveCache(CrossMap);
+                    try {
+                        Thread.sleep(30000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+        }
     }
 
     /**
@@ -189,9 +191,9 @@ public class WaybillAreaService {
 
                     PointLatLng mp = new PointLatLng();
                     //根据区域的地图类型，将GPS终端的坐标转成对应的地图类型，进行比对判断
-                    if (Constants.MAP_BAIDU.equals(maptype)) {
+                    if (Constants.MAP_BAIDU.equalsIgnoreCase(maptype)) {
                         mp = MapFixService.fix(rd.getLatitude(), rd.getLongitude(), Constants.MAP_BAIDU);
-                    } else if (Constants.MAP_GPS.equals(maptype)) {
+                    } else if (Constants.MAP_GPS.equalsIgnoreCase(maptype)) {
                         mp = new PointLatLng(rd.getLongitude(), rd.getLatitude());
                     } else {
                         mp = MapFixService.fix(rd.getLatitude(), rd.getLongitude(),

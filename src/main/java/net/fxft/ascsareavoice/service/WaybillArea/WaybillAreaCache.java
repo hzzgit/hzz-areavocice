@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class WaybillAreaCache {
 
 
-    private  ConcurrentHashMap<String, List<WaybillAreaMainVo>> waybillareacache = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, List<WaybillAreaMainVo>> waybillareacache = new ConcurrentHashMap<>();
 
     /**
      * 是否开启运单围栏报警
@@ -47,7 +47,7 @@ public class WaybillAreaCache {
      * @param simNo
      * @return
      */
-    public  List<WaybillAreaMainVo> searchbysimNo(String simNo) {
+    public List<WaybillAreaMainVo> searchbysimNo(String simNo) {
         List<WaybillAreaMainVo> waybillAreaMainVo = null;
         if (waybillareacache.containsKey(simNo)) {
             waybillAreaMainVo = waybillareacache.get(simNo);
@@ -58,24 +58,25 @@ public class WaybillAreaCache {
 
     @PostConstruct
     private void init() {
-        new Thread(() -> {
-            while (true) {
-                try {
-                    ConcurrentHashMap<String, List<WaybillAreaMainVo>> searchwaybillarea = waybillAreaDao.searchwaybillarea();
-                    waybillAreaDao.searchwaybillareapoint(searchwaybillarea);
-                    waybillareacache = searchwaybillarea;
-                    log.error("缓存运单围栏成功");
-                } catch (Exception e) {
-                    log.error("进行运单围栏缓存异常", e);
+        if (isWaybillArea) {
+            new Thread(() -> {
+                while (true) {
+                    try {
+                        ConcurrentHashMap<String, List<WaybillAreaMainVo>> searchwaybillarea = waybillAreaDao.searchwaybillarea();
+                        waybillAreaDao.searchwaybillareapoint(searchwaybillarea);
+                        waybillareacache = searchwaybillarea;
+                        log.error("缓存运单围栏成功");
+                    } catch (Exception e) {
+                        log.error("进行运单围栏缓存异常", e);
+                    }
+                    try {
+                        Thread.sleep(20000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
-                try {
-                    Thread.sleep(20000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-
+            }).start();
+        }
     }
 
 
