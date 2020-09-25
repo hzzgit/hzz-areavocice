@@ -34,6 +34,8 @@ public class MapArea extends TenantEntity implements Serializable {
     public static String CIRCLE = "circle";
     //线路
     public static String ROUTE = "route";
+    //行政区域
+    public static  String DIVISION="division";
     //地图标记
     public static String MARKER = "marker";
     public static String KEY_POINT = "keyPoint";

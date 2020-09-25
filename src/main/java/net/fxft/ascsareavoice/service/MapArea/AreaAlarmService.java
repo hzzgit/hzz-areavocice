@@ -231,7 +231,7 @@ public class AreaAlarmService implements IAreaAlarmService {
 
     //缓存围栏配置信息
     private void AreaConfigThread() {
-        AttrLog alog = AttrLog.get("缓存围栏配置信息20200925版本");
+        AttrLog alog = AttrLog.get("缓存围栏配置信息20200925版本,围栏兼容机构的模式");
         try {
             long s = System.currentTimeMillis();   //获取开始时间
             //  Map<String, Integer> areaBindingMap = new HashMap<String, Integer>();
@@ -962,7 +962,8 @@ public class AreaAlarmService implements IAreaAlarmService {
     private boolean IsInArea(MapArea ec, PointLatLng mp) {
         List<PointLatLng> points = GetPoints(ec.getPoints());
 
-        if (MapArea.POLYGON.equals(ec.getAreaType()) && points.size() > 2) {
+        //如果是多边形，或者是行政区域
+        if ((MapArea.POLYGON.equalsIgnoreCase(ec.getAreaType())||MapArea.DIVISION.equalsIgnoreCase(ec.getAreaType())) && points.size() > 2) {
             if (MapFixService.IsInPolygon(mp, points)) {
                 Date end = new Date();
                 return true;
