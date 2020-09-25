@@ -231,16 +231,28 @@ public class AreaAlarmService implements IAreaAlarmService {
 
     //缓存围栏配置信息
     private void AreaConfigThread() {
-        AttrLog alog = AttrLog.get("缓存围栏配置信息20191213版本");
+        AttrLog alog = AttrLog.get("缓存围栏配置信息20200925版本");
         try {
             long s = System.currentTimeMillis();   //获取开始时间
             //  Map<String, Integer> areaBindingMap = new HashMap<String, Integer>();
-            String sql = "\t\tselect b.owner,b.areaId,v.simNo from MapAreaBinding b\n" +
-                    "\t\tleft join vehicle v  on b.vehicleId=v.vehicleId\n" +
-                    "\t\twhere 1=1  and b.bindType = 'platform' and v.deleted=false\n" +
-                    "\t\t\tand b.configType !=3";
+            String sql = " select b.owner,b.areaId,v.simNo from MapAreaBinding b  " +
+                    "  left join vehicle v  on b.vehicleId=v.vehicleId  " +
+                    "  where 1=1  and b.bindType = 'platform' and v.deleted=false  " +
+                    " and b.configType !=3 " +
+                    " union  select null owner,md.configId areaId,v.simNo from mapareabydep md left join vehicle v on md.depId =v.depId\n" +
+                    "where v.deleted=false  and md.deleted=false ";
+            List<RowDataMap> bindings = new ArrayList<>();
 
-            List<RowDataMap> bindings = JdbcUtil.getDefault().sql(sql).queryWithMap();
+            try {
+                bindings = JdbcUtil.getDefault().sql(sql).queryWithMap();
+            } catch (Exception e) {
+                log.error("围栏未改成新版本，使用旧版本读取方式");
+                sql = " select b.owner,b.areaId,v.simNo from MapAreaBinding b  " +
+                        "  left join vehicle v  on b.vehicleId=v.vehicleId  " +
+                        "  where 1=1  and b.bindType = 'platform' and v.deleted=false  " +
+                        " and b.configType !=3 ";
+                bindings = JdbcUtil.getDefault().sql(sql).queryWithMap();
+            }
             ConcurrentMap<String, List<Integer>> AreaConfigMap1 = new ConcurrentHashMap<>();
             if (ConverterUtils.isList(bindings)) {
                 for (RowDataMap binding : bindings) {
