@@ -666,7 +666,11 @@ public class AreaAlarmService implements IAreaAlarmService {
             name = "圆形:";
         } else if (MapArea.ROUTE.equalsIgnoreCase(areaType)) {
             name = "线路:";
-        } else if (MapArea.MARKER.equalsIgnoreCase(areaType)) {
+        }
+        else if (MapArea.DIVISION.equalsIgnoreCase(areaType)) {
+            name = "行政区域:";
+        }
+        else if (MapArea.MARKER.equalsIgnoreCase(areaType)) {
             name = "标记:";
         }
 
