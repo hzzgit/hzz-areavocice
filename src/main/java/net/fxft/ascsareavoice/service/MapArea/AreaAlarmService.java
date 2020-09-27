@@ -137,9 +137,17 @@ public class AreaAlarmService implements IAreaAlarmService {
         }
     }
 
+
     @PostConstruct
     public void start() {
         if (areaalarm) {
+
+
+            ConcurrentMap<String, Boolean> stringBooleanConcurrentMap = AreaAlarmCache.loadCache();
+            if (stringBooleanConcurrentMap != null) {
+                CrossMap = stringBooleanConcurrentMap;
+            }
+
             analyzeThread = new Thread(new Runnable() {
                 public void run() {
                     analyzeThreadFunc();
@@ -152,6 +160,19 @@ public class AreaAlarmService implements IAreaAlarmService {
             new Thread(() -> {//处理围栏报警队列的线程
                 processorAreaAlarm();
             }).start();
+
+
+            new Thread(() -> {
+                while (true) {
+                    AreaAlarmCache.saveCache(CrossMap);
+                    try {
+                        Thread.sleep(30000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+
         }
     }
 
@@ -666,11 +687,9 @@ public class AreaAlarmService implements IAreaAlarmService {
             name = "圆形:";
         } else if (MapArea.ROUTE.equalsIgnoreCase(areaType)) {
             name = "线路:";
-        }
-        else if (MapArea.DIVISION.equalsIgnoreCase(areaType)) {
+        } else if (MapArea.DIVISION.equalsIgnoreCase(areaType)) {
             name = "行政区域:";
-        }
-        else if (MapArea.MARKER.equalsIgnoreCase(areaType)) {
+        } else if (MapArea.MARKER.equalsIgnoreCase(areaType)) {
             name = "标记:";
         }
 
@@ -964,26 +983,39 @@ public class AreaAlarmService implements IAreaAlarmService {
      * @return
      */
     private boolean IsInArea(MapArea ec, PointLatLng mp) {
-        List<PointLatLng> points = GetPoints(ec.getPoints());
 
-        //如果是多边形，或者是行政区域
-        if ((MapArea.POLYGON.equalsIgnoreCase(ec.getAreaType())||MapArea.DIVISION.equalsIgnoreCase(ec.getAreaType())) && points.size() > 2) {
-            if (MapFixService.IsInPolygon(mp, points)) {
-                Date end = new Date();
-                return true;
+        String points1 = ec.getPoints();
+        if (MapArea.DIVISION.equalsIgnoreCase(ec.getAreaType())) {//如果是行政区域
+            String[] pointsquyu = points1.split("\\|");
+            for (String s : pointsquyu) {
+                List<PointLatLng> points = GetPoints(s);
+                if(points.size()>2){
+                    if (MapFixService.IsInPolygon(mp, points)) {
+                        return true;
+                    }
+                }
             }
-        } else if (MapArea.CIRCLE.equals(ec.getAreaType()) && points.size() > 0) {
-            PointLatLng pl = points.get(0);
-            double radius = ec.getRadius();
-            if (MapFixService.IsInCircle(mp, pl, radius))
-                return true;
-        } else if (MapArea.RECT.equals(ec.getAreaType()) && points.size() > 1) {
-            PointLatLng p1 = points.get(0);
-            PointLatLng p2 = points.get(2);
+        } else {
+            List<PointLatLng> points = GetPoints(points1);
+            //如果是多边形，或者是行政区域
+            if (MapArea.POLYGON.equalsIgnoreCase(ec.getAreaType()) && points.size() > 2) {
+                if (MapFixService.IsInPolygon(mp, points)) {
+                    Date end = new Date();
+                    return true;
+                }
+            } else if (MapArea.CIRCLE.equals(ec.getAreaType()) && points.size() > 0) {
+                PointLatLng pl = points.get(0);
+                double radius = ec.getRadius();
+                if (MapFixService.IsInCircle(mp, pl, radius))
+                    return true;
+            } else if (MapArea.RECT.equals(ec.getAreaType()) && points.size() > 1) {
+                PointLatLng p1 = points.get(0);
+                PointLatLng p2 = points.get(2);
 
-            if (MapFixService.IsInRect(mp.lng, mp.lat, p1.lng, p1.lat, p2.lng,
-                    p2.lat))
-                return true;
+                if (MapFixService.IsInRect(mp.lng, mp.lat, p1.lng, p1.lat, p2.lng,
+                        p2.lat))
+                    return true;
+            }
         }
         return false;
     }
