@@ -310,7 +310,9 @@ public class AreaAlarmService implements IAreaAlarmService {
                 AllArea = allMap;
             }
 
-            String hsql = "select * from LineSegment where 1=1 order by pointId ";
+            String hsql = " select l.* from LineSegment l left join maparea a \n" +
+                    "on l.routeId =a.areaId where a.deleted=false \n" +
+                    "order by l.pointId ";
 
             List<LineSegment> ls = JdbcUtil.getDefault().sql(hsql).query(LineSegment.class);
             ConcurrentMap<Long, List<LineSegment>> linesMap1 = new ConcurrentHashMap<>();
