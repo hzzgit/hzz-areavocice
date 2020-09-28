@@ -315,51 +315,64 @@ public class MapFixService {
 
 
     public static void main(String[] args) {
-
-        double d = MapFixService.GetDistanceByMeter(121.66592, 38.90836, 121.65552, 38.90826);
-
-        PointLatLng p = new PointLatLng(121.66592, 38.90846);
-        List<PointLatLng> points = new ArrayList<PointLatLng>();
-        points.add(new PointLatLng(121.65552, 38.90886));
-        points.add(new PointLatLng(121.65613, 38.90886));
-        points.add(new PointLatLng(121.65613, 38.90843));
-        points.add(new PointLatLng(121.65552, 38.90843));
-        points.add(new PointLatLng(121.65552, 38.90886));
-
-        Boolean isIn = MapFixService.IsInPolygon(p, points);
-
-        double lat = 34.123456;
-        double lng = 111.234567;
-        double maxLatitude = lat + 0.00000899 * 90000;
-        double maxLongitude = lng + 0.0000109 * 900000;
-        double d1 = MapFixService.GetDistanceByMeter(lng, lat, maxLongitude, lat);
-        double d2 = MapFixService.GetDistanceByMeter(lng, lat, lng, maxLatitude);
-        //double d1 = MapFixService.GetDistanceByMeter(111.234567, 34.123456, 111.234578, 34.123456);
-
-        //double d2 = MapFixService.GetDistanceByMeter(111.234567, 34.12345, 111.234567, 34.12346);
-
-        PointLatLng p1 = new PointLatLng(118.421619, 24.756096);
-        PointLatLng p2 = new PointLatLng(118.421399, 24.756647);
-        PointLatLng mp = new PointLatLng(118.421399, 24.756647);
-//		PointLatLng mp=new PointLatLng(118.42168259347842,24.756212193430752);
-        MapFixService.isPointOnRouteSegment(p1, p2, mp, 10);
-        /**
-         for (int m = 0; m < 100; m++) {
-         double wgLat = 32.178390 + m * 0.01;
-         double wgLon = 120.173890 + m * 0.01;
-         PointLatLng pl = MapFixService.wgsToGcj(wgLat, wgLon);
-
-         PointLatLng pl2 = MapFixService.gcjToWgs(pl.getLat(), pl.getLng());
-
-         double offsetLat = pl2.getLat() - pl.getLat();
-         double offsetLng = pl2.getLng() - pl.getLng();
-
-         double distance = GetDistanceByMeter(pl2.getLng(), pl2.getLat(),
-         wgLon, wgLat);
-
-         System.out.println(offsetLat + "," + offsetLng + ",distance:"
-         + distance);
-         }*/
+        PointLatLng pointLatLng=new PointLatLng(23.3232,123.3232);
+        List<PointLatLng> points=new ArrayList<>();
+        for (int i = 0; i < 20000; i++) {
+            PointLatLng pointLatLng1=new PointLatLng(23.3232,123.3232);
+            points.add(pointLatLng1);
+        }
+        Boolean aBoolean = MapFixService.IsInPolygon(pointLatLng, points);
+        System.out.println(aBoolean);
     }
+
+
+//    public static void main(String[] args) {
+//
+//        double d = MapFixService.GetDistanceByMeter(121.66592, 38.90836, 121.65552, 38.90826);
+//
+//        PointLatLng p = new PointLatLng(121.66592, 38.90846);
+//        List<PointLatLng> points = new ArrayList<PointLatLng>();
+//        points.add(new PointLatLng(121.65552, 38.90886));
+//        points.add(new PointLatLng(121.65613, 38.90886));
+//        points.add(new PointLatLng(121.65613, 38.90843));
+//        points.add(new PointLatLng(121.65552, 38.90843));
+//        points.add(new PointLatLng(121.65552, 38.90886));
+//
+//        Boolean isIn = MapFixService.IsInPolygon(p, points);
+//
+//        double lat = 34.123456;
+//        double lng = 111.234567;
+//        double maxLatitude = lat + 0.00000899 * 90000;
+//        double maxLongitude = lng + 0.0000109 * 900000;
+//        double d1 = MapFixService.GetDistanceByMeter(lng, lat, maxLongitude, lat);
+//        double d2 = MapFixService.GetDistanceByMeter(lng, lat, lng, maxLatitude);
+//        //double d1 = MapFixService.GetDistanceByMeter(111.234567, 34.123456, 111.234578, 34.123456);
+//
+//        //double d2 = MapFixService.GetDistanceByMeter(111.234567, 34.12345, 111.234567, 34.12346);
+//
+//        PointLatLng p1 = new PointLatLng(118.421619, 24.756096);
+//        PointLatLng p2 = new PointLatLng(118.421399, 24.756647);
+//        PointLatLng mp = new PointLatLng(118.421399, 24.756647);
+////		PointLatLng mp=new PointLatLng(118.42168259347842,24.756212193430752);
+//        MapFixService.isPointOnRouteSegment(p1, p2, mp, 10);
+//        /**
+//         for (int m = 0; m < 100; m++) {
+//         double wgLat = 32.178390 + m * 0.01;
+//         double wgLon = 120.173890 + m * 0.01;
+//         PointLatLng pl = MapFixService.wgsToGcj(wgLat, wgLon);
+//
+//         PointLatLng pl2 = MapFixService.gcjToWgs(pl.getLat(), pl.getLng());
+//
+//         double offsetLat = pl2.getLat() - pl.getLat();
+//         double offsetLng = pl2.getLng() - pl.getLng();
+//
+//         double distance = GetDistanceByMeter(pl2.getLng(), pl2.getLat(),
+//         wgLon, wgLat);
+//
+//         System.out.println(offsetLat + "," + offsetLng + ",distance:"
+//         + distance);
+//         }*/
+//    }
+
 
 }
