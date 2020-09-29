@@ -26,7 +26,7 @@ public class SqlConfig implements BeanPostProcessor {
     @Autowired
     private JdbcUtil jdbcUtil;
 
-    String sql1=" CREATE TABLE subiaodb.`orderareamanage` (\n" +
+    String sql1=" CREATE TABLE IF NOT EXISTS subiaodb.`orderareamanage` (\n" +
             "  `id` varchar(255) NOT NULL COMMENT '主键,uuid',\n" +
             "  `createDate` datetime DEFAULT NULL COMMENT '创建时间',\n" +
             "  `plateNo` varchar(255) DEFAULT NULL COMMENT '车牌号',\n" +
@@ -39,7 +39,7 @@ public class SqlConfig implements BeanPostProcessor {
             "  `userid` int(11) DEFAULT NULL COMMENT '对外接口管理里面开发者管理表里面绑定的用户id',\n" +
             "  PRIMARY KEY (`id`)\n" +
             ") ENGINE=InnoDB  COMMENT='物流订单围栏管理' ";
-String sql2="CREATE TABLE subiaodb.`orderareapoint` (\n" +
+String sql2="CREATE TABLE IF NOT EXISTS subiaodb.`orderareapoint` (\n" +
         "  `id` varchar(255) NOT NULL COMMENT '主键,uuid',\n" +
         "  `createDate` datetime DEFAULT NULL COMMENT '创建时间',\n" +
         "  `pointtype` int(11) DEFAULT NULL COMMENT '点位类型,1，开始点，2，途经点，3，结束点',\n" +
