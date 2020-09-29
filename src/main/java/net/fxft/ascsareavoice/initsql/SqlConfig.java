@@ -77,9 +77,7 @@ String sql4="   INSERT INTO `subiaodb`.`alarmconfig`(`id`, `depId`, `alarmSource
             for (String s : allsql) {
                 try {
                     jdbcUtil.sql(s).executeUpdate();
-                    log.error("语句初始化执行成功,sql="+s);
                 } catch (Exception e) {
-                    log.error("语句已执行或执行失败,sql="+s);
                 }
             }
         }
