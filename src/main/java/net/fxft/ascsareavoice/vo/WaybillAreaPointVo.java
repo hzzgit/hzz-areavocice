@@ -24,4 +24,6 @@ public class WaybillAreaPointVo {
     private String  maptype;
     /**  和orderareamanage表主键绑定  */
     private String  orderid;
+    /**  设置点位的有效半径  */
+    private Integer validradius;
 }

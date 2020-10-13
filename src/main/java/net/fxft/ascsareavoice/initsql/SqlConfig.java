@@ -69,10 +69,14 @@ String sql4="   INSERT INTO `subiaodb`.`alarmconfig`(`id`, `depId`, `alarmSource
         "    WHERE\n" +
         "      alarmSource='platform_alarm' and alarmType='Crosswaybill'\n" +
         "  )";
-    //上面是809机构车辆绑定的改为用主键绑定
+
+//定位围栏增加每个点判断的有效半径
+String sql5=" ALTER TABLE `subiaodb`.`orderareapoint` \n" +
+        "ADD COLUMN `validradius` int(11) NULL COMMENT '判断进出点位的有效半径，单位米，不得小于50，小于50会按照五十来算，不设置会触发默认值200米' ";
+
     @PostConstruct
     public void init(){
-        Collections.addAll(allsql,sql1,sql2,sql3,sql4);
+        Collections.addAll(allsql,sql1,sql2,sql3,sql4,sql5);
         if (ConverterUtils.isList(allsql)) {
             for (String s : allsql) {
                 try {

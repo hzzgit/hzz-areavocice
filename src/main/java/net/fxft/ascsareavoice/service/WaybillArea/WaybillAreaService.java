@@ -73,7 +73,7 @@ public class WaybillAreaService {
      */
     @PostConstruct
     private void checkfilecache() {
-        if(isWaybillArea) {
+        if (isWaybillArea) {
             ConcurrentMap<String, Boolean> stringBooleanConcurrentMap = WaybillAreaautoCache.loadCache();
             if (stringBooleanConcurrentMap != null) {
                 CrossMap = stringBooleanConcurrentMap;
@@ -94,7 +94,7 @@ public class WaybillAreaService {
 
 
     @PreDestroy
-    private void destory(){
+    private void destory() {
         WaybillAreaautoCache.saveCache(CrossMap);
     }
 
@@ -190,6 +190,15 @@ public class WaybillAreaService {
             List<WaybillAreaPointVo> waybillAreaPointVos = waybillAreaMainVo.getWaybillAreaPointVos();
             if (ConverterUtils.isList(waybillAreaPointVos)) {
                 for (WaybillAreaPointVo waybillAreaPointVo : waybillAreaPointVos) {
+                    int WaybillArearadiusNow = WaybillArearadius;//默认值的有效半径
+                    if (waybillAreaPointVo.getValidradius() != null) {//如果有效半径有配置，那么就直接根据配置值
+                        if (waybillAreaPointVo.getValidradius() >= 50) {
+                            WaybillArearadiusNow = waybillAreaPointVo.getValidradius();
+                        } else {
+                            WaybillArearadiusNow = 50;
+                        }
+                    }
+
                     String pointid = waybillAreaPointVo.getId();
                     double latitude = ConverterUtils.toDouble(waybillAreaPointVo.getLatitude());
                     double longitude = ConverterUtils.toDouble(waybillAreaPointVo.getLongitude());
@@ -208,7 +217,7 @@ public class WaybillAreaService {
                     }
 
                     PointLatLng pl = new PointLatLng(longitude, latitude);
-                    Boolean inArea = MapFixService.IsInCircle(mp, pl, WaybillArearadius);//判断是否进入了点位的半径圆
+                    Boolean inArea = MapFixService.IsInCircle(mp, pl, WaybillArearadiusNow);//判断是否进入了点位的半径圆
 
                     boolean isalarm = false;//是否触发报警
 

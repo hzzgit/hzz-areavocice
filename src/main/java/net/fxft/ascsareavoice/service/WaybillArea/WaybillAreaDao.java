@@ -26,6 +26,10 @@ public class WaybillAreaDao {
     @Autowired
     private WaybillAreaService waybillAreaService;
 
+    /**
+     * 查询出所有启用的订单围栏配置
+     * @return
+     */
     public ConcurrentHashMap<String, List<WaybillAreaMainVo>> searchwaybillarea() {
         ConcurrentHashMap<String, List<WaybillAreaMainVo>> data = new ConcurrentHashMap<String, List<WaybillAreaMainVo>>();
         String sql = "select id,startTime,endTime,SimNo,bytime,userid,name from orderareamanage a  where 1=1 \n" +
@@ -58,8 +62,12 @@ public class WaybillAreaDao {
         return data;
     }
 
+    /**
+     * 根据每个订单配置获取到点位进出情况
+     * @param data
+     */
     public void searchwaybillareapoint(ConcurrentHashMap<String, List<WaybillAreaMainVo>> data) {
-        String sql = "select a.simNo,b.id,b.longitude,b.latitude,b.maptype,b.pointtype,b.orderid from orderareapoint b,orderareamanage a" +
+        String sql = "select a.simNo,b.id,b.longitude,b.latitude,b.maptype,b.pointtype,b.orderid,b.validradius from orderareapoint b,orderareamanage a" +
                 " where b.orderid=a.id " +
                 " and a.state=1  ";
         List<WaybillAreaPointVo> query = jdbcUtil.sql(sql).query(WaybillAreaPointVo.class);
