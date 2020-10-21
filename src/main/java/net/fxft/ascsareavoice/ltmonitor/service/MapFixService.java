@@ -315,15 +315,16 @@ public class MapFixService {
 
 
     public static void main(String[] args) {
-        PointLatLng pointLatLng=new PointLatLng(23.3232,123.3232);
-        List<PointLatLng> points=new ArrayList<>();
-        for (int i = 0; i < 20000; i++) {
-            PointLatLng pointLatLng1=new PointLatLng(23.3232,123.3232);
-            points.add(pointLatLng1);
-        }
-        Boolean aBoolean = MapFixService.IsInPolygon(pointLatLng, points);
-        System.out.println(aBoolean);
+
+        double v = MapFixService.GetDistanceByMeter(118.82520998711767, 24.898353535636236
+                , 118.82530572803957, 24.897369220102476);
+
+        double v2 = MapFixService.GetDistanceByMeter(118.820648, 24.90125
+                , 118.8206491, 24.901261);
+        System.out.println(v);
+        System.out.println(v2);
     }
+
 
 
 //    public static void main(String[] args) {

@@ -4,6 +4,7 @@ import com.ltmonitor.entity.GPSRealData;
 import net.fxft.ascsareavoice.service.AutoVoice.IAutoVoiceService;
 import net.fxft.ascsareavoice.service.MapArea.AreaAlarmService;
 import net.fxft.ascsareavoice.service.WaybillArea.WaybillAreaService;
+import net.fxft.ascsareavoice.service.WaybillAreaKeyPoint.service.WaybillAreaKeyPointService;
 import net.fxft.ascsareavoice.service.impl.RealDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,12 +33,18 @@ public class Process0200_RealData{
     @Autowired
     private AreaAlarmService areaAlarmService;
 
+    /*注入进出运单围栏关键点停车报警*/
+    @Autowired
+    private WaybillAreaKeyPointService waybillAreaKeyPointService;
+
+
     public void processData(String simNo, GPSRealData rd) throws Exception {
 
 
         autoVoiceService.autoVoiceMain(rd);
         areaAlarmService.addAreaqueue(rd);
         waybillAreaService.addAreaqueue(rd);
+        waybillAreaKeyPointService.addAreaqueue(rd);
     }
 
 
