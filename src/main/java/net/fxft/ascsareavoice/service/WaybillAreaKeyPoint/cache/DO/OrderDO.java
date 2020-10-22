@@ -14,7 +14,7 @@ import java.util.List;
 @Data
 public class OrderDO {
 
-    private Long orderId;
-    private Long userId;
+    private long orderId;
+    private long userId;
     private List<OrderAreaDO> orderAreaDOS=new ArrayList<>();
 }

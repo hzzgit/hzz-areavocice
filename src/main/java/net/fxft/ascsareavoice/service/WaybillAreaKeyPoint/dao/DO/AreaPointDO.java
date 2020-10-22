@@ -10,16 +10,16 @@ import lombok.Data;
 @Data
 public class AreaPointDO {
 
-    private Long areaId;
+    private long areaId;
     private String name;
 
-    private Integer cfgradius;
+    private int cfgradius;
 
-    private Double latitude;
+    private double latitude;
 
-    private Double longitude;
+    private double longitude;
 
     private String maptype;
 
-    private Long pointid;
+    private long pointid;
 }

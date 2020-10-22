@@ -9,19 +9,22 @@ import lombok.Data;
  */
 @Data
 public class PointDO {
-    private Double latitude;
+    private double latitude;
 
-    private Double longitude;
+    private double longitude;
 
     private String maptype;
 
-    private Long pointid;
+    private long pointid;
 
-    public PointDO(Double latitude, Double longitude, String maptype,Long pointid) {
+    private int cfgradius;
+
+
+    public PointDO(double latitude, double longitude, String maptype, long pointid, int cfgradius) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.maptype = maptype;
-        this.pointid=pointid;
+        this.pointid = pointid;
+        this.cfgradius = cfgradius;
     }
-
 }

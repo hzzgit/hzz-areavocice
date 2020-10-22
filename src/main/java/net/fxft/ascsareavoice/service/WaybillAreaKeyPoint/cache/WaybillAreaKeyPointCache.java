@@ -10,11 +10,13 @@ import net.fxft.ascsareavoice.service.WaybillAreaKeyPoint.dao.DO.AreaOrderDO;
 import net.fxft.ascsareavoice.service.WaybillAreaKeyPoint.dao.DO.AreaPointDO;
 import net.fxft.ascsareavoice.service.WaybillAreaKeyPoint.dao.DO.SimNoOrderDO;
 import net.fxft.ascsareavoice.service.WaybillAreaKeyPoint.dao.WaybillAreaKeyPointDao;
+import net.fxft.ascsareavoice.service.WaybillAreaKeyPoint.service.WaybillAreaKeyPointService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -29,6 +31,9 @@ public class WaybillAreaKeyPointCache {
     @Autowired
     private WaybillAreaKeyPointDao WaybillAreaKeyPointDao;
 
+    @Autowired
+    private WaybillAreaKeyPointService waybillAreaKeyPointService;
+
     /**
      * 是否开启运单围栏报警
      */
@@ -36,24 +41,38 @@ public class WaybillAreaKeyPointCache {
     private boolean isWaybillAreaKeyPoint;
 
     /*simNo和orderId缓存*/
-    private ConcurrentHashMap<String, Long> simNoOrderCache = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, List<Long>> simNoOrderCache = new ConcurrentHashMap<>();
     /*orderId和订单区域配置缓存*/
     private ConcurrentHashMap<Long, OrderDO> orderAreaCache = new ConcurrentHashMap<>();
     /*areaId和区域配置点位信息缓存*/
     private ConcurrentHashMap<Long, AreaDO> AreaCache = new ConcurrentHashMap<>();
 
+    /**
+     * 开放出去simNo和订单的关系表，用于移除无用的simNo缓存
+     *
+     * @return
+     */
+    public ConcurrentHashMap<String, List<Long>> getSimNoOrderCache() {
+        return simNoOrderCache;
+    }
 
-    public boolean isWaybillArea(String simNo){
+    public boolean isWaybillArea(String simNo) {
         Boolean isexistPoint = false;//订单绑定的区域是否有点位
         if (simNoOrderCache.containsKey(simNo)) {
-            Long orderid = simNoOrderCache.get(simNo);
-            if (orderAreaCache.containsKey(orderid)) {
-                OrderDO orderDO = orderAreaCache.get(orderid);
-                List<OrderAreaDO> orderAreaDOS = orderDO.getOrderAreaDOS();
-                for (OrderAreaDO orderAreaDO : orderAreaDOS) {
-                    Long areaid = orderAreaDO.getAreaid();
-                    if (AreaCache.containsKey(areaid)) {
-                        isexistPoint = true;
+            List<Long> orderids = simNoOrderCache.get(simNo);
+
+            if (ConverterUtils.isList(orderids)) {
+
+                for (Long orderid : orderids) {
+                    if (orderAreaCache.containsKey(orderid)) {
+                        OrderDO orderDO = orderAreaCache.get(orderid);
+                        List<OrderAreaDO> orderAreaDOS = orderDO.getOrderAreaDOS();
+                        for (OrderAreaDO orderAreaDO : orderAreaDOS) {
+                            Long areaid = orderAreaDO.getAreaid();
+                            if (AreaCache.containsKey(areaid)) {
+                                isexistPoint = true;
+                            }
+                        }
                     }
                 }
             }
@@ -64,43 +83,49 @@ public class WaybillAreaKeyPointCache {
 
     /**
      * 根据区域id获取到点位信息
+     *
      * @return
      */
-    public AreaDO getAreaConfig(Long areaId){
+    public AreaDO getAreaConfig(Long areaId) {
         if (AreaCache.containsKey(areaId)) {
-            return  AreaCache.get(areaId);
+            return AreaCache.get(areaId);
         }
-        return  null;
+        return null;
     }
 
     /**
      * 根据simNO获取到最终要计算的区域关键点停车的信息
      */
-    public OrderDO getConfigSimNo(String simNo) {
+    public List<OrderDO> getConfigSimNo(String simNo) {
         Boolean isexistPoint = false;//订单绑定的区域是否有点位
+        List<OrderDO> orderDOList = new ArrayList<>();
         if (simNoOrderCache.containsKey(simNo)) {
-            Long orderid = simNoOrderCache.get(simNo);
-            if (orderAreaCache.containsKey(orderid)) {
-                OrderDO orderDO = orderAreaCache.get(orderid);
-                List<OrderAreaDO> orderAreaDOS = orderDO.getOrderAreaDOS();
-                for (OrderAreaDO orderAreaDO : orderAreaDOS) {
-                    Long areaid = orderAreaDO.getAreaid();
-                    if (AreaCache.containsKey(areaid)) {
-                        isexistPoint = true;
+            List<Long> orderids = simNoOrderCache.get(simNo);
+            if (ConverterUtils.isList(orderids)) {
+                for (Long orderid : orderids) {
+                    if (orderAreaCache.containsKey(orderid)) {
+                        OrderDO orderDO = orderAreaCache.get(orderid);
+                        List<OrderAreaDO> orderAreaDOS = orderDO.getOrderAreaDOS();
+                        for (OrderAreaDO orderAreaDO : orderAreaDOS) {
+                            Long areaid = orderAreaDO.getAreaid();
+                            if (AreaCache.containsKey(areaid)) {
+                                isexistPoint = true;
+                            }
+                        }
+                        if (isexistPoint) {
+                            orderDO.setOrderId(orderid);
+                            orderDOList.add(orderDO);
+                        }
                     }
-                }
-                if (isexistPoint) {
-                    orderDO.setOrderId(orderid);
-                    return orderDO;
                 }
             }
         }
-        return null;
+        return orderDOList;
     }
 
     @PostConstruct
     private void init() {
-        if(isWaybillAreaKeyPoint) {
+        if (isWaybillAreaKeyPoint) {
             /*每隔20秒缓存一次*/
             new Thread(() -> {
                 while (true) {
@@ -111,6 +136,7 @@ public class WaybillAreaKeyPointCache {
                         readordersimNoCache();
                         long e = System.currentTimeMillis(); //获取结束时间
                         log.debug("缓存运单围栏关键点停车用时：" + (e - s) + "ms");
+                        waybillAreaKeyPointService.removeRecordbysimNo(simNoOrderCache);
                     } catch (Exception e) {
                         log.error("缓存关键点停车异常", e);
                         simNoOrderCache = new ConcurrentHashMap<>();
@@ -148,9 +174,8 @@ public class WaybillAreaKeyPointCache {
                     areaDO = AreaCacheTemp.get(areaId);
                 }
                 areaDO.setName(name);
-                areaDO.setCfgradius(cfgradius);
                 List<PointDO> pointDOS = areaDO.getPointDOS();
-                pointDOS.add(new PointDO(latitude, longitude, maptype,pointid));
+                pointDOS.add(new PointDO(latitude, longitude, maptype, pointid, cfgradius));
                 AreaCacheTemp.put(areaId, areaDO);
             }
         }
@@ -192,14 +217,19 @@ public class WaybillAreaKeyPointCache {
      * 缓存订单号和simNo的关系
      */
     private void readordersimNoCache() throws Exception {
-        ConcurrentHashMap<String, Long> simNoOrderCacheTemp = new ConcurrentHashMap<>();
+        ConcurrentHashMap<String, List<Long>> simNoOrderCacheTemp = new ConcurrentHashMap<>();
 
         List<SimNoOrderDO> simNoOrderDOS = WaybillAreaKeyPointDao.searchsimNoOrder();
         if (ConverterUtils.isList(simNoOrderDOS)) {
             for (SimNoOrderDO simNoOrderDO : simNoOrderDOS) {
                 Long orderId = simNoOrderDO.getOrderId();
                 String simNo = simNoOrderDO.getSimNo();
-                simNoOrderCacheTemp.put(simNo, orderId);
+                List<Long> orderIds = new ArrayList<>();
+                if (simNoOrderCacheTemp.containsKey(simNo)) {
+                    orderIds = simNoOrderCacheTemp.get(simNo);
+                }
+                orderIds.add(orderId);
+                simNoOrderCacheTemp.put(simNo, orderIds);
             }
         }
         simNoOrderCache = simNoOrderCacheTemp;

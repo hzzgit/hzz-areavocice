@@ -7,6 +7,7 @@ import com.ltmonitor.util.DateUtil;
 import com.ltmonitor.util.StringUtil;
 import net.fxft.ascsareavoice.ltmonitor.util.TimeUtils;
 import net.fxft.ascsareavoice.AscsAreaVoiceApplicationStart;
+import net.fxft.ascsareavoice.service.GpsFliter.GpsInfo;
 import net.fxft.ascsareavoice.service.IMessageProcessService;
 import net.fxft.ascsareavoice.service.impl.RealDataService;
 import net.fxft.gateway.kafka.UnitConfigManager;
@@ -70,6 +71,11 @@ public class StartKafkaComsumer implements IFromDeviceMsgProcessor {
         if (vehicleData != null) {
             rd.setVehicleId(vehicleData.getEntityId());
         }
+        short altitude = jvi.getAltitude();
+        rd.setAltitude(altitude);
+        short course = jvi.getCourse();
+        rd.setDirection(course);
+        rd.setValid(jvi.isValid());
         rd.setVelocity(speed);
         String staStatus = Integer.toBinaryString(jvi.getStatus());
         staStatus = StringUtil.leftPad(staStatus, 32, '0');
@@ -96,9 +102,15 @@ public class StartKafkaComsumer implements IFromDeviceMsgProcessor {
         double latitude = jvi.getLatitude();
         double longitude = jvi.getLongitude();
         double speed = jvi.getSpeed();
+        int altitude = jvi.getAltitude();
         GPSRealData rd = new GPSRealData();
+        rd.setAltitude(altitude);
+        rd.setValid(jvi.isValid());
+        short course = jvi.getCourse();
+        rd.setDirection(course);
         rd.setSimNo(simNo);
         rd.setSendTime(dt);
+        rd.setValid(jvi.isValid());
         if (latitude > 0 && longitude > 0) {
             // 保证是有效坐标
             rd.setLatitude(latitude);
@@ -162,7 +174,7 @@ public class StartKafkaComsumer implements IFromDeviceMsgProcessor {
 
     @Override
     public int getThreadPoolSize() {
-        return 10;
+        return 0;
     }
 
     @Override

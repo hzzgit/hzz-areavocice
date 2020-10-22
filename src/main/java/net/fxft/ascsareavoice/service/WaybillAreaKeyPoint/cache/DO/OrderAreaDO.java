@@ -12,16 +12,21 @@ import java.util.Date;
 @Data
 public class OrderAreaDO{
 
-    private Long areaid;
+    private long areaid;
 
-    private Integer cfgparkdisplacedistance;
+    /*解除停车的直线位移*/
+    private int cfgparkdisplacedistance;
 
-    private Integer cfgparkdisplacetime;
+    /*超时停车的时长*/
+    private int cfgparkdisplacetime;
 
-    private Integer cfgparktime;
+    private int cfgparktime;
 
-    public OrderAreaDO(Long areaid, Integer cfgparkdisplacedistance, Integer cfgparkdisplacetime, Integer cfgparktime) {
+    public OrderAreaDO(long areaid, int cfgparkdisplacedistance, int cfgparkdisplacetime, int cfgparktime) {
         this.areaid = areaid;
+        if(cfgparkdisplacedistance==0){
+            cfgparkdisplacedistance=50;
+        }
         this.cfgparkdisplacedistance = cfgparkdisplacedistance;
         this.cfgparkdisplacetime = cfgparkdisplacetime;
         this.cfgparktime = cfgparktime;

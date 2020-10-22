@@ -26,7 +26,7 @@ public class WaybillAreaKeyPointDao {
      * 查询所有的区域点位缓存
      */
     public List<AreaPointDO> searchAreaPoint(){
-        String sql="select a.id areaId,a.name,a.cfgradius,b.latitude,b.longitude,b.maptype,b.id pointid" +
+        String sql="select a.id areaId,a.name,b.cfgradius,b.latitude,b.longitude,b.maptype,b.id pointid" +
                 " from keypoint_area a left join keypoint_areapoint b\n" +
                 "on a.id=b.areaid where 1=1 and a.state=1 and b.deleted=false";
         List<AreaPointDO> query = jdbcUtil.sql(sql).query(AreaPointDO.class);

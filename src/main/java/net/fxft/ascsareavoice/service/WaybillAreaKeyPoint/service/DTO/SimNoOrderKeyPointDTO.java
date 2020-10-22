@@ -2,6 +2,7 @@ package net.fxft.ascsareavoice.service.WaybillAreaKeyPoint.service.DTO;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -10,7 +11,7 @@ import java.util.Date;
  * @date ：2020/10/21 15:16
  */
 @Data
-public class SimNoOrderKeyPointDTO {
+public class SimNoOrderKeyPointDTO implements Serializable {
 
     /*记录第一次进入停车状态的纬度及上次经纬度*/
     private Double latitude;
@@ -31,6 +32,12 @@ public class SimNoOrderKeyPointDTO {
 
     /*用来记录是否触发了停车超时*/
     private boolean isparkTimeOut;
+
+//    /*用来记录进入关键点停车报警的每个围栏也就是进入这个围栏只能报一次*/
+//    private boolean InAlarmOnce;
+//
+//    /*用来记录进入关键点停车超时报警的每个围栏唯一性也就是进入这个围栏只能报一次*/
+//    private boolean isparkTimeOutOnce;
     /**
      * 用来记录解除停车状态的次数
      */

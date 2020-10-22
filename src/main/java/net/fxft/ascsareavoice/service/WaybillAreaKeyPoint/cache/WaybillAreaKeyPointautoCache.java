@@ -50,7 +50,7 @@ public class WaybillAreaKeyPointautoCache {
             oos.flush();
             oos.close();
             long l2 = System.currentTimeMillis();
-            log.debug( "保单关键点停车本地缓存写入时间为" + (l2 - l1) + "ms");
+          //  log.debug( "保单关键点停车本地缓存写入时间为" + (l2 - l1) + "ms");
         } catch (Exception e) {
             log.error("保存保单进出围栏关键点停车缓存失败", e);
         }

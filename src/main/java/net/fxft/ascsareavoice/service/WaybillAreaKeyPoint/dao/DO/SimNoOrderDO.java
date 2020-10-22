@@ -10,5 +10,5 @@ import lombok.Data;
 @Data
 public class SimNoOrderDO {
     private String simNo;
-    private Long orderId;
+    private long orderId;
 }

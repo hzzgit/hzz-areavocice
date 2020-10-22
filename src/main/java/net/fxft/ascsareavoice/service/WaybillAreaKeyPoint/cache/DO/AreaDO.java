@@ -13,8 +13,6 @@ import java.util.List;
 @Data
 public class AreaDO {
 
-    private int cfgradius;
-
     private String name;
 
     private List<PointDO> pointDOS=new ArrayList<>();
