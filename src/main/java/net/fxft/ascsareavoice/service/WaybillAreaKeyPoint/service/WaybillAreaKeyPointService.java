@@ -82,7 +82,8 @@ public class WaybillAreaKeyPointService {
      * 移除掉已经没有配置的simNo
      */
 
-    public void removeRecordbysimNo(ConcurrentHashMap<String, List<Long>> simNoOrderCache) {
+    public void removeRecordbysimNo(ConcurrentHashMap<String, List<Long>> simNoOrderCache,
+                                    ConcurrentHashMap<Long, OrderDO> orderAreaCache) {
         try {
             int count = 0;
             Set<Map.Entry<String, SimNoOrderKeyPointDTO>> entries = simNoKeyPointRecord.entrySet();
@@ -90,10 +91,42 @@ public class WaybillAreaKeyPointService {
             while (iterator.hasNext()) {
                 Map.Entry<String, SimNoOrderKeyPointDTO> next = iterator.next();
                 String key = next.getKey();
-                String simNo = key.split("-")[0];
+                String[] split = key.split("-");
+                String simNo = split[0];
                 if (!simNoOrderCache.containsKey(simNo)) {//如果不包含那么就移除
                     simNoKeyPointRecord.remove(key);
                     count = count + 1;
+                } else {
+                    long orderid = ConverterUtils.toLong(split[1]);
+                    List<Long> orderIds = simNoOrderCache.get(simNo);
+                    /*如果这个订单已经不包含在这个设备中，那么也移除*/
+                    if (!orderIds.contains(orderid)) {
+                        simNoKeyPointRecord.remove(key);
+                        count = count + 1;
+                    } else {
+                        /*这边判断这个订单中的区域是否已经不再和这个订单绑定*/
+                        long areaid = ConverterUtils.toLong(split[2]);
+                        if (!orderAreaCache.containsKey(orderid)) {
+                            simNoKeyPointRecord.remove(key);
+                            count = count + 1;
+                        } else {
+                            OrderDO orderDO = orderAreaCache.get(orderid);
+                            List<OrderAreaDO> orderAreaDOS = orderDO.getOrderAreaDOS();
+                            boolean isarg = true;//判断是否移除
+                            if (ConverterUtils.isList(orderAreaDOS)) {
+                                for (OrderAreaDO orderAreaDO : orderAreaDOS) {
+                                    long areaid1 = orderAreaDO.getAreaid();
+                                    if (areaid == areaid1) {
+                                        isarg = false;
+                                    }
+                                }
+                            }
+                            if (isarg) {
+                                simNoKeyPointRecord.remove(key);
+                                count = count + 1;
+                            }
+                        }
+                    }
                 }
             }
             log.debug("检测移除无用的simNo的缓存,移除的数量为:" + count);
@@ -131,6 +164,29 @@ public class WaybillAreaKeyPointService {
         WaybillAreaKeyPointautoCache.saveCache(simNoKeyPointRecord);
     }
 
+
+    private ConcurrentHashMap<String, simNoTEST> stringsimNoTESTConcurrentHashMap = new ConcurrentHashMap<>();
+
+    @PostConstruct
+    /* 开启可以模拟车辆移动*/
+    private void test() {
+        new Thread(() -> {
+            while (true) {
+                ConcurrentHashMap<String, simNoTEST> stringsimNoTESTConcurrentHashMaptemp = new ConcurrentHashMap<>();
+                List<simNoTEST> query = JdbcUtil.getDefault().sql("select * from keypoint_simnotest").query(simNoTEST.class);
+                for (simNoTEST simNoTEST : query) {
+                    stringsimNoTESTConcurrentHashMaptemp.put(simNoTEST.getSimNo(), simNoTEST);
+                }
+                stringsimNoTESTConcurrentHashMap = stringsimNoTESTConcurrentHashMaptemp;
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
     /**
      * 加入队列
      *
@@ -142,28 +198,30 @@ public class WaybillAreaKeyPointService {
                     TimeUtils.isdifferminute(rd.getSendTime(), new Date(), 1200)) {
                 return;
             }
-//            if (stringsimNoTESTConcurrentHashMap.containsKey("040231521285")) {
-//                simNoTEST simNoTEST = stringsimNoTESTConcurrentHashMap.get("040231521285");
-//                rd.setLongitude(simNoTEST.getLongitude());
-//                rd.setLatitude(simNoTEST.getLatitude());
-//                rd.setSimNo("040231521285");
-//            }
+            if (stringsimNoTESTConcurrentHashMap.containsKey("040231521285")) {
+                simNoTEST simNoTEST = stringsimNoTESTConcurrentHashMap.get("040231521285");
+                rd.setLongitude(simNoTEST.getLongitude());
+                rd.setLatitude(simNoTEST.getLatitude());
+                rd.setSimNo("040231521285");
+                rd.setVehicleId(1);
+            }
             if (!waybillAreaKeyPointCache.isWaybillArea(rd.getSimNo())) {
                 return;
             }
-            GpsInfo instance = GpsInfo.getInstance(rd);
-            List<Map<String, Object>> maps = GPSFilter.gpsFilter(instance, ConverterUtils.toString(rd.getVehicleId()));
-            if (maps != null && maps.size() > 0) {
-                for (Map<String, Object> map : maps) {
-                    int type = ConverterUtils.toInt(map.get("type"));
-                    if (type == 0) {//这边只需要正常时间的的点
-                        Object data = map.get("data");
-                        GpsInfo gpsInfo = (GpsInfo) data;
-                        AreaQueue.add(gpsInfo.gpsinfotoGpsRealData());
-                    }
-
-                }
-            }
+            AreaQueue.add(rd);
+//            GpsInfo instance = GpsInfo.getInstance(rd);
+//            List<Map<String, Object>> maps = GPSFilter.gpsFilter(instance, ConverterUtils.toString(rd.getVehicleId()));
+//            if (maps != null && maps.size() > 0) {
+//                for (Map<String, Object> map : maps) {
+//                    int type = ConverterUtils.toInt(map.get("type"));
+//                    if (type == 0) {//这边只需要正常时间的的点
+//                        Object data = map.get("data");
+//                        GpsInfo gpsInfo = (GpsInfo) data;
+//                        AreaQueue.add(gpsInfo.gpsinfotoGpsRealData());
+//                    }
+//
+//                }
+//            }
         }
     }
 
@@ -208,27 +266,6 @@ public class WaybillAreaKeyPointService {
         }
     }
 
-
-//    private ConcurrentHashMap<String, simNoTEST> stringsimNoTESTConcurrentHashMap = new ConcurrentHashMap<>();
-//
-//    @PostConstruct
-//    private void test() {
-//        new Thread(() -> {
-//            while (true) {
-//                ConcurrentHashMap<String, simNoTEST> stringsimNoTESTConcurrentHashMaptemp = new ConcurrentHashMap<>();
-//                List<simNoTEST> query = JdbcUtil.getDefault().sql("select * from keypoint_simnotest").query(simNoTEST.class);
-//                for (simNoTEST simNoTEST : query) {
-//                    stringsimNoTESTConcurrentHashMaptemp.put(simNoTEST.getSimNo(), simNoTEST);
-//                }
-//                stringsimNoTESTConcurrentHashMap = stringsimNoTESTConcurrentHashMaptemp;
-//                try {
-//                    Thread.sleep(1000);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }).start();
-//    }
 
     /**
      * 开始处理计算运单围栏关键点停车
@@ -287,7 +324,7 @@ public class WaybillAreaKeyPointService {
                             /*判断是否进入了点位的半径圆*/
                             Boolean inArea = MapFixService.IsInCircle(mp, pl, cfgradius);
                             SimNoOrderKeyPointDTO simNoKeyPointDTO = new SimNoOrderKeyPointDTO();//用来记录当前围栏车辆的情况
-                            String key = getkey(simNo, orderId, pointid);
+                            String key = getkey(simNo, orderId, areaid, pointid);
                             if (simNoKeyPointRecord.containsKey(key)) {
                                 simNoKeyPointDTO = simNoKeyPointRecord.get(key);
                             }
@@ -354,7 +391,7 @@ public class WaybillAreaKeyPointService {
                                                 String descr = getdesrc(userId, orderId, areaid, pointid, gettwodatediff, name);
                                                 inAreaAlarm(rd, name, descr);
                                                 simNoKeyPointDTO.setInAlarm(true);
-                                               // simNoKeyPointDTO.setInAlarmOnce(true);
+                                                // simNoKeyPointDTO.setInAlarmOnce(true);
                                                 /* 这个地方是触发了关键点停车报警之后,记录下来新的停车时长*/
                                                 simNoKeyPointDTO.setParkBeginTime(rd.getSendTime());
                                             }
@@ -369,14 +406,20 @@ public class WaybillAreaKeyPointService {
                                                     String descr = getdesrc(userId, orderId, areaid, pointid, gettwodatediff, name);
                                                     inAreaAlarmParkIngTimeOut(rd, name, descr);
                                                     simNoKeyPointDTO.setIsparkTimeOut(true);
-                                                  //  simNoKeyPointDTO.setIsparkTimeOutOnce(true);
+                                                    //  simNoKeyPointDTO.setIsparkTimeOutOnce(true);
                                                 }
                                             }
                                         }
                                     }
                                 }
                                 /*缓存起来这辆车orderid和pointid的计算缓存*/
-                                simNoKeyPointRecord.put(key, simNoKeyPointDTO);
+                                if (inArea || simNoKeyPointDTO.isInAlarm()) {
+                                    /*只有当进入围栏或者是已经触发了关键点停车报警*/
+                                    simNoKeyPointRecord.put(key, simNoKeyPointDTO);
+                                } else {
+                                    /*如果离开了围栏，且报警都结束了，那么就移除缓存*/
+                                    simNoKeyPointRecord.remove(key);
+                                }
                             }
                         }
                     }
@@ -397,11 +440,12 @@ public class WaybillAreaKeyPointService {
      *
      * @param simNo
      * @param orderid
+     * @param areaid
      * @param pointId
      * @return
      */
-    private String getkey(String simNo, Long orderid, Long pointId) {
-        return simNo + "-" + orderid + "-" + pointId;
+    private String getkey(String simNo, Long orderid, Long areaid, Long pointId) {
+        return simNo + "-" + orderid + "-" + areaid + "-" + pointId;
     }
 
 

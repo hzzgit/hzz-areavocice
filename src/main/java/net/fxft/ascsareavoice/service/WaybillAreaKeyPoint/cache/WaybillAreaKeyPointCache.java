@@ -136,7 +136,7 @@ public class WaybillAreaKeyPointCache {
                         readordersimNoCache();
                         long e = System.currentTimeMillis(); //获取结束时间
                         log.debug("缓存运单围栏关键点停车用时：" + (e - s) + "ms");
-                        waybillAreaKeyPointService.removeRecordbysimNo(simNoOrderCache);
+                        waybillAreaKeyPointService.removeRecordbysimNo(simNoOrderCache,orderAreaCache);
                     } catch (Exception e) {
                         log.error("缓存关键点停车异常", e);
                         simNoOrderCache = new ConcurrentHashMap<>();
