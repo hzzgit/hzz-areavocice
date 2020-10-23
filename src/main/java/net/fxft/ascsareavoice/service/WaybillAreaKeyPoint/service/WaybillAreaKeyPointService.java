@@ -20,8 +20,6 @@ import net.fxft.ascsareavoice.service.WaybillAreaKeyPoint.cache.WaybillAreaKeyPo
 import net.fxft.ascsareavoice.service.WaybillAreaKeyPoint.cache.WaybillAreaKeyPointautoCache;
 import net.fxft.ascsareavoice.service.WaybillAreaKeyPoint.enumconfig.WaybillAreaKeyPointEnum;
 import net.fxft.ascsareavoice.service.WaybillAreaKeyPoint.service.DTO.SimNoOrderKeyPointDTO;
-import net.fxft.ascsareavoice.service.WaybillAreaKeyPoint.service.DTO.simNoTEST;
-import net.fxft.common.jdbc.JdbcUtil;
 import net.fxft.gateway.event.EventMsg;
 import net.fxft.gateway.event.alarm.AreaAlarmEvent;
 import org.springframework.beans.BeanUtils;
@@ -489,7 +487,7 @@ public class WaybillAreaKeyPointService {
         em.setEventBody(areaAlarmEvent);
         em.loadDefaultDevMsgAttr();
         log.debug("触发运单围栏关键点停车相关报警,内容:" + areaAlarmEvent.toString());
-        //kafkaMessageSender.sendAreaAlarmEventMsg(em, rd.getSimNo());
+        kafkaMessageSender.sendAreaAlarmEventMsg(em, rd.getSimNo());
     }
 
 }
