@@ -165,27 +165,27 @@ public class WaybillAreaKeyPointService {
     }
 
 
-    private ConcurrentHashMap<String, simNoTEST> stringsimNoTESTConcurrentHashMap = new ConcurrentHashMap<>();
-
-    @PostConstruct
-    /* 开启可以模拟车辆移动*/
-    private void test() {
-        new Thread(() -> {
-            while (true) {
-                ConcurrentHashMap<String, simNoTEST> stringsimNoTESTConcurrentHashMaptemp = new ConcurrentHashMap<>();
-                List<simNoTEST> query = JdbcUtil.getDefault().sql("select * from keypoint_simnotest").query(simNoTEST.class);
-                for (simNoTEST simNoTEST : query) {
-                    stringsimNoTESTConcurrentHashMaptemp.put(simNoTEST.getSimNo(), simNoTEST);
-                }
-                stringsimNoTESTConcurrentHashMap = stringsimNoTESTConcurrentHashMaptemp;
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-    }
+//    private ConcurrentHashMap<String, simNoTEST> stringsimNoTESTConcurrentHashMap = new ConcurrentHashMap<>();
+//
+//    @PostConstruct
+//    /* 开启可以模拟车辆移动*/
+//    private void test() {
+//        new Thread(() -> {
+//            while (true) {
+//                ConcurrentHashMap<String, simNoTEST> stringsimNoTESTConcurrentHashMaptemp = new ConcurrentHashMap<>();
+//                List<simNoTEST> query = JdbcUtil.getDefault().sql("select * from keypoint_simnotest").query(simNoTEST.class);
+//                for (simNoTEST simNoTEST : query) {
+//                    stringsimNoTESTConcurrentHashMaptemp.put(simNoTEST.getSimNo(), simNoTEST);
+//                }
+//                stringsimNoTESTConcurrentHashMap = stringsimNoTESTConcurrentHashMaptemp;
+//                try {
+//                    Thread.sleep(1000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }).start();
+//    }
 
     /**
      * 加入队列
@@ -198,30 +198,29 @@ public class WaybillAreaKeyPointService {
                     TimeUtils.isdifferminute(rd.getSendTime(), new Date(), 1200)) {
                 return;
             }
-            if (stringsimNoTESTConcurrentHashMap.containsKey("040231521285")) {
-                simNoTEST simNoTEST = stringsimNoTESTConcurrentHashMap.get("040231521285");
-                rd.setLongitude(simNoTEST.getLongitude());
-                rd.setLatitude(simNoTEST.getLatitude());
-                rd.setSimNo("040231521285");
-                rd.setVehicleId(1);
-            }
+//            if (stringsimNoTESTConcurrentHashMap.containsKey("040231521285")) {
+//                simNoTEST simNoTEST = stringsimNoTESTConcurrentHashMap.get("040231521285");
+//                rd.setLongitude(simNoTEST.getLongitude());
+//                rd.setLatitude(simNoTEST.getLatitude());
+//                rd.setSimNo("040231521285");
+//                rd.setVehicleId(1);
+//            }
             if (!waybillAreaKeyPointCache.isWaybillArea(rd.getSimNo())) {
                 return;
             }
-            AreaQueue.add(rd);
-//            GpsInfo instance = GpsInfo.getInstance(rd);
-//            List<Map<String, Object>> maps = GPSFilter.gpsFilter(instance, ConverterUtils.toString(rd.getVehicleId()));
-//            if (maps != null && maps.size() > 0) {
-//                for (Map<String, Object> map : maps) {
-//                    int type = ConverterUtils.toInt(map.get("type"));
-//                    if (type == 0) {//这边只需要正常时间的的点
-//                        Object data = map.get("data");
-//                        GpsInfo gpsInfo = (GpsInfo) data;
-//                        AreaQueue.add(gpsInfo.gpsinfotoGpsRealData());
-//                    }
-//
-//                }
-//            }
+            GpsInfo instance = GpsInfo.getInstance(rd);
+            List<Map<String, Object>> maps = GPSFilter.gpsFilter(instance, ConverterUtils.toString(rd.getVehicleId()));
+            if (maps != null && maps.size() > 0) {
+                for (Map<String, Object> map : maps) {
+                    int type = ConverterUtils.toInt(map.get("type"));
+                    if (type == 0) {//这边只需要正常时间的的点
+                        Object data = map.get("data");
+                        GpsInfo gpsInfo = (GpsInfo) data;
+                        AreaQueue.add(gpsInfo.gpsinfotoGpsRealData());
+                    }
+
+                }
+            }
         }
     }
 
