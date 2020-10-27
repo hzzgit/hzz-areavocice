@@ -138,6 +138,7 @@ public class AreaAlarmService implements IAreaAlarmService {
     }
 
 
+    @Override
     @PostConstruct
     public void start() {
         if (areaalarm) {
@@ -149,6 +150,7 @@ public class AreaAlarmService implements IAreaAlarmService {
             }
 
             analyzeThread = new Thread(new Runnable() {
+                @Override
                 public void run() {
                     analyzeThreadFunc();
                 }
@@ -230,13 +232,15 @@ public class AreaAlarmService implements IAreaAlarmService {
         }
     }
 
+    @Override
     @PreDestroy
     public void stopService() {
         log.info("---begin stop AreaAlarmService---");
         continueAnalyze = false;
         StartKafkaComsumer.ispausepool = true;
-        if (analyzeThread == null)
+        if (analyzeThread == null) {
             return;
+        }
         try {
             analyzeThread.interrupt();
             while (AreaQueue.size() > 0) {
@@ -551,8 +555,9 @@ public class AreaAlarmService implements IAreaAlarmService {
 
 
             double ts2 = DateUtil.getSeconds(start, new Date());
-            if (ts2 > 0.2)
+            if (ts2 > 0.2) {
                 log.debug(rd.getPlateNo() + "," + ec.getName() + "路线偏移报警耗时:" + ts2);
+            }
         } catch (Exception e) {
             log.error("平台线路报警处理错误", e);
         }
@@ -600,8 +605,9 @@ public class AreaAlarmService implements IAreaAlarmService {
                     //TODO 这边改成使用整条路线的线宽
                     boolean result = MapFixService.isPointOnRouteSegment(p1, p2,
                             mp, ec.getLineWidth());
-                    if (result)
+                    if (result) {
                         return prevSegment;
+                    }
                 }
                 prevSegment = seg;
             }
@@ -767,8 +773,9 @@ public class AreaAlarmService implements IAreaAlarmService {
                         alarmSource, alarmType, stationId});
 
         if (sr == null) {
-            if (TURN_OFF.equals(alarmState))
+            if (TURN_OFF.equals(alarmState)) {
                 return null;
+            }
 
             sr = new AlarmRecord();
             sr.setVehicleId(rd.getVehicleId());
@@ -790,8 +797,9 @@ public class AreaAlarmService implements IAreaAlarmService {
 
                 sr.setLatitude1(rd.getLatitude());
                 sr.setLongitude1(rd.getLongitude());
-            } else
+            } else {
                 return null;
+            }
         }
 
         sr.setAlarmSource(alarmSource);
@@ -839,8 +847,9 @@ public class AreaAlarmService implements IAreaAlarmService {
             PointLatLng pointForGoogle = null;
             PointLatLng pointForBaidu = null;
 
-            if (StringUtil.isNullOrEmpty(ec.getPoints()))
+            if (StringUtil.isNullOrEmpty(ec.getPoints())) {
                 return;
+            }
 
             //根据区域的地图类型，将GPS终端的坐标转成对应的地图类型，进行比对判断
             if (Constants.MAP_BAIDU.equals(ec.getMapType())) {
@@ -874,10 +883,11 @@ public class AreaAlarmService implements IAreaAlarmService {
                     AnalyzeOffsetRoute(rd, ec, mp);
                 } else {
                     if (ec.getKeyPoint() == 1) {//这边计算关键点，但是不准确而且和圆是一样的
-                        if (ec.getByTime())
+                        if (ec.getByTime()) {
                             monitorKeyPointArrvie(rd, ec, mp);// 进入指定的关键点报警
-                        else
+                        } else {
                             monitorKeyPointLeave(rd, ec, mp); // 离开指定的关键点报警
+                        }
                     } else {//这边计算进区域
                         String key = rd.getSimNo() + "_" + ec.getEntityId();
                         boolean arg = true;
@@ -1011,15 +1021,17 @@ public class AreaAlarmService implements IAreaAlarmService {
             } else if (MapArea.CIRCLE.equals(ec.getAreaType()) && points.size() > 0) {
                 PointLatLng pl = points.get(0);
                 double radius = ec.getRadius();
-                if (MapFixService.IsInCircle(mp, pl, radius))
+                if (MapFixService.IsInCircle(mp, pl, radius)) {
                     return true;
+                }
             } else if (MapArea.RECT.equals(ec.getAreaType()) && points.size() > 1) {
                 PointLatLng p1 = points.get(0);
                 PointLatLng p2 = points.get(2);
 
                 if (MapFixService.IsInRect(mp.lng, mp.lat, p1.lng, p1.lat, p2.lng,
-                        p2.lat))
+                        p2.lat)) {
                     return true;
+                }
             }
         }
         return false;
