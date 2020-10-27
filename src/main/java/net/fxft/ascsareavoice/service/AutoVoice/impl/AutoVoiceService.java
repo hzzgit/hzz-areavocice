@@ -136,6 +136,7 @@ public class AutoVoiceService implements IAutoVoiceService {
     }
 
     //根据截取到的实时数据进行一系列的处理，主要处理逻辑
+    @Override
     public void autoVoiceMain(GPSRealData rd) {
         if (autoVoice) {
             AttrLog alog = AttrLog.get("语音播报主方法")
@@ -264,7 +265,7 @@ public class AutoVoiceService implements IAutoVoiceService {
                     if (arg) {//如果没有启动的配置了那就移除
                         autoRealMap.remove(simNo);
                     }
-                    log.debug(alog.toString());
+                  //  log.debug(alog.toString());
                 } else {
                     autoRealMap.remove(simNo);
                 }

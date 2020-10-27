@@ -44,5 +44,16 @@ public class SimNoOrderKeyPointDTO implements Serializable {
     private int removeParkingCount;
 
 
-
+    @Override
+    public String toString() {
+        return "SimNoOrderKeyPointDTO{" +
+                "latitude=" + latitude +
+                ", longitude=" + longitude +
+                ", parkBeginTime=" + parkBeginTime +
+                ", InAlarm=" + InAlarm +
+                ", isparkNow=" + isparkNow +
+                ", isparkTimeOut=" + isparkTimeOut +
+                ", removeParkingCount=" + removeParkingCount +
+                '}';
+    }
 }

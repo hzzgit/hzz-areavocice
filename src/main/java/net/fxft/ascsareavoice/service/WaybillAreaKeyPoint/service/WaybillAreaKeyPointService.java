@@ -20,6 +20,8 @@ import net.fxft.ascsareavoice.service.WaybillAreaKeyPoint.cache.WaybillAreaKeyPo
 import net.fxft.ascsareavoice.service.WaybillAreaKeyPoint.cache.WaybillAreaKeyPointautoCache;
 import net.fxft.ascsareavoice.service.WaybillAreaKeyPoint.enumconfig.WaybillAreaKeyPointEnum;
 import net.fxft.ascsareavoice.service.WaybillAreaKeyPoint.service.DTO.SimNoOrderKeyPointDTO;
+import net.fxft.ascsareavoice.service.WaybillAreaKeyPoint.service.DTO.simNoTEST;
+import net.fxft.common.jdbc.JdbcUtil;
 import net.fxft.gateway.event.EventMsg;
 import net.fxft.gateway.event.alarm.AreaAlarmEvent;
 import org.springframework.beans.BeanUtils;
@@ -128,6 +130,7 @@ public class WaybillAreaKeyPointService {
                 }
             }
             log.debug("检测移除无用的simNo的缓存,移除的数量为:" + count);
+            log.debug("当前的SimNo计算缓存数量为:"+simNoKeyPointRecord.size());
         } catch (Exception e) {
             log.error("检测移除无用的simNo的缓存异常", e);
         }
@@ -325,105 +328,121 @@ public class WaybillAreaKeyPointService {
                             if (simNoKeyPointRecord.containsKey(key)) {
                                 simNoKeyPointDTO = simNoKeyPointRecord.get(key);
                             }
-                            synchronized (simNoKeyPointDTO) {
-                                /*判断停车标志位*/
-                                boolean ispark = false;
-                                if (simNoKeyPointDTO.getLongitude() == null || simNoKeyPointDTO.getLatitude() == null) {//如果经纬度有一个是null。，那就不进行停车点比对
-                                    //记录第一个点的经纬度
 
-                                } else {//如果已经有经纬度了
-                                    /*只有在触发了进入关键点停车报警之后或者进入了围栏才进行以下计算*/
-                                    if (simNoKeyPointDTO.isInAlarm() || inArea) {
-                                        /*上一个点是否在停车中*/
-                                        boolean isparkNow = simNoKeyPointDTO.isIsparkNow();
-                                        if (isparkNow) {
-                                            double mi = MapFixService.GetDistanceByMeter(simNoKeyPointDTO.getLongitude(),
-                                                    simNoKeyPointDTO.getLatitude()
-                                                    , rd.getLongitude(), rd.getLatitude());
-                                            /*两点距离在配置的解除停车位移以下都算是停住了*/
-                                            if (mi <= cfgparkdisplacedistance) {
-                                                ispark = true;
-                                            } else if (simNoKeyPointDTO.getRemoveParkingCount() < 1) {
-                                                ispark = true;
-                                                /*离开停车位移的触发次数加1*/
-                                                int removeParkingCount = simNoKeyPointDTO.getRemoveParkingCount();
-                                                simNoKeyPointDTO.setRemoveParkingCount(removeParkingCount + 1);
-                                            } else {
-
-                                            }
-                                        } else {
-                                            /* 如果不在停车态，那么只有完全相同的经纬度才可以进入停车状态*/
-                                            if (simNoKeyPointDTO.getLongitude().equals(rd.getLongitude())
-                                                    && simNoKeyPointDTO.getLatitude().equals(rd.getLatitude())) {
-                                                ispark = true;
-                                                simNoKeyPointDTO.setIsparkNow(true);
-                                            }
-                                        }
-                                    }
-                                }
-                                if (ispark == false) {//没有停车才记录，否则不改变
-                                    /*这边记录下进入围栏的第一个时间，但不一定是停车时间*/
-                                    if (simNoKeyPointDTO.isInAlarm()) {//如果之前是已经触发了进入关键点停车报警，那么就代表着这边要触发离开关键点停车报警
-                                        long gettwodatediff = TimeUtils.gettwodatediff(
-                                                simNoKeyPointDTO.getParkBeginTime(), rd.getSendTime());
-                                        String descr = getdesrc(userId, orderId, areaid, pointid, gettwodatediff, name);
-                                        crossAreaAlarm(rd, name, descr);//触发离开关键点停车报警
-                                    }
-                                    simNoKeyPointDTO.setParkBeginTime(rd.getSendTime());
-                                    simNoKeyPointDTO.setInAlarm(false);
-                                    simNoKeyPointDTO.setIsparkNow(false);
-                                    simNoKeyPointDTO.setIsparkTimeOut(false);
-                                    simNoKeyPointDTO.setRemoveParkingCount(0);
+                            /*判断停车标志位*/
+                            boolean ispark = false;
+                            if (simNoKeyPointDTO.getLongitude() == null || simNoKeyPointDTO.getLatitude() == null) {//如果经纬度有一个是null。，那就不进行停车点比对
+                                //记录第一个点的经纬度
+                                if(inArea){
                                     simNoKeyPointDTO.setLongitude(rd.getLongitude());
                                     simNoKeyPointDTO.setLatitude(rd.getLatitude());
-                                } else {
-                                    /*只有在进入围栏的情况下才会有关键点停车报警和停车超时报警*/
-                                    if (inArea) {
-                                        if (simNoKeyPointDTO.isInAlarm() == false) {//只有没有触发过进入围栏才会报警
-                                            /*计算下当前时间和之前记录的停车时间相差是否达到停车要求*/
+                                    simNoKeyPointDTO.setParkBeginTime(rd.getSendTime());
+                                }
+                            } else {//如果已经有经纬度了
+                                /*只有在触发了进入关键点停车报警之后或者进入了围栏才进行以下计算*/
+                                if (simNoKeyPointDTO.isInAlarm() || inArea) {
+                                    /*上一个点是否在停车中*/
+                                    boolean isparkNow = simNoKeyPointDTO.isIsparkNow();
+                                    if (isparkNow) {
+                                        double mi = MapFixService.GetDistanceByMeter(simNoKeyPointDTO.getLongitude(),
+                                                simNoKeyPointDTO.getLatitude()
+                                                , rd.getLongitude(), rd.getLatitude());
+                                        /*两点距离在配置的解除停车位移以下都算是停住了*/
+                                        if (mi <= cfgparkdisplacedistance) {
+                                            ispark = true;
+                                        } else if (simNoKeyPointDTO.getRemoveParkingCount() < 1) {
+                                            ispark = true;
+                                            /*离开停车位移的触发次数加1*/
+                                            int removeParkingCount = simNoKeyPointDTO.getRemoveParkingCount();
+                                            simNoKeyPointDTO.setRemoveParkingCount(removeParkingCount + 1);
+                                            printLog("进入了围栏且停车位移配置值+1,内容:"+simNoKeyPointDTO);
+                                        } else {
+                                            printLog("进入了围栏且停车位移超过配置值,内容:"+simNoKeyPointDTO);
+                                        }
+                                    } else {
+                                        /* 如果不在停车态，那么只有完全相同的经纬度才可以进入停车状态*/
+                                        if (simNoKeyPointDTO.getLongitude().equals(rd.getLongitude())
+                                                && simNoKeyPointDTO.getLatitude().equals(rd.getLatitude())) {
+                                            ispark = true;
+                                            simNoKeyPointDTO.setIsparkNow(true);
+                                            printLog("进入了围栏且开始停车,内容:"+simNoKeyPointDTO);
+                                        }
+                                    }
+
+                                }
+                            }
+                            if (ispark == false&&simNoKeyPointDTO.getLongitude() != null) {//没有停车才记录，否则不改变，且只有停车了才触发
+                                /*这边记录下进入围栏的第一个时间，但不一定是停车时间*/
+                                if (simNoKeyPointDTO.isInAlarm()) {//如果之前是已经触发了进入关键点停车报警，那么就代表着这边要触发离开关键点停车报警
+                                    long gettwodatediff = TimeUtils.gettwodatediff(
+                                            simNoKeyPointDTO.getParkBeginTime(), rd.getSendTime());
+                                    String descr = getdesrc(userId, orderId, areaid, pointid, gettwodatediff, name);
+                                    crossAreaAlarm(rd, name, descr);//触发离开关键点停车报警
+                                }
+                                simNoKeyPointDTO.setParkBeginTime(rd.getSendTime());
+                                simNoKeyPointDTO.setInAlarm(false);
+                                simNoKeyPointDTO.setIsparkNow(false);
+                                simNoKeyPointDTO.setIsparkTimeOut(false);
+                                simNoKeyPointDTO.setRemoveParkingCount(0);
+                                simNoKeyPointDTO.setLongitude(rd.getLongitude());
+                                simNoKeyPointDTO.setLatitude(rd.getLatitude());
+                                printLog("进入了围栏且未停车,内容:"+simNoKeyPointDTO);
+                            } else {
+                                /*只有在进入围栏的情况下才会有关键点停车报警和停车超时报警*/
+                                if (inArea) {
+                                    if (simNoKeyPointDTO.isInAlarm() == false) {//只有没有触发过进入围栏才会报警
+                                        /*计算下当前时间和之前记录的停车时间相差是否达到停车要求*/
+                                        long gettwodatediff = TimeUtils.gettwodatediff(
+                                                simNoKeyPointDTO.getParkBeginTime(), rd.getSendTime());
+                                        printLog("进入了围栏且停车时长达到"+gettwodatediff+"秒,内容:"+simNoKeyPointDTO);
+
+                                        /*如果停车时间超过了配置的,且在围栏内，则触发进入关键点停车报警*/
+                                        if (cfgparktime != null && cfgparktime > 0 && gettwodatediff >= cfgparktime) {
+                                            String descr = getdesrc(userId, orderId, areaid, pointid, gettwodatediff, name);
+                                            inAreaAlarm(rd, name, descr);
+                                            simNoKeyPointDTO.setInAlarm(true);
+                                            // simNoKeyPointDTO.setInAlarmOnce(true);
+                                            /* 这个地方是触发了关键点停车报警之后,记录下来新的停车时长*/
+                                            simNoKeyPointDTO.setParkBeginTime(rd.getSendTime());
+                                        }
+                                    } else {
+                                        /*这边也是只有没触发过停车超时报警，才会触发*/
+                                        if (simNoKeyPointDTO.isIsparkTimeOut() == false) {
+                                            /*如果是触发过的，就继续计算停车超时*/
                                             long gettwodatediff = TimeUtils.gettwodatediff(
                                                     simNoKeyPointDTO.getParkBeginTime(), rd.getSendTime());
-                                            /*如果停车时间超过了配置的,且在围栏内，则触发进入关键点停车报警*/
-                                            if (cfgparktime != null && cfgparktime > 0 && gettwodatediff >= cfgparktime) {
+                                            printLog("进入了围栏且停车超时时长达到"+gettwodatediff+"秒,内容:"+simNoKeyPointDTO);
+                                            /*超时时间不为空且不为0，且大于停车时长*/
+                                            if (cfgparkdisplacetime != null && cfgparkdisplacetime > 0 && gettwodatediff >= cfgparkdisplacetime) {
                                                 String descr = getdesrc(userId, orderId, areaid, pointid, gettwodatediff, name);
-                                                inAreaAlarm(rd, name, descr);
-                                                simNoKeyPointDTO.setInAlarm(true);
-                                                // simNoKeyPointDTO.setInAlarmOnce(true);
-                                                /* 这个地方是触发了关键点停车报警之后,记录下来新的停车时长*/
-                                                simNoKeyPointDTO.setParkBeginTime(rd.getSendTime());
-                                            }
-                                        } else {
-                                            /*这边也是只有没触发过停车超时报警，才会触发*/
-                                            if (simNoKeyPointDTO.isIsparkTimeOut() == false) {
-                                                /*如果是触发过的，就继续计算停车超时*/
-                                                long gettwodatediff = TimeUtils.gettwodatediff(
-                                                        simNoKeyPointDTO.getParkBeginTime(), rd.getSendTime());
-                                                /*超时时间不为空且不为0，且大于停车时长*/
-                                                if (cfgparkdisplacetime != null && cfgparkdisplacetime > 0 && gettwodatediff >= cfgparkdisplacetime) {
-                                                    String descr = getdesrc(userId, orderId, areaid, pointid, gettwodatediff, name);
-                                                    inAreaAlarmParkIngTimeOut(rd, name, descr);
-                                                    simNoKeyPointDTO.setIsparkTimeOut(true);
-                                                    //  simNoKeyPointDTO.setIsparkTimeOutOnce(true);
-                                                }
+                                                inAreaAlarmParkIngTimeOut(rd, name, descr);
+                                                simNoKeyPointDTO.setIsparkTimeOut(true);
+                                                //  simNoKeyPointDTO.setIsparkTimeOutOnce(true);
                                             }
                                         }
                                     }
                                 }
-                                /*缓存起来这辆车orderid和pointid的计算缓存*/
-                                if (inArea || simNoKeyPointDTO.isInAlarm()) {
-                                    /*只有当进入围栏或者是已经触发了关键点停车报警*/
-                                    simNoKeyPointRecord.put(key, simNoKeyPointDTO);
-                                } else {
-                                    /*如果离开了围栏，且报警都结束了，那么就移除缓存*/
-                                    simNoKeyPointRecord.remove(key);
-                                }
+                            }
+                            /*缓存起来这辆车orderid和pointid的计算缓存*/
+                            if (inArea || simNoKeyPointDTO.isInAlarm()) {
+                                /*只有当进入围栏或者是已经触发了关键点停车报警*/
+                                simNoKeyPointRecord.put(key, simNoKeyPointDTO);
+                            } else {
+                                /*如果离开了围栏，且报警都结束了，那么就移除缓存*/
+                                simNoKeyPointRecord.remove(key);
                             }
                         }
                     }
                 }
+
             }
         }
 
+    }
+
+
+    private void printLog(String desc){
+        log.debug("运单围栏——关键点停车——"+desc);
     }
 
 
