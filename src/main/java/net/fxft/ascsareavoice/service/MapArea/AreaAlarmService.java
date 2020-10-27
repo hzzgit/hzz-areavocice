@@ -370,7 +370,7 @@ public class AreaAlarmService implements IAreaAlarmService {
                             this.AnalyzeAreaAlarm(rd, ec);
                         }
                         long e = System.currentTimeMillis(); //获取结束时间
-                        log.debug(alog.toString() + "用时" + (e - s) + "ms");
+                        //log.debug(alog.toString() + "用时" + (e - s) + "ms");
                     }
                 }
             }
@@ -882,6 +882,9 @@ public class AreaAlarmService implements IAreaAlarmService {
                         String key = rd.getSimNo() + "_" + ec.getEntityId();
                         boolean arg = true;
                         boolean inArea = IsInArea(ec, mp);//这边进行计算是否在区域内
+                        log.debug("当前车辆的围栏处理情况为，simno=" + rd.getSimNo() + ",sendTime=" + rd.getSendTime() + "" +
+                                ",name=" + ec.getName() + ",之前是否在围栏内=" + CrossMap.get(key) + ",现在是否在围栏内=" + inArea);
+
                         if (CrossMap.containsKey(key)) {
                             if (inArea == CrossMap.get(key)) {//如果进去和出去和之前报警的相同，那么就不产生报警
                                 arg = false;
@@ -892,12 +895,12 @@ public class AreaAlarmService implements IAreaAlarmService {
                         if (arg) {
                             CrossBorder(ec, rd, inArea);
                         }
-                        log.debug("当前车辆的围栏处理情况为，simno=" + rd.getSimNo() + ",sendTime=" + rd.getSendTime() + ",name=" + ec.getName() + ",之前是否在围栏内=" + CrossMap.get(key) + ",现在是否在围栏内=" + inArea);
                         CrossMap.put(key, inArea);
                     }
                 }
             } else {
-                log.debug("当前车辆的围栏处理情况为，simno=" + rd.getSimNo() + ",sendTime=" + rd.getSendTime() + ",name=" + ec.getName() + ",不在时间范围内=" + TimeUtils.dateTodetailStr(ec.getStartDate()) + "-" + TimeUtils.dateTodetailStr(ec.getEndDate()));
+                log.debug("当前车辆的围栏处理情况为，simno=" + rd.getSimNo() + ",sendTime=" + rd.getSendTime() + ",name=" + ec.getName() + "" +
+                        ",不在时间范围内=" + TimeUtils.dateTodetailStr(ec.getStartDate()) + "-" + TimeUtils.dateTodetailStr(ec.getEndDate()));
             }
         } catch (Exception e) {
             log.error("处理围栏报错" + rd.getSimNo() + "+" + ec.getName(), e);
