@@ -1,4 +1,4 @@
-package net.fxft.ascsareavoice.po.autovoice;
+package net.fxft.ascsareavoice.service.AutoVoice.po;
 
 
 import java.util.Date;

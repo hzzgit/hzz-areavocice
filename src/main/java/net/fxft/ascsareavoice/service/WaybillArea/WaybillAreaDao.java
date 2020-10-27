@@ -51,7 +51,7 @@ public class WaybillAreaDao {
                     datas = data.get(waybillAreaMainVo.getSimNo());
                 }
                 if (waybillAreaVo.getBytime() == 1) {//如果要根据时间
-                    if (endTime.getTime() < new Date().getTime()) {//如果大于了当前时间，就算他过了
+                    if (endTime.getTime() < System.currentTimeMillis()) {//如果大于了当前时间，就算他过了
                         continue;
                     }
                 }

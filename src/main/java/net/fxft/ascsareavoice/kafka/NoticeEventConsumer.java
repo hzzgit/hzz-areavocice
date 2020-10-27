@@ -4,7 +4,7 @@ import net.fxft.gateway.event.EventMsg;
 import net.fxft.gateway.event.IEventBody;
 import net.fxft.gateway.event.everyunit.UpdateCacheEvent;
 import net.fxft.gateway.kafka.eventmsg.IEveryUnitMsgProcessor;
-import net.fxft.ascsareavoice.service.impl.RealDataService;
+import net.fxft.ascsareavoice.service.cache.RealDataService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +26,11 @@ public class NoticeEventConsumer implements IEveryUnitMsgProcessor {
             if (UpdateCacheEvent.CacheName_Vehicle.equalsIgnoreCase(up.getCacheName())) {
                 RealDataService.updateVehiclearg.set(true);//开启更新车辆缓存的标志位
                 log.debug("接收到其他服务的车辆信息修改通知" + up.getParams());
+            }
+            if(UpdateCacheEvent.CacheName_Department.equalsIgnoreCase(up.getCacheName())){
+                log.debug("接收到其他服务的机构信息修改通知" + up.getParams());
+                //alarmConfigSaveService.saveNewAlarmByDep(up.getParams());
+                RealDataService.updateVehiclearg.set(true);//开启更新车辆缓存的标志位
             }
         }
     }

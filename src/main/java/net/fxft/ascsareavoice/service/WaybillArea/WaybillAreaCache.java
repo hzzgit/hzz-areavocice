@@ -62,10 +62,13 @@ public class WaybillAreaCache {
             new Thread(() -> {
                 while (true) {
                     try {
+                        long s = System.currentTimeMillis();   //获取开始时间
                         ConcurrentHashMap<String, List<WaybillAreaMainVo>> searchwaybillarea = waybillAreaDao.searchwaybillarea();
                         waybillAreaDao.searchwaybillareapoint(searchwaybillarea);
                         waybillareacache = searchwaybillarea;
-                        log.error("缓存运单围栏成功");
+                        long e = System.currentTimeMillis(); //获取结束时间
+                        log.debug("用时：" + (e - s) + "ms");
+                        log.info("缓存运单围栏成功用时：" + (e - s) + "ms");
                     } catch (Exception e) {
                         log.error("进行运单围栏缓存异常", e);
                     }

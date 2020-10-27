@@ -13,9 +13,9 @@ import net.fxft.common.jdbc.RowDataMap;
 import net.fxft.common.log.AttrLog;
 import net.fxft.common.util.BasicUtil;
 import net.fxft.gateway.util.SimNoUtil;
-import net.fxft.ascsareavoice.po.autovoice.AutoVoiceConfigPO;
-import net.fxft.ascsareavoice.po.autovoice.AutoVoicePO;
-import net.fxft.ascsareavoice.service.impl.RealDataService;
+import net.fxft.ascsareavoice.service.AutoVoice.po.AutoVoiceConfigPO;
+import net.fxft.ascsareavoice.service.AutoVoice.po.AutoVoicePO;
+import net.fxft.ascsareavoice.service.cache.RealDataService;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
@@ -139,10 +139,10 @@ public class AutoVoiceConfigService {
             AttrLog alog = AttrLog.get("刷新读取语音播报配置信息根据车辆进行缓存");
             try {
                 String sql = "select c1.id as configid,c1.startTime,c1.endTime,c1.isuse,c1.sendContent,c1.type,c1.sendInterval,v1.plateNo,v1.SimNo,v1.vehicleId,v1.depId from ( " +
-                        "select v.vehicleid,a.startTime ,a.endTime, a.isuse,b.sendContent,b.type,b.sendInterval,b.id from autovoice a,autovoiceconfig b ,autovoicebyvehicle v where a.id=b.autovoiceId and a.id=v.autovoiceId  and a.isuse=1) c1 left join vehicle v1 on c1.vehicleId=v1.vehicleId  where v1.deleted =false " +
+                        "select v.vehicleid,a.startTime ,a.endTime, a.isuse,b.sendContent,b.type,b.sendInterval,b.id from po a,autovoiceconfig b ,autovoicebyvehicle v where a.id=b.autovoiceId and a.id=v.autovoiceId  and a.isuse=1) c1 left join vehicle v1 on c1.vehicleId=v1.vehicleId  where v1.deleted =false " +
                         "union  " +
                         "select c1.id as configid,c1.startTime,c1.endTime,c1.isuse,c1.sendContent,c1.type,c1.sendInterval,v1.plateNo,v1.SimNo,v1.vehicleId,v1.depId from ( " +
-                        "select v.depId,a.startTime ,a.endTime, a.isuse,b.sendContent,b.type,b.sendInterval,b.id from autovoice a,autovoiceconfig b ,autovoicebydep v where a.id=b.autovoiceId and a.id=v.autovoiceId and a.isuse=1 ) c1 left join vehicle v1 on c1.depId=v1.depId  where v1.deleted =false";
+                        "select v.depId,a.startTime ,a.endTime, a.isuse,b.sendContent,b.type,b.sendInterval,b.id from po a,autovoiceconfig b ,autovoicebydep v where a.id=b.autovoiceId and a.id=v.autovoiceId and a.isuse=1 ) c1 left join vehicle v1 on c1.depId=v1.depId  where v1.deleted =false";
                 List<RowDataMap> result = jdbcUtil.sql(sql).queryWithMap();
                 Map<String, AutoVoicePO> autovoiceconfig = new ConcurrentHashMap();
                 if (ConverterUtils.isList(result)) {

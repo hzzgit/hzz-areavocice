@@ -24,6 +24,7 @@ public class MessageProcessService implements IMessageProcessService {
 	/**
 	 * 开始处理收到的完整的808数据包
 	 */
+	@Override
 	public void processMsg(GPSRealData rd) {
 		try{
 			//log.debug("收到kafka点位信息,simNO="+rd.getSimNo()+","+rd.toString());

@@ -5,7 +5,7 @@ import net.fxft.ascsareavoice.service.AutoVoice.IAutoVoiceService;
 import net.fxft.ascsareavoice.service.MapArea.AreaAlarmService;
 import net.fxft.ascsareavoice.service.WaybillArea.WaybillAreaService;
 import net.fxft.ascsareavoice.service.WaybillAreaKeyPoint.service.WaybillAreaKeyPointService;
-import net.fxft.ascsareavoice.service.impl.RealDataService;
+import net.fxft.ascsareavoice.service.cache.RealDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
