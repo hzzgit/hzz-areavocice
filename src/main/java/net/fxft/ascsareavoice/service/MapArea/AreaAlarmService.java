@@ -166,7 +166,7 @@ public class AreaAlarmService implements IAreaAlarmService {
                 while (true) {
                     AreaAlarmCache.saveCache(CrossMap);
                     try {
-                        Thread.sleep(30000);
+                        Thread.sleep(1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
