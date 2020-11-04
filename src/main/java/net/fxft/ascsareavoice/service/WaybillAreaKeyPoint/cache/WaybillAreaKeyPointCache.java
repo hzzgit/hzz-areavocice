@@ -11,6 +11,7 @@ import net.fxft.ascsareavoice.service.WaybillAreaKeyPoint.dao.DO.AreaPointDO;
 import net.fxft.ascsareavoice.service.WaybillAreaKeyPoint.dao.DO.SimNoOrderDO;
 import net.fxft.ascsareavoice.service.WaybillAreaKeyPoint.dao.WaybillAreaKeyPointDao;
 import net.fxft.ascsareavoice.service.WaybillAreaKeyPoint.service.WaybillAreaKeyPointService;
+import net.fxft.cloud.config.RefreshValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Service
 @Slf4j
+@RefreshValue
 public class WaybillAreaKeyPointCache {
     @Autowired
     private WaybillAreaKeyPointDao WaybillAreaKeyPointDao;
@@ -39,6 +41,14 @@ public class WaybillAreaKeyPointCache {
      */
     @Value("${isWaybillAreaKeyPoint:false}")
     private boolean isWaybillAreaKeyPoint;
+
+    public boolean isWaybillAreaKeyPoint() {
+        return isWaybillAreaKeyPoint;
+    }
+
+    public void setWaybillAreaKeyPoint(boolean waybillAreaKeyPoint) {
+        isWaybillAreaKeyPoint = waybillAreaKeyPoint;
+    }
 
     /*simNo和orderId缓存*/
     private ConcurrentHashMap<String, List<Long>> simNoOrderCache = new ConcurrentHashMap<>();
