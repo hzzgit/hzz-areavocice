@@ -2,6 +2,7 @@ package net.fxft.ascsareavoice.service.WaybillArea;
 
 import lombok.extern.slf4j.Slf4j;
 import net.fxft.ascsareavoice.vo.WaybillAreaMainVo;
+import net.fxft.cloud.config.RefreshValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Slf4j
 @Service
+@RefreshValue
 public class WaybillAreaCache {
 
 
@@ -28,6 +30,9 @@ public class WaybillAreaCache {
     @Value("${isWaybillArea:false}")
     private boolean isWaybillArea;
 
+    public void setWaybillArea(boolean waybillArea) {
+        isWaybillArea = waybillArea;
+    }
 
     @Autowired
     private WaybillAreaDao waybillAreaDao;

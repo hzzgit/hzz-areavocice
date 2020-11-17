@@ -21,6 +21,7 @@ import net.fxft.ascsareavoice.service.WaybillAreaKeyPoint.cache.WaybillAreaKeyPo
 import net.fxft.ascsareavoice.service.WaybillAreaKeyPoint.enumconfig.WaybillAreaKeyPointEnum;
 import net.fxft.ascsareavoice.service.WaybillAreaKeyPoint.service.DTO.SimNoOrderKeyPointDTO;
 import net.fxft.ascsareavoice.service.WaybillAreaKeyPoint.service.DTO.simNoTEST;
+import net.fxft.cloud.config.RefreshValue;
 import net.fxft.common.jdbc.JdbcUtil;
 import net.fxft.gateway.event.EventMsg;
 import net.fxft.gateway.event.alarm.AreaAlarmEvent;
@@ -43,6 +44,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 @Service
 @Slf4j
+@RefreshValue
 public class WaybillAreaKeyPointService {
 
 
@@ -56,6 +58,10 @@ public class WaybillAreaKeyPointService {
     //运单围栏的点位圆圈半径
     @Value("${WaybillArearadius:200}")
     private int WaybillArearadius;
+
+    public void setWaybillArearadius(int waybillArearadius) {
+        WaybillArearadius = waybillArearadius;
+    }
 
     /**
      * 处理运单围栏关键点停车的独立队列

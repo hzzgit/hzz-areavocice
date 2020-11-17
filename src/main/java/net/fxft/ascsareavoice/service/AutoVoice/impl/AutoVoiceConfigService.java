@@ -7,6 +7,7 @@ import net.fxft.ascsareavoice.ltmonitor.service.ITerminalCommandService;
 import net.fxft.ascsareavoice.ltmonitor.service.JT808Constants;
 import net.fxft.ascsareavoice.ltmonitor.util.ConverterUtils;
 import net.fxft.ascsareavoice.ltmonitor.util.TimeUtils;
+import net.fxft.cloud.config.RefreshValue;
 import net.fxft.cloud.redis.RedisUtil;
 import net.fxft.common.jdbc.JdbcUtil;
 import net.fxft.common.jdbc.RowDataMap;
@@ -35,6 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 //语音自动播放配置信息及下发命令的服务类
 @Service
+@RefreshValue
 public class AutoVoiceConfigService {
 
     private static final Logger logger = LoggerFactory.getLogger(AutoVoiceConfigService.class);
@@ -57,6 +59,12 @@ public class AutoVoiceConfigService {
 
     @Value("${autoVoice:false}")
     private boolean autoVoice;
+
+
+    public void setAutoVoice(boolean autoVoice) {
+        this.autoVoice = autoVoice;
+    }
+
     //语音播报的各车辆配置表信息缓存
     private static Map<String, AutoVoicePO> autovoiceconfig = new ConcurrentHashMap();
 

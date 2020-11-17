@@ -12,6 +12,7 @@ import net.fxft.ascsareavoice.ltmonitor.util.ConverterUtils;
 import net.fxft.ascsareavoice.ltmonitor.util.TimeUtils;
 import net.fxft.ascsareavoice.ltmonitor.vo.PointLatLng;
 import net.fxft.ascsareavoice.service.AutoVoice.impl.AutoVoiceQueueService;
+import net.fxft.cloud.config.RefreshValue;
 import net.fxft.common.jdbc.JdbcUtil;
 import net.fxft.common.jdbc.RowDataMap;
 import net.fxft.common.log.AttrLog;
@@ -40,6 +41,7 @@ import java.util.stream.Collectors;
  * @author DELL
  */
 @Service("areaAlarmService")
+@RefreshValue
 public class AreaAlarmService implements IAreaAlarmService {
 
     protected Logger log = LoggerFactory.getLogger(getClass());
@@ -51,6 +53,10 @@ public class AreaAlarmService implements IAreaAlarmService {
 
     @Value("${areaQueueThreadco:3}")
     private int areaQueueThreadco;
+
+    public void setAreaQueueThreadco(int areaQueueThreadco) {
+        this.areaQueueThreadco = areaQueueThreadco;
+    }
 
     @Autowired
     private IAlarmRecordService alarmRecordService;
@@ -64,6 +70,11 @@ public class AreaAlarmService implements IAreaAlarmService {
 
     @Value("${areaalarm}")
     private boolean areaalarm;
+
+    public void setAreaalarm(boolean areaalarm) {
+        this.areaalarm = areaalarm;
+    }
+
     /**
      * 报警分析线程，单独开辟一个线程进行分析
      */

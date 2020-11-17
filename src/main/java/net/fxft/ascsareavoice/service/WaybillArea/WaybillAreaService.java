@@ -12,6 +12,7 @@ import net.fxft.ascsareavoice.ltmonitor.util.TimeUtils;
 import net.fxft.ascsareavoice.ltmonitor.vo.PointLatLng;
 import net.fxft.ascsareavoice.vo.WaybillAreaMainVo;
 import net.fxft.ascsareavoice.vo.WaybillAreaPointVo;
+import net.fxft.cloud.config.RefreshValue;
 import net.fxft.gateway.event.EventMsg;
 import net.fxft.gateway.event.alarm.AreaAlarmEvent;
 import org.springframework.beans.BeanUtils;
@@ -35,6 +36,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 @Service
 @Slf4j
+@RefreshValue
 public class WaybillAreaService {
 
     /**
@@ -46,6 +48,11 @@ public class WaybillAreaService {
     //运单围栏的点位圆圈半径
     @Value("${WaybillArearadius:200}")
     private int WaybillArearadius;
+
+    public void setWaybillArearadius(int waybillArearadius) {
+        WaybillArearadius = waybillArearadius;
+    }
+
     /**
      * 处理运单围栏的独立队列
      */
