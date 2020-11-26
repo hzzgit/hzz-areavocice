@@ -172,7 +172,11 @@ public class ConverterUtils {
         }
     }
     public static Date toDate(Object object){
-        return   toDate( object,  null);
+        if(object instanceof Date){
+            return (Date) object;
+        }else{
+            return   toDate( object,  null);
+        }
     }
     public static Date toDate(Object object, Date defaultVal) {
         try {
