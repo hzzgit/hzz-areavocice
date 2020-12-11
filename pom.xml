@@ -5,7 +5,7 @@
     <parent>
         <groupId>net.fxft</groupId>
         <artifactId>ascs-dependencies</artifactId>
-        <version>0.2.27-RELEASE</version>
+        <version>0.2.30-RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>net.fxft</groupId>
@@ -26,7 +26,6 @@
         <dependency>
             <groupId>net.fxft</groupId>
             <artifactId>fxft-cloud</artifactId>
-            <version>1.5.7-RELEASE</version>
         </dependency>
         <dependency>
             <groupId>net.fxft</groupId>
