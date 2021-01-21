@@ -10,7 +10,7 @@ public class AreaAlarmCache {
 
 
     private static final Logger log = LoggerFactory.getLogger(AreaAlarmCache.class);
-    private static final   String cachename="AreaAlarmCache.cache";
+    private static final   String cachename="AreaAlarmCache.dao";
 
 
 
