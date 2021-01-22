@@ -39,7 +39,7 @@ private static final long serialVersionUID = 1L;
     /**  名称修改则传列表中的  */
     private String  name;
     /**  拍照间隔(单位：分)修改则传列表中的  */
-    private Long  interval;
+    private Long  configinterval;
     /**  创建时间修改则传列表中的  */
     private Date  createdate;
     /**  修改时间修改则传列表中的  */
@@ -53,7 +53,7 @@ private static final long serialVersionUID = 1L;
     /**  配置有效期结束时间修改则传列表中的  */
     private Date  validendtime;
     /**  触发条件,0、不限制，1、根据车速，2、根据停车时长修改则传列表中的  */
-    private Long  condition;
+    private Long  configcondition;
     /**  车速单位km/h，触发条件为1的车速修改则传列表中的  */
     private double  speed;
     /**  停车时长单位分钟，触发条件为2的停车时长修改则传列表中的  */

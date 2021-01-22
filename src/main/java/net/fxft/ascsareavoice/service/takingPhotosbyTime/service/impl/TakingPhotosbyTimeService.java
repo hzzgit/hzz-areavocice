@@ -175,7 +175,7 @@ public class TakingPhotosbyTimeService {
                         checkConfigBySimNo(vehicleData.getEntityId(), simNo, takingphotosbytime);
                     }
                 } else {//如果之前已经收到了照片，那么判断的时间就必须读取配置了
-                    boolean differminute = TimeUtils.differminute(isPhotoDto.getTime(), new Date(), takingphotosbytime.getInterval());
+                    boolean differminute = TimeUtils.differminute(isPhotoDto.getTime(), new Date(), takingphotosbytime.getConfiginterval());
                     if (differminute) {
                         checkConfigBySimNo(vehicleData.getEntityId(), simNo, takingphotosbytime);
                     }
@@ -203,7 +203,7 @@ public class TakingPhotosbyTimeService {
             return false;
         }
         gpsRealData.setVehicleId(vehicleId);
-        Long condition = takingphotosbytime.getCondition();
+        Long condition = takingphotosbytime.getConfigcondition();
         if (Takingphotosbytime.condition不限制 == condition) {//到这一步说明前面都已经判断完了
             takingPhotosbyTimeQueue.addQueue(simNo, takingphotosbytime, gpsRealData);
             return true;
