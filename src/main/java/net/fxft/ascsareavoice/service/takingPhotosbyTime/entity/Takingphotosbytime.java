@@ -11,6 +11,10 @@ import java.util.Date;
 public class Takingphotosbytime implements java.io.Serializable  {
 
 private static final long serialVersionUID = 1L;
+
+    public static  final  int condition不限制=0;
+    public static  final  int condition根据车速=1;
+    public static  final  int condition根据停车时长=2;
     public static final String F_id = "id";
     public static final String F_name = "name";
     public static final String F_interval = "interval";
@@ -31,7 +35,7 @@ private static final long serialVersionUID = 1L;
 
     /**  主键修改则传列表中的  */
         @DbId
-    private Long  id;
+    private int  id;
     /**  名称修改则传列表中的  */
     private String  name;
     /**  拍照间隔(单位：分)修改则传列表中的  */
@@ -51,17 +55,20 @@ private static final long serialVersionUID = 1L;
     /**  触发条件,0、不限制，1、根据车速，2、根据停车时长修改则传列表中的  */
     private Long  condition;
     /**  车速单位km/h，触发条件为1的车速修改则传列表中的  */
-    private String  speed;
+    private double  speed;
     /**  停车时长单位分钟，触发条件为2的停车时长修改则传列表中的  */
-    private String  packduration;
+    private double  packduration;
     /**  拍照的通道,用";"号隔开修改则传列表中的  */
     private String  channel;
     /**  用户id修改则传列表中的  */
     private Long  userid;
+    private String username;
     /**  是否启用,0禁用,1启用修改则传列表中的  */
     private Boolean  isuse;
     /**  删除标志,1代表删除,0代表正常修改则传列表中的  */
     private Long  deleted;
+
+
 
 public static void main(String[] args) {
 String name="{\n";

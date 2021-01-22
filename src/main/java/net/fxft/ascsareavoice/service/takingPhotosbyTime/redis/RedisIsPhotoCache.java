@@ -29,20 +29,34 @@ public class RedisIsPhotoCache {
      * @param vehicleId
      * @param configid
      */
-    public void put(Long vehicleId, Long configid) {
+    public void put(Long vehicleId, int configid) {
         String key = getKey(vehicleId, configid);
-        IsPhotoDto isPhotoDto = new IsPhotoDto(IsPhotoDto.照片已上传);
+        IsPhotoDto isPhotoDto = new IsPhotoDto(IsPhotoDto.已下发);
         redisUtil.execute(jedis -> {
             jedis.set(key, JacksonUtil.toJsonString(isPhotoDto));
         });
         log.debug("定时拍照-照片上传设置key:" + key + ",value:" + isPhotoDto);
     }
 
+
+    /**
+     * 移除关闭或者过期的定时拍照配置的车辆配置
+     * @param vehicleId
+     * @param configid
+     */
+    public void remove(Long vehicleId, int configid){
+        String key = getKey(vehicleId, configid);
+        redisUtil.execute(jedis -> {
+            jedis.del(key);
+        });
+
+    }
+
     /**
      * @param vehicleId
      * @param configid
      */
-    public IsPhotoDto get(Long vehicleId, Long configid) {
+    public IsPhotoDto get(Long vehicleId, int configid) {
         String key = getKey(vehicleId, configid);
         IsPhotoDto isPhotoDto = null;
         Boolean exists = (Boolean) redisUtil.execute(jedis -> {
@@ -58,7 +72,7 @@ public class RedisIsPhotoCache {
     }
 
 
-    private String getKey(Long vehicleId, Long configId) {
+    private String getKey(Long vehicleId, int configId) {
         String key1 = key + vehicleId + "-" + configId;
         return key1;
     }

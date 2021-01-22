@@ -41,7 +41,8 @@ public class RealDataService implements IRealDataService {
                 if (RealDataService.updateVehiclearg.get()) {//如果队列里面有需要更新车辆缓存
                     RealDataService.updateVehiclearg.set(false);
                     try {
-                        String sql = "select vehicleId,plateNo,simNo from vehicle where deleted=false";
+                        String sql = "select vehicleId,plateNo,simNo," +
+                                " videoChannelNum,videoChannelNames from vehicle where deleted=false";
                         List<VehicleData> vehicleData = jdbcUtil.sql(sql).query(VehicleData.class);
                         if (ConverterUtils.isList(vehicleData)) {
                             for (VehicleData vehicleDatum : vehicleData) {
@@ -100,6 +101,7 @@ public class RealDataService implements IRealDataService {
     }
 
 
+    @Override
     public VehicleData getVehicleData(String simNo) {
         VehicleData vehicleData = null;
         if(vehicleDataMap.containsKey(simNo)){

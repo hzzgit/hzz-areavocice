@@ -18,9 +18,7 @@ public final class TimeUtils {
 
     // 无参数的构造函数,防止被实例化
     private TimeUtils() {
-    }
-
-    ;
+    };
 
 
     /**
@@ -418,18 +416,49 @@ public final class TimeUtils {
 
     }
 
-    public static void main(String[] args) {
-        Date sendTime = new Date();
-        Date startTime = new Date();
-        Date endTime = new Date();
-        sendTime = TimeUtils.todatetime("2020-08-11 15:00:31");
-        startTime = TimeUtils.todatetime("2020-08-11 10:00:00");
-        endTime = TimeUtils.todatetime("2020-08-11 23:25:54");
-        boolean arg = isEffectiveDate(sendTime, startTime, endTime);
+    /**
+     * 计算两个时间是否相差指定分钟数
+     * @param startTime
+     * @param endTime
+     * @param minute
+     * @return
+     */
+    public static  boolean differminute(Date startTime,Date endTime,long minute){
+        long l = endTime.getTime() - startTime.getTime();
+        l = Math.abs(l);
+        double v = (l * 1.0) / 1000 / 60;
+        System.out.println(v);
+        if (v > minute) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-     //   Date a=TimeUtils.date("2020-06-12 02:02:11");
-      //  Date todatetime = TimeUtils.todatetime("2020-06-12");
-        System.out.println(arg);
+    /**
+     * 计算两个时间是否相差指定分钟数
+     * @param startTime
+     * @param endTime
+     * @param minute
+     * @return
+     */
+    public static  boolean differminute(Date startTime,Date endTime,double minute){
+        long l = endTime.getTime() - startTime.getTime();
+        l = Math.abs(l);
+        double v = (l * 1.0) / 1000 / 60;
+        System.out.println(v);
+        if (v > minute) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+    public static void main(String[] args) {
+        Date date = new Date();
+        Date enddate=TimeUtils.todatetime("2021-01-22 09:40:00");
+        System.out.println(differminute(enddate,date,20));
     }
 
 

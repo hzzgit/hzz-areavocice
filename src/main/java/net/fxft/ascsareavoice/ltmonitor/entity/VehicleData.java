@@ -25,14 +25,23 @@ public class VehicleData extends TenantEntity {
     //GPS手机卡号
     private String simNo;
 
+    /**
+     * 视频通道数
+     */
+    private int videoChannelNum;
+
+    private String videoChannelNames;
+
     public VehicleData() {
         setCreateDate(new Date());
     }
 
+    @Override
     public long getEntityId() {
         return entityId;
     }
 
+    @Override
     public void setEntityId(long value) {
         entityId = value;
     }
@@ -45,6 +54,22 @@ public class VehicleData extends TenantEntity {
         plateNo = value;
     }
 
+
+    public int getVideoChannelNum() {
+        return videoChannelNum;
+    }
+
+    public void setVideoChannelNum(int videoChannelNum) {
+        this.videoChannelNum = videoChannelNum;
+    }
+
+    public String getVideoChannelNames() {
+        return videoChannelNames;
+    }
+
+    public void setVideoChannelNames(String videoChannelNames) {
+        this.videoChannelNames = videoChannelNames;
+    }
 
     public String getSimNo() {
         simNo = SimNoUtil.toSimNo12(simNo);

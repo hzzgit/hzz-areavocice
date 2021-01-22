@@ -32,39 +32,39 @@ private static final long serialVersionUID = 1L;
 
     /**    */
         @DbId
-    private Long  id;
+    private long  id=0;
     /**  创建时间  */
-    private Date  createdate;
+    private Date  createdate=new Date();
     /**  更新时间  */
-    private Date  updatedate;
+    private Date  updatedate=new Date();
     /**  删除标志  */
-    private String  deleted;
+    private int  deleted=0;
     /**  发送命令用户id  */
-    private Long  userid;
+    private long  userid;
     /**  拍照总数  */
-    private Long  photonum;
+    private long  photonum;
     /**  备注  */
     private String  remark;
     /**  维度  */
-    private String  latitude;
+    private double  latitude;
     /**  经度  */
-    private String  longitude;
+    private double  longitude;
     /**  定位时间  */
     private Date  sendtime;
     /**  simNo  */
     private String  simno;
     /**  车辆主键  */
-    private String  vehicleid;
+    private long  vehicleid;
     /**  当前车速  */
-    private String  speed;
+    private double  speed;
     /**  司机姓名  */
     private String  drivername;
     /**  从业资格证号  */
     private String  certificate;
     /**  配置表id,表名takingphotosbytime  */
-    private Long  configid;
+    private long  configid;
     /**  上传情况，0,未上传,1上传成功  */
-    private Long  status;
+    private long  status=0;
 
 public static void main(String[] args) {
 String name="{\n";

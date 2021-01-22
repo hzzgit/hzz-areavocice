@@ -32,7 +32,7 @@ public class Takingphotosbytimedetail implements java.io.Serializable {
      * 主键
      */
     @DbId
-    private long id;
+    private long id=0;
     /**
      * 结果表主键，用于关联
      */
@@ -40,15 +40,15 @@ public class Takingphotosbytimedetail implements java.io.Serializable {
     /**
      * 创建时间
      */
-    private Date createdate;
+    private Date createdate=new Date();
     /**
      * 更新时间
      */
-    private Date updatedate;
+    private Date updatedate=new Date();
     /**
      * 删除标志
      */
-    private String deleted;
+    private int deleted=0;
     /**
      * 备注
      */
@@ -56,7 +56,7 @@ public class Takingphotosbytimedetail implements java.io.Serializable {
     /**
      * 通道
      */
-    private byte channelid;
+    private int channelid;
     /**
      * 多媒体格式编码 0：JPEG；1：TIF；2：MP3；3：WAV；4：WMV
      */
@@ -66,7 +66,7 @@ public class Takingphotosbytimedetail implements java.io.Serializable {
      */
     private long commandid;
     /**
-     * 上传情况，0未上传，1上传成功
+     * 上传情况，0未上传，1上传成功,2未配置摄像头
      */
     private int commandtype;
     /**

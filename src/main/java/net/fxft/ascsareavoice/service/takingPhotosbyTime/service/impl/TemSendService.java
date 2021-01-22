@@ -37,9 +37,9 @@ public class TemSendService {
      * @param userName  配置这个定时拍照任务的用户名称
      * @return
      */
-    public long sendTakePhote(String simNo, int channel, long userId, String userName) {
+    public long sendTakePhoto(String simNo, int channel, long userId, String userName) {
 
-        int cmdId = 0;
+        long cmdId = 0;
         PictureParam p = new PictureParam();
         VehicleData vehicleData = realDataService.getVehicleData(simNo);
         if (vehicleData != null) {
@@ -57,7 +57,8 @@ public class TemSendService {
                 strCmd = "0" + strCmd;
             }
             strCmd = "0x" + strCmd;
-            cmdId = jdbcUtil.insert(tc).insertColumn(ColumnSet.all()).execute(true);
+            jdbcUtil.insert(tc).insertColumn(ColumnSet.all()).execute(true);
+            cmdId=tc.getEntityId();
             log.debug("定时拍照:车辆发送命令成功,simNo=" + simNo+",channel="+channel+",cmdId="+cmdId);
         } else {
             log.debug("定时拍照:车辆不存在无法发送,simNo=" + simNo);
