@@ -47,16 +47,6 @@ public class PictureParam {
 
 	public PictureParam()
 	{
-		this.channel =0;
-		this.action = 1;//0表示停止拍摄；0xFFFF表示录像；其它表示拍照张数
-		this.interval = 1;//拍摄间隔
-		this.saveType = 0;//1：保存；0：实时上传
-		this.picSize = 1;//照片分辨率大小 0x01:320*210;
-		this.quality = 1;//1～10，1代表质量损失最小，10表示压缩比最大
-		this.light = 125;
-		this.compare = 120;
-		this.stature = 120;
-		this.grade = 120;
 	}
 	
 	public String getCommandString()

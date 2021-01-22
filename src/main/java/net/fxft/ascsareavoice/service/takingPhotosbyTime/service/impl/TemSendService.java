@@ -41,6 +41,7 @@ public class TemSendService {
 
         long cmdId = 0;
         PictureParam p = new PictureParam();
+        p.setChannel(channel);
         VehicleData vehicleData = realDataService.getVehicleData(simNo);
         if (vehicleData != null) {
             TerminalCommand tc = new TerminalCommand();

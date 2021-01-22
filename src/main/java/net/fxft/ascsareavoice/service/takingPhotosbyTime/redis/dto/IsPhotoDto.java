@@ -12,8 +12,8 @@ import java.util.Date;
  */
 public class IsPhotoDto {
 
-        public static  int 已下发=0;
-        public static  int 照片已上传=1;
+    public static int 已下发 = 0;
+    public static int 照片已上传 = 1;
 
     /**
      * 执行时间
@@ -25,9 +25,12 @@ public class IsPhotoDto {
      */
     private int status;
 
+    public IsPhotoDto() {
+    }
+
     public IsPhotoDto(int status) {
         this.status = status;
-        time =new Date();
+        time = new Date();
     }
 
     public Date getTime() {
