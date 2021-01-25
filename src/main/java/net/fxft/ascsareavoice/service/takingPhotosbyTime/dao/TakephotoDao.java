@@ -118,16 +118,14 @@ public class TakephotoDao {
                 "\tWHERE\n" +
                 "\t\t1 = 1 \n" +
                 "\t\tAND a.id = v.mainid \n" +
-                "\t\tAND ( a.deleted = true \n" +
-                "\t\t or v.deleted = true " +
-                " or a.isuse = 0   or a.validendtime <=sysdate() ) \n" +
+                "\t\tAND ( a.deleted >0\n" +
+                "\t\t or v.deleted >0  or a.isuse = 0   or a.validendtime <sysdate() ) \n" +
                 "\t) c1\n" +
                 "\tLEFT JOIN vehicle v1 ON c1.vehicleId = v1.vehicleId \n" +
-                "WHERE\n" +
-                "\tv1.deleted = FALSE UNION\n" +
+                " UNION\n" +
                 "SELECT\n" +
                 "\tc1.id, v1.vehicleId \n" +
-                "FROM\n" +
+                " FROM\n" +
                 "\t(\n" +
                 "\tSELECT\n" +
                 "\t\tv.depId,\n" +
@@ -137,13 +135,10 @@ public class TakephotoDao {
                 "\t\ttakingphotosbytimebydep v \n" +
                 "\tWHERE\n" +
                 "\t\t1 = 1 and  a.id = v.mainid \n" +
-                "\t\tAND ( a.deleted = true \n" +
-                "\t\t or v.deleted = true" +
-                " or a.isuse = 0  or a.validendtime <=sysdate() ) \n" +
+                "\t\tAND ( a.deleted >0 \n" +
+                "\t\t or v.deleted >0 or a.isuse = 0  or a.validendtime <sysdate() ) \n" +
                 "\t) c1\n" +
-                "\tLEFT JOIN vehicle v1 ON c1.depId = v1.depId \n" +
-                "WHERE\n" +
-                "\tv1.deleted = FALSE";
+                "\tLEFT JOIN vehicle v1 ON c1.depId = v1.depId ";
 
         List<TakingPhotoByVehicleIdDto> query = jdbcUtil.sql(sql).query(TakingPhotoByVehicleIdDto.class);
         long e = System.currentTimeMillis(); //获取结束时间
@@ -224,7 +219,7 @@ public class TakephotoDao {
                 "\t\t1 = 1 \n" +
                 "\t\tAND a.id = v.mainid \n" +
                 "\t\tAND ( a.deleted = true \n" +
-                "\t\t or v.deleted = false " +
+                "\t\t or v.deleted = true " +
                 " or a.isuse = 0   or a.validendtime <=sysdate() ) \n" +
                 "\t) c1\n" +
                 "\tLEFT JOIN vehicle v1 ON c1.vehicleId = v1.vehicleId \n" +
@@ -243,13 +238,15 @@ public class TakephotoDao {
                 "\tWHERE\n" +
                 "\t\t1 = 1 and  a.id = v.mainid \n" +
                 "\t\tAND ( a.deleted = true \n" +
-                "\t\t or v.deleted = false" +
+                "\t\t or v.deleted = true" +
                 " or a.isuse = 0  or a.validendtime <=sysdate() ) \n" +
                 "\t) c1\n" +
                 "\tLEFT JOIN vehicle v1 ON c1.depId = v1.depId \n" +
                 "WHERE\n" +
-                "\tv1.deleted = FALSE";
+                "\tv1.deleted = FALSE;";
+
         System.out.println(sql);
+
 
         String sql1 = "SELECT\n" +
                 "\tc1.id ,v1.SimNo \n" +
@@ -264,7 +261,7 @@ public class TakephotoDao {
                 "\tWHERE\n" +
                 "\t\t1 = 1 \n" +
                 "\t\tAND a.id = v.mainid \n" +
-                "\t\tAND a.deleted = FALSE and a.validendtime <=sysdate() \n" +
+                "\t\tAND a.deleted = FALSE and a.validendtime >sysdate() \n" +
                 "\t\tAND v.deleted = false and a.isuse = 1 \n" +
                 "\t) c1\n" +
                 "\tLEFT JOIN vehicle v1 ON c1.vehicleId = v1.vehicleId \n" +
@@ -283,13 +280,16 @@ public class TakephotoDao {
                 "\tWHERE\n" +
                 "\t\t1 = 1 and  a.id = v.mainid \n" +
                 "\t\tAND a.isuse = 1 \n" +
-                "\t\tAND a.deleted = FALSE  and a.validendtime <=sysdate()  \n" +
+                "\t\tAND a.deleted = FALSE  and a.validendtime >sysdate()  \n" +
                 "\t\tAND v.deleted = FALSE \n" +
                 "\t) c1\n" +
                 "\tLEFT JOIN vehicle v1 ON c1.depId = v1.depId \n" +
                 "WHERE\n" +
-                "\tv1.deleted = FALSE";
-
+                "\tv1.deleted = FALSE;";
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        System.out.println();
         System.out.println(sql1);
 
     }
