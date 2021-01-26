@@ -119,7 +119,7 @@ public class TakephotoDao {
                 "\t\t1 = 1 \n" +
                 "\t\tAND a.id = v.mainid \n" +
                 "\t\tAND ( a.deleted >0\n" +
-                "\t\t or v.deleted >0  or a.isuse = 0   or a.validendtime <sysdate() ) \n" +
+                "\t\t   or a.validendtime <sysdate() ) \n" +
                 "\t) c1\n" +
                 "\tLEFT JOIN vehicle v1 ON c1.vehicleId = v1.vehicleId \n" +
                 " UNION\n" +
@@ -136,7 +136,7 @@ public class TakephotoDao {
                 "\tWHERE\n" +
                 "\t\t1 = 1 and  a.id = v.mainid \n" +
                 "\t\tAND ( a.deleted >0 \n" +
-                "\t\t or v.deleted >0 or a.isuse = 0  or a.validendtime <sysdate() ) \n" +
+                "\t\t  or a.validendtime <sysdate() ) \n" +
                 "\t) c1\n" +
                 "\tLEFT JOIN vehicle v1 ON c1.depId = v1.depId ";
 
