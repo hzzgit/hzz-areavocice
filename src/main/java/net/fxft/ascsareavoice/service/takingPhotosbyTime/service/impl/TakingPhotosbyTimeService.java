@@ -169,16 +169,23 @@ public class TakingPhotosbyTimeService {
 
 
             if (isPhotoDto != null) {//这边不为null说明已经有下发过拍照命令
-                if (isPhotoDto.getStatus() == IsPhotoDto.已下发) {//如果只是已经下发，但是却没有上传照片，过五分钟之后继续下发
-                    boolean differ5minute = TimeUtils.differminute(isPhotoDto.getTime(), new Date(), 5);
-                    if (differ5minute) {//如果相差五分钟，并且之前已经下发确没有收到照片，那么就继续进行判断
-                        checkConfigBySimNo(vehicleData.getEntityId(), simNo, takingphotosbytime);
-                    }
-                } else {//如果之前已经收到了照片，那么判断的时间就必须读取配置了
-                    boolean differminute = TimeUtils.differminute(isPhotoDto.getTime(), new Date(), takingphotosbytime.getConfiginterval());
-                    if (differminute) {
-                        checkConfigBySimNo(vehicleData.getEntityId(), simNo, takingphotosbytime);
-                    }
+                //之前逻辑是如果没有上传就等待五分钟
+//                if (isPhotoDto.getStatus() == IsPhotoDto.已下发) {//如果只是已经下发，但是却没有上传照片，过五分钟之后继续下发
+//                    boolean differ5minute = TimeUtils.differminute(isPhotoDto.getTime(), new Date(), 5);
+//                    if (differ5minute) {//如果相差五分钟，并且之前已经下发确没有收到照片，那么就继续进行判断
+//                        checkConfigBySimNo(vehicleData.getEntityId(), simNo, takingphotosbytime);
+//                    }
+//                } else {//如果之前已经收到了照片，那么判断的时间就必须读取配置了
+//                    boolean differminute = TimeUtils.differminute(isPhotoDto.getTime(), new Date(), takingphotosbytime.getConfiginterval());
+//                    if (differminute) {
+//                        checkConfigBySimNo(vehicleData.getEntityId(), simNo, takingphotosbytime);
+//                    }
+//                }
+
+                //现在的逻辑则是只要下发过，那么再下次就是按照间隔时间来下发
+                boolean differminute = TimeUtils.differminute(isPhotoDto.getTime(), new Date(), takingphotosbytime.getConfiginterval());
+                if (differminute) {
+                    checkConfigBySimNo(vehicleData.getEntityId(), simNo, takingphotosbytime);
                 }
             } else {//如果为null，那么就是都没有执行过，就开始初始判断
                 checkConfigBySimNo(vehicleData.getEntityId(), simNo, takingphotosbytime);
