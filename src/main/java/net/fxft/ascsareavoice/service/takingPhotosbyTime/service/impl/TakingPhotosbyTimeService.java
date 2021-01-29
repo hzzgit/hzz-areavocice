@@ -158,9 +158,9 @@ public class TakingPhotosbyTimeService {
 
             //这边判断时间区间
             String starttime = takingphotosbytime.getStarttime();
-            starttime = TimeUtils.dateToStr(new Date()) + starttime;
+            starttime = TimeUtils.dateToStr(new Date()) +" "+ starttime;
             String endtime = takingphotosbytime.getEndtime();
-            endtime = TimeUtils.dateToStr(new Date()) + endtime;
+            endtime = TimeUtils.dateToStr(new Date()) +" "+ endtime;
             if (!TimeUtils.isEffectiveDate(new Date(),
                     TimeUtils.todatetime(starttime),
                     TimeUtils.todatetime(endtime))) {
@@ -169,7 +169,7 @@ public class TakingPhotosbyTimeService {
 
 
             if (isPhotoDto != null) {//这边不为null说明已经有下发过拍照命令
-                //之前逻辑是如果没有上传就等待五分钟
+                //之前逻辑是如果没有上传就等待五分钟，
 //                if (isPhotoDto.getStatus() == IsPhotoDto.已下发) {//如果只是已经下发，但是却没有上传照片，过五分钟之后继续下发
 //                    boolean differ5minute = TimeUtils.differminute(isPhotoDto.getTime(), new Date(), 5);
 //                    if (differ5minute) {//如果相差五分钟，并且之前已经下发确没有收到照片，那么就继续进行判断
