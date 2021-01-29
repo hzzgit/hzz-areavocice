@@ -163,13 +163,30 @@ public class TakingPhotosbyTimeService {
             endtime = TimeUtils.dateToStr(new Date()) +" "+ endtime;
             Date startdatetime = TimeUtils.todatetime(starttime);
             Date enddatetime = TimeUtils.todatetime(endtime);
+
+
+
             if(startdatetime.getTime()>enddatetime.getTime()){//假如开始时间大于结束时间，那么说明希望跨夜间
-                enddatetime=TimeUtils.getDatebyDAY(enddatetime,1);
-            }
-            if (!TimeUtils.isEffectiveDate(new Date(),
-                    startdatetime,
-                    enddatetime)) {
-                return;
+                boolean arg=false;
+                if (TimeUtils.isEffectiveDate(new Date(),
+                        startdatetime,
+                        TimeUtils.getDatebyDAY(enddatetime,1))) {
+                    arg=true;
+                }
+                if (TimeUtils.isEffectiveDate(new Date(),
+                        TimeUtils.getDatebyDAY(startdatetime,-1),
+                        enddatetime)) {
+                    arg=true;
+                }
+                if(arg==false){
+                    return;
+                }
+            }else{
+                if (!TimeUtils.isEffectiveDate(new Date(),
+                        startdatetime,
+                        enddatetime)) {
+                    return;
+                }
             }
 
 
