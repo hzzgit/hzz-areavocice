@@ -190,6 +190,20 @@ public final class TimeUtils {
         return null;
     }
 
+    /**
+     * 加上天
+     *
+     * @param time1
+     * @param day
+     * @return
+     */
+    public static Date getDatebyDAY(Date time1, int day) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(time1);
+        cal.add(Calendar.DATE, day);
+        Date time = cal.getTime();
+        return time;
+    }
 
     /**
      * 判断当前时间是否在[startTime, endTime]区间，注意时间格式要一致

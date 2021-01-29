@@ -161,9 +161,14 @@ public class TakingPhotosbyTimeService {
             starttime = TimeUtils.dateToStr(new Date()) +" "+ starttime;
             String endtime = takingphotosbytime.getEndtime();
             endtime = TimeUtils.dateToStr(new Date()) +" "+ endtime;
+            Date startdatetime = TimeUtils.todatetime(starttime);
+            Date enddatetime = TimeUtils.todatetime(endtime);
+            if(startdatetime.getTime()>enddatetime.getTime()){//假如开始时间大于结束时间，那么说明希望跨夜间
+                enddatetime=TimeUtils.getDatebyDAY(enddatetime,1);
+            }
             if (!TimeUtils.isEffectiveDate(new Date(),
-                    TimeUtils.todatetime(starttime),
-                    TimeUtils.todatetime(endtime))) {
+                    startdatetime,
+                    enddatetime)) {
                 return;
             }
 
@@ -229,6 +234,12 @@ public class TakingPhotosbyTimeService {
             }
         }
         return false;
+    }
+
+
+    public static void main(String[] args) {
+        Date datebyDAY = TimeUtils.getDatebyDAY(new Date(), 1);
+        System.out.println(datebyDAY);
     }
 
 
