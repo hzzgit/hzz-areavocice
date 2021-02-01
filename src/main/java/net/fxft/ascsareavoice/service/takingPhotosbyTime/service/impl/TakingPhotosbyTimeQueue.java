@@ -91,7 +91,7 @@ public class TakingPhotosbyTimeQueue {
 
                     if (istakingphotoQueue.size() == 0) {
                         try {//每隔五秒检测一次队列处理线程
-                            Thread.sleep(3000);
+                            Thread.sleep(1000);
                         } catch (InterruptedException e1) {
                         }
                     }

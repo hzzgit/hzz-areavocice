@@ -442,7 +442,7 @@ public final class TimeUtils {
         l = Math.abs(l);
         double v = (l * 1.0) / 1000 / 60;
         System.out.println(v);
-        if (v > minute) {
+        if (v >= minute) {
             return true;
         } else {
             return false;
