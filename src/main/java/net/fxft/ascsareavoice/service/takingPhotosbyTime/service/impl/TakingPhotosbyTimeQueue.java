@@ -197,14 +197,14 @@ public class TakingPhotosbyTimeQueue {
                         //这边如果小于5秒，那么就直接使用这个命令id
                         if(cmdIdDto.getCmdTime().getTime()-checkTime.getTime()<=5000){
                             cmdId=cmdIdDto.getCmdId();
-                        }else{
-                            //下发拍照指令，并获取到命令id
-                            cmdId = temSendService.sendTakePhoto(simNo, channelId, takingphotosbytime.getUserid(), takingphotosbytime.getUsername());
-                            cmdTimeIdCache.put(cmdKey, CmdIdDto.bulider(cmdId, checkTime));
                         }
-                        cmdIds += cmdId + ";";
                     }
-
+                    if(cmdId==0) {
+                        //下发拍照指令，并获取到命令id
+                        cmdId = temSendService.sendTakePhoto(simNo, channelId, takingphotosbytime.getUserid(), takingphotosbytime.getUsername());
+                        cmdTimeIdCache.put(cmdKey, CmdIdDto.bulider(cmdId, checkTime));
+                    }
+                    cmdIds += cmdId + ";";
                 }
                 int commandtype = 0;
                 if (cmdId == 0) {
