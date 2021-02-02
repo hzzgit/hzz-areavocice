@@ -4,6 +4,8 @@ import com.ltmonitor.entity.GPSRealData;
 import lombok.Data;
 import net.fxft.ascsareavoice.service.takingPhotosbyTime.entity.Takingphotosbytime;
 
+import java.util.Date;
+
 /**
  * @author ：hzz
  * @description：TODO
@@ -12,6 +14,8 @@ import net.fxft.ascsareavoice.service.takingPhotosbyTime.entity.Takingphotosbyti
 @Data
 public class QueueDto {
     private String simNo;
+    private Date checkTime;
     private Takingphotosbytime takingphotosbytime;
     private GPSRealData gpsRealData;
+
 }

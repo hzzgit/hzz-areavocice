@@ -28,8 +28,10 @@ public class NoticeEventConsumer implements IEveryUnitMsgProcessor {
                 RealDataService.updateVehiclearg.set(true);//开启更新车辆缓存的标志位
                 log.debug("接收到其他服务的车辆信息修改通知" + up.getParams());
             }else if("takingphotosbytime".equalsIgnoreCase(up.getCacheName())){
-                TakingPhotosbyTimeService.updatTakingPhotoarg.set(true);//开启更新车辆缓存的标志位
-                log.debug("接收到其他服务的定时拍照配置修改通知" + up.getParams());
+                synchronized (TakingPhotosbyTimeService.updatTakingPhotoarg) {
+                    TakingPhotosbyTimeService.updatTakingPhotoarg.set(true);//开启更新车辆缓存的标志位
+                    log.debug("接收到其他服务的定时拍照配置修改通知" + up.getParams());
+                }
             }
 
         }

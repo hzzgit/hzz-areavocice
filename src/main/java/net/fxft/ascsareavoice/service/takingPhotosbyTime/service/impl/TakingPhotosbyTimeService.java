@@ -38,9 +38,9 @@ public class TakingPhotosbyTimeService {
     public static AtomicBoolean updatTakingPhotoarg = new AtomicBoolean(true);
 
     //缓存配置
-    private Map<Integer, Takingphotosbytime> integerTakingphotosbytimeMap=new ConcurrentHashMap<>();
+    private Map<Integer, Takingphotosbytime> integerTakingphotosbytimeMap = new ConcurrentHashMap<>();
     //缓存车辆信息
-    private List<TakingPhotoBySimNoDto> takingPhotoBySimNoDtos=new ArrayList<>();
+    private List<TakingPhotoBySimNoDto> takingPhotoBySimNoDtos = new ArrayList<>();
 
 
     @Autowired
@@ -70,9 +70,11 @@ public class TakingPhotosbyTimeService {
             //这边进行配置项的缓存
             new Thread(() -> {
                 while (true) {
-                    if(TakingPhotosbyTimeService.updatTakingPhotoarg.get()){
-                        cacheConfig();
-                        TakingPhotosbyTimeService.updatTakingPhotoarg.set(false);
+                    synchronized (TakingPhotosbyTimeService.updatTakingPhotoarg) {
+                        if (TakingPhotosbyTimeService.updatTakingPhotoarg.get()) {
+                            cacheConfig();
+                            TakingPhotosbyTimeService.updatTakingPhotoarg.set(false);
+                        }
                     }
                     try {
                         Thread.sleep(1000);
@@ -91,7 +93,7 @@ public class TakingPhotosbyTimeService {
                     }
 
                     try {
-                        Thread.sleep(10000);
+                        Thread.sleep(20000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -114,16 +116,16 @@ public class TakingPhotosbyTimeService {
     }
 
 
-    private void cacheConfig(){
+    private void cacheConfig() {
         try {
-            Map<Integer, Takingphotosbytime> integerTakingphotosbytimeMapTemp =new ConcurrentHashMap<>();
-            List<TakingPhotoBySimNoDto> takingPhotoBySimNoDtosTemp =new ArrayList<>();
-            integerTakingphotosbytimeMapTemp=takephotoDao.searchTakingPhotoConfig();
+            Map<Integer, Takingphotosbytime> integerTakingphotosbytimeMapTemp = new ConcurrentHashMap<>();
+            List<TakingPhotoBySimNoDto> takingPhotoBySimNoDtosTemp = new ArrayList<>();
+            integerTakingphotosbytimeMapTemp = takephotoDao.searchTakingPhotoConfig();
             takingPhotoBySimNoDtosTemp = takephotoDao.searchTakingVehicle();
-            integerTakingphotosbytimeMap=integerTakingphotosbytimeMapTemp;
-            takingPhotoBySimNoDtos=takingPhotoBySimNoDtosTemp;
+            integerTakingphotosbytimeMap = integerTakingphotosbytimeMapTemp;
+            takingPhotoBySimNoDtos = takingPhotoBySimNoDtosTemp;
         } catch (Exception e) {
-            log.error("定时拍照:缓存定时拍照规则配置异常",e);
+            log.error("定时拍照:缓存定时拍照规则配置异常", e);
         }
 
     }
@@ -145,6 +147,7 @@ public class TakingPhotosbyTimeService {
 
     private void begin() throws Exception {
         long s = System.currentTimeMillis();   //获取开始时间
+        Date checkTime = new Date();
         if (integerTakingphotosbytimeMap != null && integerTakingphotosbytimeMap.size() > 0) {
             for (int i = 0; i < takingPhotoBySimNoDtos.size(); i++) {
                 TakingPhotoBySimNoDto takingPhotoBySimNoDto = takingPhotoBySimNoDtos.get(i);
@@ -153,7 +156,7 @@ public class TakingPhotosbyTimeService {
                     int id = takingPhotoBySimNoDto.getId();
                     if (integerTakingphotosbytimeMap.containsKey(id)) {
                         Takingphotosbytime takingphotosbytime = integerTakingphotosbytimeMap.get(id);
-                        checkTakingPhoto(simNo, takingphotosbytime.getId(), takingphotosbytime);
+                        checkTakingPhoto(simNo, takingphotosbytime.getId(), takingphotosbytime,checkTime);
                     }
                 } catch (Exception e) {
                     log.error("定时拍照:simNo=" + takingPhotoBySimNoDto.getSimNo() + "id=" + takingPhotoBySimNoDto.getId() + "执行异常", e);
@@ -168,7 +171,7 @@ public class TakingPhotosbyTimeService {
     /**
      * 检测是否要进行拍照
      */
-    private void checkTakingPhoto(String simNo, int id, Takingphotosbytime takingphotosbytime) {
+    private void checkTakingPhoto(String simNo, int id, Takingphotosbytime takingphotosbytime,Date checkTime) {
         VehicleData vehicleData = realDataService.getVehicleData(simNo);
         if (vehicleData != null) {
             //拍摄通道如果没有配置
@@ -183,11 +186,11 @@ public class TakingPhotosbyTimeService {
 
             //这边判断是否在配置生效的有效期里面
             if (takingphotosbytime.getValidstarttime() != null || takingphotosbytime.getValidendtime() != null) {
-                if (takingphotosbytime.getValidstarttime() == null && takingphotosbytime.getValidendtime().getTime() < System.currentTimeMillis()) {
+                if (takingphotosbytime.getValidstarttime() == null && takingphotosbytime.getValidendtime().getTime() < checkTime.getTime()) {
                     return;
-                } else if (takingphotosbytime.getValidendtime() == null && takingphotosbytime.getValidstarttime().getTime() > System.currentTimeMillis()) {
+                } else if (takingphotosbytime.getValidendtime() == null && takingphotosbytime.getValidstarttime().getTime() >checkTime.getTime()) {
                     return;
-                } else if (!TimeUtils.isEffectiveDate(new Date(),
+                } else if (!TimeUtils.isEffectiveDate(checkTime,
                         takingphotosbytime.getValidstarttime(),
                         takingphotosbytime.getValidendtime())) {//如果不在有效期里面
                     return;
@@ -196,21 +199,21 @@ public class TakingPhotosbyTimeService {
 
             //这边判断时间区间
             String starttime = takingphotosbytime.getStarttime();
-            starttime = TimeUtils.dateToStr(new Date()) + " " + starttime;
+            starttime = TimeUtils.dateToStr(checkTime) + " " + starttime;
             String endtime = takingphotosbytime.getEndtime();
-            endtime = TimeUtils.dateToStr(new Date()) + " " + endtime;
+            endtime = TimeUtils.dateToStr(checkTime) + " " + endtime;
             Date startdatetime = TimeUtils.todatetime(starttime);
             Date enddatetime = TimeUtils.todatetime(endtime);
 
 
             if (startdatetime.getTime() > enddatetime.getTime()) {//假如开始时间大于结束时间，那么说明希望跨夜间
                 boolean arg = false;
-                if (TimeUtils.isEffectiveDate(new Date(),
+                if (TimeUtils.isEffectiveDate(checkTime,
                         startdatetime,
                         TimeUtils.getDatebyDAY(enddatetime, 1))) {
                     arg = true;
                 }
-                if (TimeUtils.isEffectiveDate(new Date(),
+                if (TimeUtils.isEffectiveDate(checkTime,
                         TimeUtils.getDatebyDAY(startdatetime, -1),
                         enddatetime)) {
                     arg = true;
@@ -219,7 +222,7 @@ public class TakingPhotosbyTimeService {
                     return;
                 }
             } else {
-                if (!TimeUtils.isEffectiveDate(new Date(),
+                if (!TimeUtils.isEffectiveDate(checkTime,
                         startdatetime,
                         enddatetime)) {
                     return;
@@ -230,24 +233,24 @@ public class TakingPhotosbyTimeService {
             if (isPhotoDto != null) {//这边不为null说明已经有下发过拍照命令
                 //之前逻辑是如果没有上传就等待五分钟，
 //                if (isPhotoDto.getStatus() == IsPhotoDto.已下发) {//如果只是已经下发，但是却没有上传照片，过五分钟之后继续下发
-//                    boolean differ5minute = TimeUtils.differminute(isPhotoDto.getTime(), new Date(), 5);
+//                    boolean differ5minute = TimeUtils.differminute(isPhotoDto.getTime(), checkTime, 5);
 //                    if (differ5minute) {//如果相差五分钟，并且之前已经下发确没有收到照片，那么就继续进行判断
 //                        checkConfigBySimNo(vehicleData.getEntityId(), simNo, takingphotosbytime);
 //                    }
 //                } else {//如果之前已经收到了照片，那么判断的时间就必须读取配置了
-//                    boolean differminute = TimeUtils.differminute(isPhotoDto.getTime(), new Date(), takingphotosbytime.getConfiginterval());
+//                    boolean differminute = TimeUtils.differminute(isPhotoDto.getTime(), checkTime, takingphotosbytime.getConfiginterval());
 //                    if (differminute) {
 //                        checkConfigBySimNo(vehicleData.getEntityId(), simNo, takingphotosbytime);
 //                    }
 //                }
 
                 //现在的逻辑则是只要下发过，那么再下次就是按照间隔时间来下发
-                boolean differminute = TimeUtils.differminute(isPhotoDto.getTime(), new Date(), takingphotosbytime.getConfiginterval());
+                boolean differminute = TimeUtils.differminute(isPhotoDto.getTime(), checkTime, takingphotosbytime.getConfiginterval());
                 if (differminute) {
-                    checkConfigBySimNo(vehicleData.getEntityId(), simNo, takingphotosbytime);
+                    checkConfigBySimNo(vehicleData.getEntityId(), simNo, takingphotosbytime,checkTime);
                 }
             } else {//如果为null，那么就是都没有执行过，就开始初始判断
-                checkConfigBySimNo(vehicleData.getEntityId(), simNo, takingphotosbytime);
+                checkConfigBySimNo(vehicleData.getEntityId(), simNo, takingphotosbytime,checkTime);
             }
 
 
@@ -259,30 +262,30 @@ public class TakingPhotosbyTimeService {
      *
      * @return
      */
-    private boolean checkConfigBySimNo(long vehicleId, String simNo, Takingphotosbytime takingphotosbytime) {
+    private boolean checkConfigBySimNo(long vehicleId, String simNo, Takingphotosbytime takingphotosbytime,Date checkTime) {
         GPSRealData gpsRealData = realDataService.get(simNo);
         if (gpsRealData == null) {
             return false;
         }
         if (gpsRealData.isOnline() == false ||
-                TimeUtils.differminute(gpsRealData.getUpdateDate(), new Date(), 5)) {//离线判断，离线或者信号时间相差五分钟
+                TimeUtils.differminute(gpsRealData.getUpdateDate(), checkTime, 5)) {//离线判断，离线或者信号时间相差五分钟
             return false;
         }
         gpsRealData.setVehicleId(vehicleId);
         Long condition = takingphotosbytime.getConfigcondition();
         if (Takingphotosbytime.condition不限制 == condition) {//到这一步说明前面都已经判断完了
-            takingPhotosbyTimeQueue.addQueue(simNo, takingphotosbytime, gpsRealData);
+            takingPhotosbyTimeQueue.addQueue(simNo, takingphotosbytime, gpsRealData,checkTime);
             return true;
         } else if (Takingphotosbytime.condition根据车速 == condition) {
             if (gpsRealData.getVelocity() > takingphotosbytime.getSpeed()) {
-                takingPhotosbyTimeQueue.addQueue(simNo, takingphotosbytime, gpsRealData);
+                takingPhotosbyTimeQueue.addQueue(simNo, takingphotosbytime, gpsRealData,checkTime);
                 return true;
             }
         } else if (Takingphotosbytime.condition根据停车时长 == condition) {
             Date parkingTime = gpsRealData.getParkingTime();
             if (parkingTime != null) {//这边判断停车时长是否达到
-                if (TimeUtils.differminute(parkingTime, new Date(), takingphotosbytime.getPackduration())) {
-                    takingPhotosbyTimeQueue.addQueue(simNo, takingphotosbytime, gpsRealData);
+                if (TimeUtils.differminute(parkingTime, checkTime, takingphotosbytime.getPackduration())) {
+                    takingPhotosbyTimeQueue.addQueue(simNo, takingphotosbytime, gpsRealData,checkTime);
                     return true;
                 }
             }
@@ -290,11 +293,6 @@ public class TakingPhotosbyTimeService {
         return false;
     }
 
-
-    public static void main(String[] args) {
-        Date datebyDAY = TimeUtils.getDatebyDAY(new Date(), 1);
-        System.out.println(datebyDAY);
-    }
 
 
 }

@@ -153,9 +153,11 @@ public class TakephotoDao {
     public Takingphotosbytimeresult insertTakingphotosbytimeresult(long vehicleId, String simNo, long userId,
                                                                    int photonum, double latitude,
                                                                    double longitude, Date sendTime, double speed,
-                                                                   String driverName, String certificate, long configid) {
+                                                                   String driverName, String certificate, long configid,Date checkTime) {
         Takingphotosbytimeresult takingphotosbytimeresult = new Takingphotosbytimeresult();
         takingphotosbytimeresult.setVehicleid(vehicleId);
+        takingphotosbytimeresult.setCreatedate(checkTime);
+        takingphotosbytimeresult.setUpdatedate(checkTime);
         takingphotosbytimeresult.setSimno(simNo);
         takingphotosbytimeresult.setUserid(userId);
         takingphotosbytimeresult.setPhotonum(photonum);
@@ -176,12 +178,14 @@ public class TakephotoDao {
      * 插入到详情表
      */
     public void insertTakingphotosbytimeDetail(long resultId, int channelid,
-                                               long commandid, long configid, long vehicleId, int commandtype) {
+                                               long commandid, long configid, long vehicleId, int commandtype,Date checkTime) {
 
         Takingphotosbytimedetail takingphotosbytimedetail = new Takingphotosbytimedetail();
         takingphotosbytimedetail.setResultid(resultId);
         takingphotosbytimedetail.setChannelid(channelid);
         takingphotosbytimedetail.setCommandid(commandid);
+        takingphotosbytimedetail.setCreatedate(checkTime);
+        takingphotosbytimedetail.setUpdatedate(checkTime);
         takingphotosbytimedetail.setCommandtype(commandtype);
         takingphotosbytimedetail.setConfigid(configid);
         takingphotosbytimedetail.setVehicleid(vehicleId);
