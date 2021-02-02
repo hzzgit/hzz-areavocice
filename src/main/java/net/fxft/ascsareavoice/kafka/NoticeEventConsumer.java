@@ -1,5 +1,6 @@
 package net.fxft.ascsareavoice.kafka;
 
+import net.fxft.ascsareavoice.service.takingPhotosbyTime.service.impl.TakingPhotosbyTimeService;
 import net.fxft.gateway.event.EventMsg;
 import net.fxft.gateway.event.IEventBody;
 import net.fxft.gateway.event.everyunit.UpdateCacheEvent;
@@ -26,7 +27,11 @@ public class NoticeEventConsumer implements IEveryUnitMsgProcessor {
             if (UpdateCacheEvent.CacheName_Vehicle.equalsIgnoreCase(up.getCacheName())) {
                 RealDataService.updateVehiclearg.set(true);//开启更新车辆缓存的标志位
                 log.debug("接收到其他服务的车辆信息修改通知" + up.getParams());
+            }else if("takingphotosbytime".equalsIgnoreCase(up.getCacheName())){
+                TakingPhotosbyTimeService.updatTakingPhotoarg.set(true);//开启更新车辆缓存的标志位
+                log.debug("接收到其他服务的定时拍照配置修改通知" + up.getParams());
             }
+
         }
     }
 
