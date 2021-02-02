@@ -195,7 +195,7 @@ public class TakingPhotosbyTimeQueue {
                     if(cmdTimeIdCache.containsKey(cmdKey)){
                         CmdIdDto cmdIdDto = cmdTimeIdCache.get(cmdKey);
                         //这边如果小于5秒，那么就直接使用这个命令id
-                        if(cmdIdDto.getCmdTime().getTime()-checkTime.getTime()<=5000){
+                        if(checkTime.getTime()-cmdIdDto.getCmdTime().getTime()<=5000){
                             cmdId=cmdIdDto.getCmdId();
                         }
                     }
