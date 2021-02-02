@@ -10,7 +10,7 @@ public class WaybillAreaautoCache {
 
 
     private static final Logger log = LoggerFactory.getLogger(WaybillAreaautoCache.class);
-    private static final   String cachename="WaybillAreaautoCache.dao";
+    private static final   String cachename="WaybillAreaautoCache.cache";
 
 
 

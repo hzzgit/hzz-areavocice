@@ -210,10 +210,11 @@ public class TakingPhotosbyTimeQueue {
                 if (cmdId == 0) {
                     commandtype = 2;
                 }
-
-                takephotoDao.insertTakingphotosbytimeDetail(takingphotosbytimeresult.getId(),
-                        channelId, cmdId, takingphotosbytime.getId(), gpsRealData.getVehicleId(), commandtype, checkTime);
-
+                //必须是配置了摄像头的才插入表，避免表过大
+                if(commandtype!=2) {
+                    takephotoDao.insertTakingphotosbytimeDetail(takingphotosbytimeresult.getId(),
+                            channelId, cmdId, takingphotosbytime.getId(), gpsRealData.getVehicleId(), commandtype, checkTime);
+                }
             }
             redisIsPhotoCache.put(gpsRealData.getVehicleId(), takingphotosbytime.getId());
             log.debug("定时拍照:下发拍照并插入定时拍照记录表,内容为:simNo=" + simNo + ",通道=" + channel + ",命令id=" + cmdIds);
