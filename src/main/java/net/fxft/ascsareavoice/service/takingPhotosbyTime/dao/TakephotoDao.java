@@ -8,6 +8,7 @@ import net.fxft.ascsareavoice.service.takingPhotosbyTime.dao.dto.TakingPhotoByVe
 import net.fxft.ascsareavoice.service.takingPhotosbyTime.entity.Takingphotosbytime;
 import net.fxft.ascsareavoice.service.takingPhotosbyTime.entity.Takingphotosbytimedetail;
 import net.fxft.ascsareavoice.service.takingPhotosbyTime.entity.Takingphotosbytimeresult;
+import net.fxft.ascsareavoice.service.takingPhotosbyTime.service.impl.TakingPhotosbyTimeDetailQueue;
 import net.fxft.common.jdbc.ColumnSet;
 import net.fxft.common.jdbc.JdbcUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -174,6 +175,9 @@ public class TakephotoDao {
     }
 
 
+    @Autowired
+    private TakingPhotosbyTimeDetailQueue takingPhotosbyTimeDetailQueue;
+
     /**
      * 插入到详情表
      */
@@ -189,7 +193,7 @@ public class TakephotoDao {
         takingphotosbytimedetail.setCommandtype(commandtype);
         takingphotosbytimedetail.setConfigid(configid);
         takingphotosbytimedetail.setVehicleid(vehicleId);
-        jdbcUtil.insert(takingphotosbytimedetail).insertColumn(ColumnSet.all()).execute();
+        takingPhotosbyTimeDetailQueue.addexecpool(takingphotosbytimedetail);
 
 
     }

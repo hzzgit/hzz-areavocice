@@ -441,7 +441,7 @@ public final class TimeUtils {
         long l = endTime.getTime() - startTime.getTime();
         l = Math.abs(l);
         double v = (l * 1.0) / 1000 / 60;
-        System.out.println(v);
+
         if (v >= minute) {
             return true;
         } else {
@@ -460,7 +460,7 @@ public final class TimeUtils {
         long l = endTime.getTime() - startTime.getTime();
         l = Math.abs(l);
         double v = (l * 1.0) / 1000 / 60;
-        System.out.println(v);
+
         if (v > minute) {
             return true;
         } else {

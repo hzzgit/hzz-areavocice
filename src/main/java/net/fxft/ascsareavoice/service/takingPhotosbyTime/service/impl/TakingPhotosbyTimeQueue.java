@@ -151,6 +151,8 @@ public class TakingPhotosbyTimeQueue {
      */
     private void sendTakingPhoto(QueueDto queueDto) {
         try {
+              long s1 = System.currentTimeMillis();   //获取开始时间
+
             Date checkTime = queueDto.getCheckTime();
             String simNo = queueDto.getSimNo();
             Takingphotosbytime takingphotosbytime = queueDto.getTakingphotosbytime();
@@ -211,9 +213,10 @@ public class TakingPhotosbyTimeQueue {
                     takephotoDao.insertTakingphotosbytimeDetail(takingphotosbytimeresult.getId(),
                             channelId, cmdId, takingphotosbytime.getId(), gpsRealData.getVehicleId(), commandtype, checkTime);
                 }
-            }
+            }  long e = System.currentTimeMillis(); //获取结束时间
+
             redisIsPhotoCache.put(gpsRealData.getVehicleId(), takingphotosbytime.getId(),checkTime);
-            log.debug("定时拍照:下发拍照并插入定时拍照记录表,内容为:simNo=" + simNo + ",通道=" + channel + ",命令id=" + cmdIds);
+            log.debug("定时拍照:下发拍照并插入定时拍照记录表,内容为:simNo=" + simNo + ",通道=" + channel + ",命令id=" + cmdIds+"用时：" + (e - s1) + "ms");
         } catch (Exception e) {
             log.error("定时拍照:下发拍照并插入定时拍照记录异常", e);
         }
