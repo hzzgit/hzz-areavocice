@@ -59,7 +59,7 @@ public class RocksdbTableUtil {
         try {
             String property = System.getProperty("user.dir");
             String dbPath = property + File.separator + "rocks";
-            dbPath = "D:\\test\\rocksdb";
+            //dbPath = "D:\\test\\rocksdb";
 //            String dbPath = "/ascs/rocks";
             Options options = new Options();
             options.setCreateIfMissing(true);
