@@ -61,6 +61,17 @@ public class RealDataService implements IRealDataService {
                 }
             }
         }).start();
+
+        new Thread(() -> {
+            while (true) {
+                RealDataService.updateVehiclearg.set(true);
+                try {
+                    Thread.sleep(30000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     public GPSRealData getGpsRealData(String simNo) {
@@ -105,10 +116,10 @@ public class RealDataService implements IRealDataService {
     @Override
     public VehicleData getVehicleData(String simNo) {
         VehicleData vehicleData = null;
-        if(vehicleDataMap.containsKey(simNo)){
+        if (vehicleDataMap.containsKey(simNo)) {
             vehicleData = vehicleDataMap.get(simNo);
         }
-        return  vehicleData;
+        return vehicleData;
 
     }
 
