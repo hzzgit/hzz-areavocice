@@ -47,6 +47,7 @@ public class TakingPhotosbyTimeDetailQueue {
     @PostConstruct
     private void init() {
 
+
         execPool = new AbstractBatchExecThreadPoolExecutor<Integer, Takingphotosbytimedetail>("定时拍照详情插入",
                 2, 2000, 10, 2000) {
             @Override
