@@ -4,15 +4,14 @@ import com.ltmonitor.entity.GPSRealData;
 import com.ltmonitor.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.fxft.ascsareavoice.ltmonitor.entity.VehicleData;
-import net.fxft.ascsareavoice.ltmonitor.util.ConverterUtils;
 import net.fxft.ascsareavoice.ltmonitor.util.TimeUtils;
 import net.fxft.ascsareavoice.service.impl.RealDataService;
 import net.fxft.ascsareavoice.service.takingPhotosbyTime.dao.TakephotoDao;
 import net.fxft.ascsareavoice.service.takingPhotosbyTime.dao.dto.TakingPhotoBySimNoDto;
 import net.fxft.ascsareavoice.service.takingPhotosbyTime.dao.dto.TakingPhotoByVehicleIdDto;
 import net.fxft.ascsareavoice.service.takingPhotosbyTime.entity.Takingphotosbytime;
-import net.fxft.ascsareavoice.service.takingPhotosbyTime.redis.RedisIsPhotoCache;
-import net.fxft.ascsareavoice.service.takingPhotosbyTime.redis.dto.IsPhotoDto;
+import net.fxft.ascsareavoice.service.takingPhotosbyTime.cache.IsPhotoCache;
+import net.fxft.ascsareavoice.service.takingPhotosbyTime.cache.dto.IsPhotoDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -47,7 +46,7 @@ public class TakingPhotosbyTimeService {
     private TakephotoDao takephotoDao;
 
     @Autowired
-    private RedisIsPhotoCache redisIsPhotoCache;
+    private IsPhotoCache redisIsPhotoCache;
 
     @Autowired
     private RealDataService realDataService;

@@ -81,6 +81,11 @@
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.rocksdb</groupId>
+            <artifactId>rocksdbjni</artifactId>
+            <version>6.10.2</version>
+        </dependency>
+        <dependency>
             <groupId>net.sf.json-lib</groupId>
             <artifactId>json-lib</artifactId>
             <version>2.4</version>

@@ -41,8 +41,9 @@ public class RealDataService implements IRealDataService {
                 if (RealDataService.updateVehiclearg.get()) {//如果队列里面有需要更新车辆缓存
                     RealDataService.updateVehiclearg.set(false);
                     try {
-                        String sql = "select vehicleId,plateNo,simNo," +
-                                " videoChannelNum,videoChannelNames from vehicle where deleted=false";
+                        String sql = "select d.certificationCode,d.driverName,v.vehicleId,v.plateNo,v.simNo," +
+                                " v.videoChannelNum,v.videoChannelNames from vehicle v left join" +
+                                " drivercardrecordonly d on v.vehicleId= d.vehicleId where v.deleted=false";
                         List<VehicleData> vehicleData = jdbcUtil.sql(sql).query(VehicleData.class);
                         if (ConverterUtils.isList(vehicleData)) {
                             for (VehicleData vehicleDatum : vehicleData) {
@@ -54,7 +55,7 @@ public class RealDataService implements IRealDataService {
                     }
                 }
                 try {
-                    Thread.sleep(10000);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

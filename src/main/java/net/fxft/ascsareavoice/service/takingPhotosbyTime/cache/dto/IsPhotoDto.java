@@ -1,4 +1,4 @@
-package net.fxft.ascsareavoice.service.takingPhotosbyTime.redis.dto;
+package net.fxft.ascsareavoice.service.takingPhotosbyTime.cache.dto;
 
 
 import net.fxft.ascsareavoice.ltmonitor.util.TimeUtils;
@@ -28,9 +28,9 @@ public class IsPhotoDto {
     public IsPhotoDto() {
     }
 
-    public IsPhotoDto(int status) {
+    public IsPhotoDto(int status,Date checkTime) {
         this.status = status;
-        time = new Date();
+        time = checkTime;
     }
 
     public Date getTime() {

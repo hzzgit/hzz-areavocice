@@ -24,7 +24,10 @@ public class VehicleData extends TenantEntity {
     private String plateNo;
     //GPS手机卡号
     private String simNo;
-
+    //从业资格证
+    private String certificationCode;
+    //司机姓名
+    private String driverName;
     /**
      * 视频通道数
      */
@@ -54,6 +57,21 @@ public class VehicleData extends TenantEntity {
         plateNo = value;
     }
 
+    public String getCertificationCode() {
+        return certificationCode;
+    }
+
+    public void setCertificationCode(String certificationCode) {
+        this.certificationCode = certificationCode;
+    }
+
+    public String getDriverName() {
+        return driverName;
+    }
+
+    public void setDriverName(String driverName) {
+        this.driverName = driverName;
+    }
 
     public int getVideoChannelNum() {
         return videoChannelNum;

@@ -1,31 +1,24 @@
 package net.fxft.ascsareavoice.service.takingPhotosbyTime.service.impl;
 
 import com.ltmonitor.entity.GPSRealData;
-import com.ltmonitor.util.StringUtil;
-import com.netflix.ribbon.proxy.annotation.Var;
 import lombok.extern.slf4j.Slf4j;
 import net.fxft.ascsareavoice.ltmonitor.entity.VehicleData;
 import net.fxft.ascsareavoice.ltmonitor.util.ConverterUtils;
-import net.fxft.ascsareavoice.ltmonitor.util.TimeUtils;
 import net.fxft.ascsareavoice.service.impl.RealDataService;
 import net.fxft.ascsareavoice.service.takingPhotosbyTime.dao.TakephotoDao;
-import net.fxft.ascsareavoice.service.takingPhotosbyTime.dao.dto.DriverInfoDto;
-import net.fxft.ascsareavoice.service.takingPhotosbyTime.dao.dto.TakingPhotoBySimNoDto;
 import net.fxft.ascsareavoice.service.takingPhotosbyTime.entity.Takingphotosbytime;
 import net.fxft.ascsareavoice.service.takingPhotosbyTime.entity.Takingphotosbytimeresult;
-import net.fxft.ascsareavoice.service.takingPhotosbyTime.redis.RedisIsPhotoCache;
-import net.fxft.ascsareavoice.service.takingPhotosbyTime.redis.dto.IsPhotoDto;
+import net.fxft.ascsareavoice.service.takingPhotosbyTime.cache.IsPhotoCache;
 import net.fxft.ascsareavoice.service.takingPhotosbyTime.service.dto.CmdIdDto;
 import net.fxft.ascsareavoice.service.takingPhotosbyTime.service.dto.QueueDto;
-import org.apache.commons.beanutils.ConvertUtils;
+import net.fxft.common.tpool.BlockedThreadPoolExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.*;
 
 /**
  * @author ：hzz
@@ -52,7 +45,7 @@ public class TakingPhotosbyTimeQueue {
     @Value("${istakingphoto:false}")
     private boolean istakingphoto;
     @Autowired
-    private RedisIsPhotoCache redisIsPhotoCache;
+    private IsPhotoCache redisIsPhotoCache;
 
 
     /**
@@ -72,22 +65,22 @@ public class TakingPhotosbyTimeQueue {
      */
     private ConcurrentLinkedQueue<QueueDto> istakingphotoQueue = new ConcurrentLinkedQueue();
 
+    ExecutorService executorService = null;
+
 
     @PostConstruct
     private void init() {
         if (istakingphoto) {
+            BlockedThreadPoolExecutor blockedThreadPoolExecutor = new BlockedThreadPoolExecutor(10, "定时拍照队列消耗线程");
             new Thread(() -> {
                 while (true) {
                     try {
-
-                        int qs = istakingphotoQueue.size();
-                        if (qs > 100) {
-                            log.debug("处理定时拍照队列排队等待应答数量:" + qs);
-                        }
                         QueueDto rd = istakingphotoQueue.poll();
-
                         while (rd != null) {
-                            sendTakingPhoto(rd);
+                            QueueDto finalRd = rd;
+                            blockedThreadPoolExecutor.submit(new Thread(() -> {
+                                sendTakingPhoto(finalRd);
+                            }));
                             rd = istakingphotoQueue.poll();
                         }
                     } catch (Exception ex) {
@@ -107,9 +100,16 @@ public class TakingPhotosbyTimeQueue {
             new Thread(() -> {
                 while (true) {
                     try {
+                        int qs = istakingphotoQueue.size();
+                        if (qs > 100000) {
+                            log.debug("处理定时拍照队列排队等待应答数量:" + qs);
+                            while (istakingphotoQueue.size()>100000) {
+                              istakingphotoQueue.poll();
+                            }
+                        }
                         removeTimeOutCmd();
                     } catch (Exception e) {
-                        log.error("定时拍照:移除超时的命令id异常",e);
+                        log.error("定时拍照:移除超时的命令id异常", e);
                     }
 
                     try {
@@ -126,19 +126,19 @@ public class TakingPhotosbyTimeQueue {
     /**
      * 移除已经超时的
      */
-    private void removeTimeOutCmd(){
-        long nowdate =System.currentTimeMillis();
-        if(cmdTimeIdCache!=null&&cmdTimeIdCache.size()>0){
-            List<String> removeKeys=new ArrayList<>();
-            cmdTimeIdCache.forEach((p,v)->{
+    private void removeTimeOutCmd() {
+        long nowdate = System.currentTimeMillis();
+        if (cmdTimeIdCache != null && cmdTimeIdCache.size() > 0) {
+            List<String> removeKeys = new ArrayList<>();
+            cmdTimeIdCache.forEach((p, v) -> {
                 long time = v.getCmdTime().getTime();
                 //这边只要和当前时间超过600秒就移除，节约内存
-                if(nowdate-time>600000){
+                if (nowdate - time > 600000) {
                     removeKeys.add(p);
                 }
             });
 
-            if(removeKeys!=null&&removeKeys.size()>0){
+            if (removeKeys != null && removeKeys.size() > 0) {
                 for (String removeKey : removeKeys) {
                     cmdTimeIdCache.remove(removeKey);
                 }
@@ -157,20 +157,16 @@ public class TakingPhotosbyTimeQueue {
             GPSRealData gpsRealData = queueDto.getGpsRealData();
             String channel = takingphotosbytime.getChannel();
             String[] channels = channel.split(";");
-            DriverInfoDto driverInfoDto = takephotoDao.searchDriverInfo(gpsRealData.getVehicleId());
-            String driverName = null;
-            String certificationCode = null;
-            if (driverInfoDto != null) {
-                driverName = driverInfoDto.getDriverName();
-                certificationCode = driverInfoDto.getCertificationCode();
-            }
+            VehicleData vehicleData = realDataService.getVehicleData(simNo);
+            String driverName= vehicleData.getDriverName();
+            String certificationCode=vehicleData.getCertificationCode();
             //插入结果表，并获取主键
             Takingphotosbytimeresult takingphotosbytimeresult = takephotoDao.insertTakingphotosbytimeresult(gpsRealData.getVehicleId(), simNo, takingphotosbytime.getUserid(),
                     channels.length, gpsRealData.getLatitude(), gpsRealData.getLongitude(), gpsRealData.getSendTime(),
                     gpsRealData.getVelocity(), driverName, certificationCode,
                     takingphotosbytime.getId(), checkTime);
             String cmdIds = "";
-            VehicleData vehicleData = realDataService.getVehicleData(simNo);
+
             String videoChannelNames = vehicleData.getVideoChannelNames();
             int videoChannelNum = vehicleData.getVideoChannelNum();
             //用来缓存设备配置的摄像头情况
@@ -192,14 +188,14 @@ public class TakingPhotosbyTimeQueue {
                 long cmdId = 0;
                 if (channelId > 0 && channelMap.containsKey(channelId)) {
                     String cmdKey = getCmdKey(simNo, channelId);
-                    if(cmdTimeIdCache.containsKey(cmdKey)){
+                    if (cmdTimeIdCache.containsKey(cmdKey)) {
                         CmdIdDto cmdIdDto = cmdTimeIdCache.get(cmdKey);
                         //这边如果小于5秒，那么就直接使用这个命令id
-                        if(checkTime.getTime()-cmdIdDto.getCmdTime().getTime()<=5000){
-                            cmdId=cmdIdDto.getCmdId();
+                        if (checkTime.getTime() - cmdIdDto.getCmdTime().getTime() <= 5000) {
+                            cmdId = cmdIdDto.getCmdId();
                         }
                     }
-                    if(cmdId==0) {
+                    if (cmdId == 0) {
                         //下发拍照指令，并获取到命令id
                         cmdId = temSendService.sendTakePhoto(simNo, channelId, takingphotosbytime.getUserid(), takingphotosbytime.getUsername());
                         cmdTimeIdCache.put(cmdKey, CmdIdDto.bulider(cmdId, checkTime));
@@ -211,12 +207,12 @@ public class TakingPhotosbyTimeQueue {
                     commandtype = 2;
                 }
                 //必须是配置了摄像头的才插入表，避免表过大
-                if(commandtype!=2) {
+                if (commandtype != 2) {
                     takephotoDao.insertTakingphotosbytimeDetail(takingphotosbytimeresult.getId(),
                             channelId, cmdId, takingphotosbytime.getId(), gpsRealData.getVehicleId(), commandtype, checkTime);
                 }
             }
-            redisIsPhotoCache.put(gpsRealData.getVehicleId(), takingphotosbytime.getId());
+            redisIsPhotoCache.put(gpsRealData.getVehicleId(), takingphotosbytime.getId(),checkTime);
             log.debug("定时拍照:下发拍照并插入定时拍照记录表,内容为:simNo=" + simNo + ",通道=" + channel + ",命令id=" + cmdIds);
         } catch (Exception e) {
             log.error("定时拍照:下发拍照并插入定时拍照记录异常", e);
