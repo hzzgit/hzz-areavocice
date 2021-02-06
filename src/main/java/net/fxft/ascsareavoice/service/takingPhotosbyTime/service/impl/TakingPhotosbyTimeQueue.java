@@ -67,12 +67,12 @@ public class TakingPhotosbyTimeQueue {
 
     ExecutorService executorService = null;
 
-    BlockedThreadPoolExecutor blockedThreadPoolExecutor=null;
+    BlockedThreadPoolExecutor blockedThreadPoolExecutor = null;
 
     @PostConstruct
     private void init() {
         if (istakingphoto) {
-             blockedThreadPoolExecutor = new BlockedThreadPoolExecutor(10, "定时拍照队列消耗线程");
+            blockedThreadPoolExecutor = new BlockedThreadPoolExecutor(10, "定时拍照队列消耗线程");
             new Thread(() -> {
                 while (true) {
                     try {
@@ -104,8 +104,8 @@ public class TakingPhotosbyTimeQueue {
                         int qs = istakingphotoQueue.size();
                         if (qs > 100000) {
                             log.debug("处理定时拍照队列排队等待应答数量:" + qs);
-                            while (istakingphotoQueue.size()>100000) {
-                              istakingphotoQueue.poll();
+                            while (istakingphotoQueue.size() > 100000) {
+                                istakingphotoQueue.poll();
                             }
                         }
                         removeTimeOutCmd();
@@ -152,7 +152,7 @@ public class TakingPhotosbyTimeQueue {
      */
     private void sendTakingPhoto(QueueDto queueDto) {
         try {
-              long s1 = System.currentTimeMillis();   //获取开始时间
+            long s1 = System.currentTimeMillis();   //获取开始时间
 
             Date checkTime = queueDto.getCheckTime();
             String simNo = queueDto.getSimNo();
@@ -161,8 +161,8 @@ public class TakingPhotosbyTimeQueue {
             String channel = takingphotosbytime.getChannel();
             String[] channels = channel.split(";");
             VehicleData vehicleData = realDataService.getVehicleData(simNo);
-            String driverName= vehicleData.getDriverName();
-            String certificationCode=vehicleData.getCertificationCode();
+            String driverName = vehicleData.getDriverName();
+            String certificationCode = vehicleData.getCertificationCode();
             //插入结果表，并获取主键
             Takingphotosbytimeresult takingphotosbytimeresult = takephotoDao.insertTakingphotosbytimeresult(gpsRealData.getVehicleId(), simNo, takingphotosbytime.getUserid(),
                     channels.length, gpsRealData.getLatitude(), gpsRealData.getLongitude(), gpsRealData.getSendTime(),
@@ -200,7 +200,7 @@ public class TakingPhotosbyTimeQueue {
                     }
                     if (cmdId == 0) {
                         //下发拍照指令，并获取到命令id
-                        cmdId = temSendService.sendTakePhoto(simNo, channelId, takingphotosbytime.getUserid(), takingphotosbytime.getUsername(),checkTime,gpsRealData);
+                        cmdId = temSendService.sendTakePhoto(simNo, channelId, takingphotosbytime.getUserid(), takingphotosbytime.getUsername(), checkTime, gpsRealData);
                         cmdTimeIdCache.put(cmdKey, CmdIdDto.bulider(cmdId, checkTime));
                     }
                     cmdIds += cmdId + ";";
@@ -214,10 +214,11 @@ public class TakingPhotosbyTimeQueue {
                     takephotoDao.insertTakingphotosbytimeDetail(takingphotosbytimeresult.getId(),
                             channelId, cmdId, takingphotosbytime.getId(), gpsRealData.getVehicleId(), commandtype, checkTime);
                 }
-            }  long e = System.currentTimeMillis(); //获取结束时间
+            }
+            long e = System.currentTimeMillis(); //获取结束时间
 
-            redisIsPhotoCache.put(gpsRealData.getVehicleId(), takingphotosbytime.getId(),checkTime);
-            log.debug("定时拍照:下发拍照并插入定时拍照记录表,内容为:simNo=" + simNo + ",通道=" + channel + ",命令id=" + cmdIds+"用时：" + (e - s1) + "ms");
+            redisIsPhotoCache.put(gpsRealData.getVehicleId(), takingphotosbytime.getId(), checkTime);
+            log.debug("定时拍照:下发拍照并插入定时拍照记录表,内容为:simNo=" + simNo + ",通道=" + channel + ",命令id=" + cmdIds + "用时：" + (e - s1) + "ms");
         } catch (Exception e) {
             log.error("定时拍照:下发拍照并插入定时拍照记录异常", e);
         }
