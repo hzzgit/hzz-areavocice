@@ -67,11 +67,12 @@ public class TakingPhotosbyTimeQueue {
 
     ExecutorService executorService = null;
 
+    BlockedThreadPoolExecutor blockedThreadPoolExecutor=null;
 
     @PostConstruct
     private void init() {
         if (istakingphoto) {
-            BlockedThreadPoolExecutor blockedThreadPoolExecutor = new BlockedThreadPoolExecutor(10, "定时拍照队列消耗线程");
+             blockedThreadPoolExecutor = new BlockedThreadPoolExecutor(10, "定时拍照队列消耗线程");
             new Thread(() -> {
                 while (true) {
                     try {
@@ -199,7 +200,7 @@ public class TakingPhotosbyTimeQueue {
                     }
                     if (cmdId == 0) {
                         //下发拍照指令，并获取到命令id
-                        cmdId = temSendService.sendTakePhoto(simNo, channelId, takingphotosbytime.getUserid(), takingphotosbytime.getUsername());
+                        cmdId = temSendService.sendTakePhoto(simNo, channelId, takingphotosbytime.getUserid(), takingphotosbytime.getUsername(),checkTime,gpsRealData);
                         cmdTimeIdCache.put(cmdKey, CmdIdDto.bulider(cmdId, checkTime));
                     }
                     cmdIds += cmdId + ";";

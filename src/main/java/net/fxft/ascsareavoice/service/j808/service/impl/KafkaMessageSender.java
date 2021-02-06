@@ -1,12 +1,14 @@
-package net.fxft.ascsareavoice.kafka;
+package net.fxft.ascsareavoice.service.j808.service.impl;
 
 import com.ltmonitor.jt808.protocol.T808Message;
 import com.ltmonitor.jt808.tool.Tools;
+import net.fxft.ascsareavoice.service.j808.service.IMessageSender;
 import net.fxft.ascsareavoice.service.j808.service.T808Manager;
 import net.fxft.cloud.metrics.Tps;
 import net.fxft.common.util.BasicUtil;
 import net.fxft.gateway.event.EventMsg;
 import net.fxft.gateway.kafka.IKafkaSenderHelper;
+import net.fxft.gateway.kafka.UnitConfigManager;
 import net.fxft.gateway.protocol.DevMsgAttr;
 import net.fxft.gateway.protocol.DeviceMsg;
 import net.fxft.gateway.util.TraceLogger;
@@ -18,22 +20,26 @@ import org.springframework.stereotype.Service;
 import java.util.concurrent.atomic.LongAdder;
 
 @Service
-public class KafkaMessageSender {
+public class KafkaMessageSender implements IMessageSender {
 
     private static final Logger log = LoggerFactory.getLogger(KafkaMessageSender.class);
 
     @Autowired
-    private IKafkaSenderHelper kafkaSender;
-
-
-//    @Value("${kafka.toDeviceMsgTopic}")
-//    private String toDeviceMsgTopic;
+    private IKafkaSenderHelper kafkaSenderHelper;
 
     private Tps sendKafkaTps = new Tps();
 
     private LongAdder totalSendCount = new LongAdder();
 
+    public Tps getSendKafkaTps() {
+        return sendKafkaTps;
+    }
 
+    public long getTotalSendCount() {
+        return totalSendCount.longValue();
+    }
+
+    @Override
     public boolean Send808Message(T808Message tm, String toDevTopic, String toChannelId) {
         try {
             if (tm == null) {
@@ -61,7 +67,7 @@ public class KafkaMessageSender {
                         "; msgType=" + Tools.msgTypeToHexString(tm.getMessageType()));
                 return false;
             }
-            kafkaSender.sendDeviceMsg(msgAttr.getToDevTopic(), tm);
+            kafkaSenderHelper.sendDeviceMsg(msgAttr.getToDevTopic(), tm);
 //            DeviceMsg msg = DeviceMsgBuilder.buildFromT808Message(0, 0, tm);
 //            kafkaTemplate.send(msgAttr.getToDevTopic(), TransferMsgBuilder.build(msg).toTransferBytes());
             if (TraceLogger.isTrace(tm.getSimNo())) {
@@ -76,7 +82,7 @@ public class KafkaMessageSender {
         }
     }
 
-
+    @Override
     public boolean Send808Message(DeviceMsg dm, String toDevTopic, String toChannelId) {
         try {
             if (dm == null) {
@@ -104,7 +110,7 @@ public class KafkaMessageSender {
                         "; msgType=" + Tools.msgTypeToHexString(dm.getMessageType()));
                 return false;
             }
-            kafkaSender.sendDeviceMsg(msgAttr.getToDevTopic(), dm);
+            kafkaSenderHelper.sendDeviceMsg(msgAttr.getToDevTopic(), dm);
 //            kafkaTemplate.send(msgAttr.getToDevTopic(), TransferMsgBuilder.build(dm).toTransferBytes());
             if (TraceLogger.isTrace(dm.getSimNo())) {
                 log.debug("kafka发送ToDeviceMsg！" + dm);
@@ -119,16 +125,51 @@ public class KafkaMessageSender {
     }
 
 
-    public boolean sendAreaAlarmEventMsg(EventMsg eventMsg,String simNo) {
+    public boolean sendEveryUnitEventMsg(EventMsg eventMsg) {
         try {
-            kafkaSender.sendAlarmEventMsg(eventMsg,simNo);
-            log.debug("kafka发送围栏报警！" + eventMsg);
+//            byte[] bytes = TransferMsgBuilder.build(eventMsg).toTransferBytes();
+            kafkaSenderHelper.sendEveryUnitEventMsg(eventMsg);
+//            kafkaTemplate.send(UnitConfig.instance.getEveryUnitEventTopic(), bytes);
+            log.debug("kafka发送EveryUnitEvent！" + eventMsg);
             totalSendCount.increment();
             sendKafkaTps.inc();
             return true;
         } catch (Exception e) {
-            log.error("kafka发送围栏报警！", e);
+            log.error("kafka发送EveryUnitEvent出错！", e);
             return false;
+        }
+    }
+
+    public boolean sendAlarmEventMsg(EventMsg eventMsg, String simNo) {
+        try {
+            kafkaSenderHelper.sendAlarmEventMsg(eventMsg, simNo);
+//            byte[] bytes = TransferMsgBuilder.build(eventMsg).toTransferBytes();
+//            kafkaTemplate.send(UnitConfig.instance.getAlarmEventTopic(), simNo, bytes);
+            log.debug("kafka发送AlarmEvent！" + eventMsg);
+            totalSendCount.increment();
+            sendKafkaTps.inc();
+            return true;
+        } catch (Exception e) {
+            log.error("kafka发送EveryUnitEvent出错！", e);
+            return false;
+        }
+    }
+
+
+    public void sendNoticeEventMsg(String simNo, EventMsg eventMsg) {
+        String topic = UnitConfigManager.instance.getKafkaTopicConfig().getNoticeEventTopic();
+        try {
+            if (eventMsg.getEventBody() == null) {
+                throw new RuntimeException("EventMsg中EventBody不能为null！");
+            }
+            kafkaSenderHelper.sendNoticeEventMsg(eventMsg, simNo);
+//            byte[] barr = TransferMsgBuilder.build(eventMsg).toTransferBytes();
+//            kafkaTemplate.send(topic, simNo, barr);
+            if (TraceLogger.isTrace(simNo)) {
+                log.debug("kafka发送NoticeEventMsg！topic=" + topic + "; " + eventMsg);
+            }
+        } catch (Exception e) {
+            log.error("kafka发送NoticeEventMsg出错！topic=" + topic + "; simNo=" + simNo + "; msg=" + eventMsg, e);
         }
     }
 
