@@ -20,9 +20,9 @@ import org.springframework.stereotype.Service;
 import java.util.concurrent.atomic.LongAdder;
 
 @Service
-public class KafkaMessageSender implements IMessageSender {
+public class KafkaMessageSenderToTem implements IMessageSender {
 
-    private static final Logger log = LoggerFactory.getLogger(KafkaMessageSender.class);
+    private static final Logger log = LoggerFactory.getLogger(KafkaMessageSenderToTem.class);
 
     @Autowired
     private IKafkaSenderHelper kafkaSenderHelper;

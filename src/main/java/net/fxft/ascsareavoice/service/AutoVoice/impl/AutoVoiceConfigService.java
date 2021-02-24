@@ -160,7 +160,11 @@ public class AutoVoiceConfigService {
                         String plateNo = rowDataMap.getStringValue("plateNo");
                         int configid = rowDataMap.getIntegerValue("configid");
                         Long depId = rowDataMap.getLongValue("depId");
-                        int isuse = rowDataMap.getIntegerValue("isuse");//是否启用
+                        boolean isuse = rowDataMap.getBooleanValue("isuse");//是否启用
+                        int isuseint=0;
+                        if(isuse){
+                            isuseint=1;
+                        }
                         int type = rowDataMap.getIntegerValue("type");//选择类型，1、ACC开之后立即、2、ACC开之后等待
                         int sendInterval = rowDataMap.getIntegerValue("sendInterval");//持续多久，在type=2的时候才生效
                         String sendContent = rowDataMap.getStringValue("sendContent");//播报内容
@@ -175,7 +179,7 @@ public class AutoVoiceConfigService {
                             autoVoiceConfigPO.setId(configid);
                             autoVoiceConfigPO.setStartTime(startTime);
                             autoVoiceConfigPO.setEndTime(endTime);
-                            autoVoiceConfigPO.setIsuse(isuse);
+                            autoVoiceConfigPO.setIsuse(isuseint);
                             autoVoiceConfigPOS.add(autoVoiceConfigPO);
                             autoVoicePO.setAutoVoiceConfigPOS(autoVoiceConfigPOS);
                         } else {
@@ -185,7 +189,7 @@ public class AutoVoiceConfigService {
                             autoVoicePO.setEndTime(endTime);
                             autoVoicePO.setPlateNo(plateNo);
                             autoVoicePO.setDepId(depId);
-                            autoVoicePO.setIsuse(isuse);
+                            autoVoicePO.setIsuse(isuseint);
                             List<AutoVoiceConfigPO> autoVoiceConfigPOS = new ArrayList<>();
                             AutoVoiceConfigPO autoVoiceConfigPO = new AutoVoiceConfigPO();
                             autoVoiceConfigPO.setSendContent(sendContent);
@@ -194,7 +198,7 @@ public class AutoVoiceConfigService {
                             autoVoiceConfigPO.setId(configid);
                             autoVoiceConfigPO.setStartTime(startTime);
                             autoVoiceConfigPO.setEndTime(endTime);
-                            autoVoiceConfigPO.setIsuse(isuse);
+                            autoVoiceConfigPO.setIsuse(isuseint);
                             autoVoiceConfigPOS.add(autoVoiceConfigPO);
                             autoVoicePO.setAutoVoiceConfigPOS(autoVoiceConfigPOS);
                         }
