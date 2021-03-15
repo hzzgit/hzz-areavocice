@@ -2,8 +2,8 @@ package net.fxft.ascsareavoice.service.takingPhotosbyTime.cache;
 
 
 import lombok.extern.slf4j.Slf4j;
-import net.fxft.ascsareavoice.config.RocksdbTableUtil;
 import net.fxft.ascsareavoice.service.takingPhotosbyTime.cache.dto.IsPhotoDto;
+import net.fxft.ascsutils.config.rocksdb.RocksdbTableUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

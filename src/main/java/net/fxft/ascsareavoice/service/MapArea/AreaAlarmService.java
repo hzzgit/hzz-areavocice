@@ -49,6 +49,9 @@ public class AreaAlarmService implements IAreaAlarmService {
     @Autowired
     private IMapAreaService mapAreaService;
 
+    @Autowired
+    private AreaGpsRealDataService areaGpsRealDataService;
+
     @Value("${areaQueueThreadco:3}")
     private int areaQueueThreadco;
 
@@ -882,6 +885,7 @@ public class AreaAlarmService implements IAreaAlarmService {
                         String key = rd.getSimNo() + "_" + ec.getEntityId();
                         boolean arg = true;
                         boolean inArea = IsInArea(ec, mp);//这边进行计算是否在区域内
+                        areaGpsRealDataService.checkAreaGpsRealData(inArea,rd.getVehicleId(),ec.getEntityId());
                         if (CrossMap.containsKey(key)) {
                             if (inArea == CrossMap.get(key)) {//如果进去和出去和之前报警的相同，那么就不产生报警
                                 arg = false;

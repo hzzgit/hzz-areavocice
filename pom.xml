@@ -26,6 +26,11 @@
     <dependencies>
         <dependency>
             <groupId>net.fxft</groupId>
+            <artifactId>ascs-utilshzz</artifactId>
+            <version>0.0.6-RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>net.fxft</groupId>
             <artifactId>fxft-cloud</artifactId>
             <version>1.5.11-RELEASE</version>
         </dependency>
