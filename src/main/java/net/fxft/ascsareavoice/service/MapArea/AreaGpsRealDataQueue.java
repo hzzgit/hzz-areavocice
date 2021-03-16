@@ -96,14 +96,12 @@ public class AreaGpsRealDataQueue {
                             if (arg) {//存在rocksdb就才进行删除操作
                                 deleteList.add(areagpsrealdata);
                             }
+                            areaGpsRealDataService.deleteKeyByRocksdb(areagpsrealdata.getVehicleid(), areagpsrealdata.getAreaid());
                         }
                     }
                     if (deleteList != null && deleteList.size() > 0) {
                         try {
                             jdbcUtil.deleteList(deleteList).whereColumn(Areagpsrealdata.F_vehicleid, Areagpsrealdata.F_areaid).executeBatch(true);
-                            for (Areagpsrealdata areagpsrealdata : deleteList) {
-                                areaGpsRealDataService.deleteKeyByRocksdb(areagpsrealdata.getVehicleid(), areagpsrealdata.getAreaid());
-                            }
                         } catch (Exception e) {
                             log.error("批量删除失败", e);
                         }
