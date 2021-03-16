@@ -66,7 +66,7 @@ public class NewAlarmService implements INewAlarmService {
             //this.enQueue(ar, remark);//2019版就不插入到alarm表
             return ar;
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            log.error("获取报警信息异常", e);
             return null;
         }
     }

@@ -65,7 +65,7 @@ public class WaybillAreaCache {
                         ConcurrentHashMap<String, List<WaybillAreaMainVo>> searchwaybillarea = waybillAreaDao.searchwaybillarea();
                         waybillAreaDao.searchwaybillareapoint(searchwaybillarea);
                         waybillareacache = searchwaybillarea;
-                        log.error("缓存运单围栏成功");
+                        log.info("缓存运单围栏成功");
                     } catch (Exception e) {
                         log.error("进行运单围栏缓存异常", e);
                     }
