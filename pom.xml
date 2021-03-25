@@ -20,7 +20,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
-        <ascs-gateway-protocol.version>0.7.27-RELEASE</ascs-gateway-protocol.version>
+        <ascs-gateway-protocol.version>0.7.52.3-RELEASE</ascs-gateway-protocol.version>
     </properties>
 
     <dependencies>
