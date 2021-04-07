@@ -12,7 +12,7 @@
     <artifactId>ascs-areavoice</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>ascs-areavoice</name>
-    <description>Demo project for Spring Boot</description>
+    <description>围栏、语音播报、定时拍照、停车围栏计算服务</description>
 
 
 
