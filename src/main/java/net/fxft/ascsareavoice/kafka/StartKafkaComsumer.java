@@ -118,6 +118,12 @@ public class StartKafkaComsumer implements IFromDeviceMsgProcessor {
     }
 
 
+    /**
+     * 这边是接收设备报文，并进行处理
+     * @param s
+     * @param deviceMsg
+     * @param consumerRecord
+     */
     @Override
     public void pocessMsg(String s, DeviceMsg deviceMsg, ConsumerRecord<String, byte[]> consumerRecord) {
 
