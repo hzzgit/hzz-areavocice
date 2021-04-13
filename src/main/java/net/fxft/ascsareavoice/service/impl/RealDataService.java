@@ -17,6 +17,9 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * 车辆信息缓存
+ */
 @Service
 public class RealDataService implements IRealDataService {
 
@@ -38,7 +41,8 @@ public class RealDataService implements IRealDataService {
     private void init() {
         new Thread(() -> {
             while (true) {
-                if (RealDataService.updateVehiclearg.get()) {//如果队列里面有需要更新车辆缓存
+                if (RealDataService.updateVehiclearg.get()) {
+                    //如果队列里面有需要更新车辆缓存
                     RealDataService.updateVehiclearg.set(false);
                     try {
                         String sql = "select d.certificationCode,d.driverName,v.vehicleId,v.plateNo,v.simNo," +
@@ -74,6 +78,11 @@ public class RealDataService implements IRealDataService {
         }).start();
     }
 
+    /**
+     * 从redis中获取到设备最新在线状态
+     * @param simNo
+     * @return
+     */
     public GPSRealData getGpsRealData(String simNo) {
         try {
             GPSRealData rd = (GPSRealData) redisUtil.execute(jedis -> {
@@ -92,7 +101,11 @@ public class RealDataService implements IRealDataService {
             return null;
         }
     }
-
+    /**
+     * 从redis中获取到设备最新在线状态，协议版本要跟着网关
+     * @param simNo
+     * @return
+     */
     public GPSRealData get(String simNo) {
         try {
             GPSRealData rd = (GPSRealData) redisUtil.execute(jedis -> {

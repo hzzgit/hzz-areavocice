@@ -35,6 +35,10 @@ public class TakingPhotosbyTimeQueue {
      * 用来缓存simNo+通道号下发的命令id和命令下发的时间
      */
     private Map<String, CmdIdDto> cmdTimeIdCache = new ConcurrentHashMap<>();
+
+    /**
+     * 获取到车辆缓存和实时数据获取类
+     */
     @Autowired
     private RealDataService realDataService;
     @Autowired
@@ -58,11 +62,12 @@ public class TakingPhotosbyTimeQueue {
         queueDto.setTakingphotosbytime(takingphotosbytime);
         queueDto.setGpsRealData(gpsRealData);
         istakingphotoQueue.add(queueDto);
+        //这边是只要加入了队列，就算是已经下发了拍照命令
         redisIsPhotoCache.put(gpsRealData.getVehicleId(), takingphotosbytime.getId(), checkTime);
     }
 
     /**
-     * 处理运单围栏的独立队列
+     * 处理下发定时拍照命令的独立队列
      */
     private ConcurrentLinkedQueue<QueueDto> istakingphotoQueue = new ConcurrentLinkedQueue();
 
@@ -73,6 +78,7 @@ public class TakingPhotosbyTimeQueue {
     @PostConstruct
     private void init() {
         if (istakingphoto) {
+            //开启线程池处理定时下发拍照命令的队列
             blockedThreadPoolExecutor = new BlockedThreadPoolExecutor(10, "定时拍照队列消耗线程");
             new Thread(() -> {
                 while (true) {
@@ -81,6 +87,7 @@ public class TakingPhotosbyTimeQueue {
                         while (rd != null) {
                             QueueDto finalRd = rd;
                             blockedThreadPoolExecutor.submit(new Thread(() -> {
+                                //下发拍照，并创建拍照结果表，详情表数据
                                 sendTakingPhoto(finalRd);
                             }));
                             rd = istakingphotoQueue.poll();
@@ -149,7 +156,7 @@ public class TakingPhotosbyTimeQueue {
     }
 
     /**
-     * 下发拍照
+     * 下发拍照，并创建拍照结果表，详情表数据
      */
     private void sendTakingPhoto(QueueDto queueDto) {
         try {

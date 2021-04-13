@@ -86,6 +86,7 @@ public class TakingPhotosbyTimeService {
             new Thread(() -> {
                 while (true) {
                     try {
+                      //  主线程。一直检测所有定时拍照配置，并进行判断是否达到定时拍照的时间
                         begin();
                     } catch (Exception e) {
                         log.error("定时拍照：主线程异常", e);
@@ -115,6 +116,9 @@ public class TakingPhotosbyTimeService {
     }
 
 
+    /**
+     * 定时拍照配置重新缓存
+     */
     private void cacheConfig() {
         try {
             Map<Integer, Takingphotosbytime> integerTakingphotosbytimeMapTemp = new ConcurrentHashMap<>();
@@ -144,6 +148,10 @@ public class TakingPhotosbyTimeService {
 
     }
 
+    /**
+     * 主线程。一直检测所有定时拍照配置，并进行判断是否达到定时拍照的时间
+     * @throws Exception
+     */
     private void begin() throws Exception {
         long s = System.currentTimeMillis();   //获取开始时间
         Date checkTime = new Date();
@@ -181,6 +189,7 @@ public class TakingPhotosbyTimeService {
             if (vehicleData.getVideoChannelNum() == 0) {
                 return;
             }
+            //这边获取到这辆车这个配置是否已经上传过图片，以及主要记录上次上传的时间，用于判断拍照间隔
             IsPhotoDto isPhotoDto = redisIsPhotoCache.get(vehicleData.getEntityId(), id);
 
             //这边判断是否在配置生效的有效期里面

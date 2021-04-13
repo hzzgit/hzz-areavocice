@@ -39,6 +39,13 @@ public class KafkaMessageSenderToTem implements IMessageSender {
         return totalSendCount.longValue();
     }
 
+    /**
+     * 发送808命令给设备
+     * @param tm
+     * @param toDevTopic
+     * @param toChannelId
+     * @return
+     */
     @Override
     public boolean Send808Message(T808Message tm, String toDevTopic, String toChannelId) {
         try {

@@ -52,6 +52,7 @@ public class AutoVoiceService implements IAutoVoiceService {
                 @Override
                 public void run() {
                     while (true) {
+                        //初始化语音播报缓存配置，每隔五秒一次
                         initrealdata();
                         try {
                             Thread.sleep(5000);
@@ -65,6 +66,7 @@ public class AutoVoiceService implements IAutoVoiceService {
                 @Override
                 public void run() {
                     while (true) {
+                        //用来检测是否有离线和熄火的情况
                         checkoffline();
                         try {
                             Thread.sleep(5000);
@@ -87,11 +89,13 @@ public class AutoVoiceService implements IAutoVoiceService {
                     if (v.isIsacc()) {//acc是开的时候才判断是否关闭
                         GPSRealData rd = realDataService.getGpsRealData(p);
                         if (rd != null) {
-                            if (rd.isOnline() == false) {//如果有一个下线了，这边也要变成false
+                            //如果有一个下线了，这边也要变成false
+                            if (rd.isOnline() == false) {
                                 v.setIsacc(false);
                                 v.setConfigTime(new HashMap<>());
                             } else {
-                                if (!isacc(rd.getStatus())) {//且必须acc关才更新
+                                //且必须acc关才更新
+                                if (!isacc(rd.getStatus())) {
                                     v.setIsacc(false);
                                     v.setConfigTime(new HashMap<>());
                                 }
@@ -112,7 +116,9 @@ public class AutoVoiceService implements IAutoVoiceService {
         }
     }
 
-    //用户检测是否有新的配置加入，
+    /**
+     *  检测是否有新的配置加入
+     */
     private void initrealdata() {
         AttrLog alog = AttrLog.get("同步实时播报的实时数据的历史情况");
         try {
@@ -135,7 +141,9 @@ public class AutoVoiceService implements IAutoVoiceService {
         }
     }
 
-    //根据截取到的实时数据进行一系列的处理，主要处理逻辑
+    /**
+     *根据截取到的实时数据进行一系列的处理，主要处理逻辑
+     */
     public void autoVoiceMain(GPSRealData rd) {
         if (autoVoice) {
             AttrLog alog = AttrLog.get("语音播报主方法")

@@ -33,7 +33,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-//语音自动播放配置信息及下发命令的服务类
+/**
+ * 语音自动播放配置信息及下发命令的服务类
+ */
+
 @Service
 public class AutoVoiceConfigService {
 
@@ -55,9 +58,15 @@ public class AutoVoiceConfigService {
     @Autowired
     private RealDataService dm;
 
+    /**
+     * 语音播放配置开关
+     */
     @Value("${autoVoice:false}")
     private boolean autoVoice;
-    //语音播报的各车辆配置表信息缓存
+
+    /**
+     *语音播报的各车辆配置表信息缓存
+     */
     private static Map<String, AutoVoicePO> autovoiceconfig = new ConcurrentHashMap();
 
 
@@ -76,7 +85,9 @@ public class AutoVoiceConfigService {
     }
 
 
-    //插入到命令表，并进行语音播放
+    /**
+     *   插入到命令表，并进行语音播放,这个是有一个队列在处理发送语音播报命令的数据
+     */
     public void sendAutoVoice(String textContent, String simNo) {
         AttrLog alog = AttrLog.get("发送语音播报命令")
                 .log("simNo", simNo)
@@ -130,8 +141,9 @@ public class AutoVoiceConfigService {
     }
 
 
-
-    //读取语音播报命令配置信息,每分钟同步一次
+    /**
+     * 读取语音播报命令配置信息,每分钟同步一次
+     */
     @PostConstruct
     @Scheduled(fixedRate = 30000)
     private void readAutoVoiceConfig() {
@@ -148,28 +160,38 @@ public class AutoVoiceConfigService {
                 if (ConverterUtils.isList(result)) {
                     for (RowDataMap rowDataMap : result) {
                         Long vehicleId = rowDataMap.getLongValue("vehicleId");
+                        //simno卡号
                         String simNo = rowDataMap.getStringValue("simNo");
                         Date startTime = TimeUtils.todatetime(rowDataMap.getStringValue("startTime"));
                         Date endTime = TimeUtils.todatetime(rowDataMap.getStringValue("endTime"));
+                        //配置的开始时间
                         if(startTime==null) {
                             startTime = TimeUtils.date(rowDataMap.getStringValue("startTime"));
                         }
+                        //配置的结束时间
                         if(endTime==null) {
                             endTime = TimeUtils.date(rowDataMap.getStringValue("endTime"));
                         }
+                        //车牌号
                         String plateNo = rowDataMap.getStringValue("plateNo");
+                        //配置主键
                         int configid = rowDataMap.getIntegerValue("configid");
                         Long depId = rowDataMap.getLongValue("depId");
-                        boolean isuse = rowDataMap.getBooleanValue("isuse");//是否启用
+                        //是否启用
+                        boolean isuse = rowDataMap.getBooleanValue("isuse");
                         int isuseint=0;
                         if(isuse){
                             isuseint=1;
                         }
-                        int type = rowDataMap.getIntegerValue("type");//选择类型，1、ACC开之后立即、2、ACC开之后等待
-                        int sendInterval = rowDataMap.getIntegerValue("sendInterval");//持续多久，在type=2的时候才生效
-                        String sendContent = rowDataMap.getStringValue("sendContent");//播报内容
+                        //选择类型，1、ACC开之后立即、2、ACC开之后等待
+                        int type = rowDataMap.getIntegerValue("type");
+                        //持续多久，在type=2的时候才生效
+                        int sendInterval = rowDataMap.getIntegerValue("sendInterval");
+                        //播报内容
+                        String sendContent = rowDataMap.getStringValue("sendContent");
                         AutoVoicePO autoVoicePO = new AutoVoicePO();
-                        if (autovoiceconfig.containsKey(simNo)) {//如果这个车辆的配置信息是存在的那么就进行更新操作，
+                        if (autovoiceconfig.containsKey(simNo)) {
+                            //如果这个车辆的配置信息是存在的那么就进行更新操作，
                             autoVoicePO = autovoiceconfig.get(simNo);
                             List<AutoVoiceConfigPO> autoVoiceConfigPOS = autoVoicePO.getAutoVoiceConfigPOS();
                             AutoVoiceConfigPO autoVoiceConfigPO = new AutoVoiceConfigPO();
@@ -183,6 +205,7 @@ public class AutoVoiceConfigService {
                             autoVoiceConfigPOS.add(autoVoiceConfigPO);
                             autoVoicePO.setAutoVoiceConfigPOS(autoVoiceConfigPOS);
                         } else {
+                            //如果配置不存在，就新建然后添加到缓存当中
                             autoVoicePO.setVehicleId(vehicleId);
                             autoVoicePO.setSimNo(simNo);
                             autoVoicePO.setStartTime(startTime);
@@ -205,6 +228,7 @@ public class AutoVoiceConfigService {
                         autovoiceconfig.put(simNo, autoVoicePO);
                     }
                 }
+                //这边就是将配置缓存到全局当中去
                 this.autovoiceconfig = autovoiceconfig;
 
             } catch (Exception e) {

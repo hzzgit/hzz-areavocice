@@ -74,33 +74,66 @@ public class AreaAlarmService implements IAreaAlarmService {
 
     private volatile boolean continueAnalyze = true;
 
-    private ConcurrentMap<String, AlarmItem> offsetRouteWarn = new ConcurrentHashMap(); //路线偏移缓存
+    /**
+     *路线偏移缓存
+     */
 
-    private ConcurrentMap<String, AlarmItem> onRouteWarn = new ConcurrentHashMap();//在路线上的缓存
+    private ConcurrentMap<String, AlarmItem> offsetRouteWarn = new ConcurrentHashMap();
+
+    /**
+     *在路线上的缓存
+     */
+    private ConcurrentMap<String, AlarmItem> onRouteWarn = new ConcurrentHashMap();
     // private Map routePointMap = new HashMap();
     /**
-     * 当前的关键点报警
+     * 当前的关键点报警，key为rd.getPlateNo() + "_" + ec.getEntityId() + "_" + alarmType;
+     * 平台基本不会使用关键点报警，因为这个和圆形围栏是一个意思
      */
     private ConcurrentMap<String, AlarmItem> keyPlaceAlarmMap = new ConcurrentHashMap<String, AlarmItem>();
 
+    /**
+     * 用于缓存上个实时数据点位信息，key为simnO
+     * 暂时已经不适用，后续如果有使用可以再次启用
+     */
     Map<String, GPSRealData> realDataMap = new HashMap<String, GPSRealData>();
     private ConcurrentMap<String, AlarmItem> areaAlarmMap = new ConcurrentHashMap<String, AlarmItem>();
     // private ConcurrentMap<String, AlarmItem> overSpeedAlarmMap = new ConcurrentHashMap<String, AlarmItem>();//分段限速报警
 
-    private ConcurrentMap<String, Boolean> CrossMap = new ConcurrentHashMap<>();//用来判断进出围栏的情况，如果已经进入围栏则不再报警，直到出去之后
+    /**
+     * 用来判断进出围栏的情况，如果已经进入围栏则不再报警，直到出去之后
+     * key为simNo + 围栏主键 的组合
+     */
+    private ConcurrentMap<String, Boolean> CrossMap = new ConcurrentHashMap<>();
 
+    /**
+     * 缓存每个simNo对应的围栏配置主键
+     */
     private ConcurrentMap<String, List<Integer>> AreaConfigMap = new ConcurrentHashMap<>();//当前围栏报警的车辆配置信息
 
-    //处理实时数据的队列
+    /**
+     * 处理围栏计算的队列，主要存实时数据，也就是收到的每个点的信息
+     */
     private ConcurrentLinkedQueue<GPSRealData> AreaQueue = new ConcurrentLinkedQueue();
 
+    /**
+     * 缓存每个围栏主键对应的围栏配置
+     */
     private ConcurrentMap<Integer, MapArea> AllArea = new ConcurrentHashMap<>();//用来缓存所有的围栏信息
 
+    /**
+     * 缓存每个线路对应的路段信息，线路计算平台并没有使用，只使用了终端的线路围栏报警
+     */
     private ConcurrentMap<Long, List<LineSegment>> linesMap = new ConcurrentHashMap<>();//用来缓存线路对应的拐点信息
 
-    private ConcurrentMap<String, Date> AreaTimeMap = new ConcurrentHashMap<>();//当前车辆点位的时间情况
+    /**
+     * 当前车辆点位的时间情况，主要用于过滤时间异常点
+     */
+    private ConcurrentMap<String, Date> AreaTimeMap = new ConcurrentHashMap<>();
 
-    //这边是下发给终端
+    /**
+     * 这边是下发给终端的语音播报命令队列，主要是用于下发离开线路语音播报的逻辑
+     * 平台并没有配置平台的线路报警，逻辑是可以使用的
+     */
     @Autowired
     private AutoVoiceQueueService autoVoiceQueueService;
 
@@ -108,8 +141,8 @@ public class AreaAlarmService implements IAreaAlarmService {
     //添加到队列
     public void addAreaqueue(GPSRealData rd) {
         if (areaalarm) {
-
-            if (AreaConfigMap.containsKey(rd.getSimNo())) {//如果存在这个围栏配置就加入队列进行运算
+            //如果存在这个围栏配置就加入队列进行运算
+            if (AreaConfigMap.containsKey(rd.getSimNo())) {
                 boolean isargTme = false;
                 if (TimeUtils.isdifferminute(rd.getSendTime(), new Date(), 1200)) {//如果超过20小时直接干掉
                     return;
@@ -132,6 +165,7 @@ public class AreaAlarmService implements IAreaAlarmService {
                     AreaTimeMap.put(rd.getSimNo(), rd.getSendTime());
                 }
                 if (isargTme) {
+                    //如果以上判断都通过，那么就加入到围栏计算队列当中
                     AreaQueue.add(rd);
                 }
             } else {
@@ -179,7 +213,10 @@ public class AreaAlarmService implements IAreaAlarmService {
         }
     }
 
-    //处理围栏报警判断
+    /**
+     *处理每个定位点的围栏进出报警
+     */
+
     private void processorAreaAlarm() {
         int times = 0;
         while (true) {
@@ -215,7 +252,10 @@ public class AreaAlarmService implements IAreaAlarmService {
     }
 
 
-    //十秒缓存一次围栏配置信息
+    /**
+     * 十秒缓存一次围栏配置信息
+     */
+
     private void analyzeThreadFunc() {
         while (continueAnalyze) {
             try {
@@ -253,7 +293,10 @@ public class AreaAlarmService implements IAreaAlarmService {
 
     }
 
-    //缓存围栏配置信息
+    /**
+     *缓存围栏配置信息
+     */
+
     private void AreaConfigThread() {
         AttrLog alog = AttrLog.get("缓存围栏配置信息20200925版本,围栏兼容机构的模式");
         try {
@@ -332,6 +375,11 @@ public class AreaAlarmService implements IAreaAlarmService {
         }
     }
 
+    /**
+     * 主逻辑，将受到的定位信息进行围栏报警判断
+     * @param AreaId
+     * @param rd
+     */
     public void analyze(List<Integer> AreaId, GPSRealData rd) {
         AttrLog alog = AttrLog.get("处理单个设备的围栏报警")
                 .log("simNo", rd.getSimNo())
@@ -639,7 +687,7 @@ public class AreaAlarmService implements IAreaAlarmService {
     }
 
     /**
-     * 判断进出区域的临界点
+     * 判断如果确实进出了围栏，那么就触发围栏报警kafka通知到报警中心
      *
      * @param ec
      * @param rd

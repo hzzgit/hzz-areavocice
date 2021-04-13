@@ -7,7 +7,7 @@ import java.util.Date;
 
 /**
  * @author ：hzz
- * @description：照片上传的记录信息
+ * @description：照片上传的记录，主要是用于定时拍照的间隔
  * @date ：2021/1/21 13:54
  */
 public class IsPhotoDto {
@@ -16,7 +16,7 @@ public class IsPhotoDto {
     public static int 照片已上传 = 1;
 
     /**
-     * 执行时间
+     * 执行时间，主要是用于定时拍照的间隔
      */
     private Date time;
 

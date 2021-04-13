@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+/**
+ * 用于处理语音播报命令下发的队列和线程
+ */
 @Service
 public class AutoVoiceQueueService {
 
@@ -23,7 +26,10 @@ public class AutoVoiceQueueService {
 
 
     private Thread downThread;
-    //初始化上行、下行、补发队列
+
+    /**
+     * 初始化语音播放命令下发队列线程
+     */
     @PostConstruct
     public void startTransfer()
     {
@@ -39,8 +45,10 @@ public class AutoVoiceQueueService {
     }
 
 
+    /**
+     *这边是将要发送语音播放的设备以及命令用队列的方式一点一点处理掉
+     */
 
-    //这边是下行要发送给上行车辆的连接
     private void downMessageThreadFunc() {
         int times = 0;
         while (true) {
@@ -75,7 +83,11 @@ public class AutoVoiceQueueService {
     }
 
 
-
+    /**
+     * 将要下发的语音播放放入到队列当中
+     * @param textContent
+     * @param simNo
+     */
     public void addSendQueue(String textContent,String simNo) {
         String data=textContent+"_"+simNo;
         sendVoiceQueue.add(data);

@@ -13,7 +13,7 @@ import java.util.Date;
 
 /**
  * @author ：hzz
- * @description：redis缓存点
+ * @description：rocksdb缓存类
  * @date ：2021/1/21 13:50
  */
 @Slf4j
@@ -32,7 +32,7 @@ public class IsPhotoCache {
     }
 
     /**
-     * 如果照片上来，那么就更新拍照时间以及状态
+     * 这边是只要下发了拍照命令，那么就算它已经上传了照片，失败不考虑
      *
      * @param vehicleId
      * @param configid
@@ -57,6 +57,7 @@ public class IsPhotoCache {
     }
 
     /**
+     * 获取到照片是否已经上传的缓存
      * @param vehicleId
      * @param configid
      */

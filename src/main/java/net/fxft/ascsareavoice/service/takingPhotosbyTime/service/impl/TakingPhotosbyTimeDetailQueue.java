@@ -1,30 +1,15 @@
 package net.fxft.ascsareavoice.service.takingPhotosbyTime.service.impl;
 
-import com.ltmonitor.entity.GPSRealData;
 import lombok.extern.slf4j.Slf4j;
-import net.fxft.ascsareavoice.ltmonitor.entity.VehicleData;
-import net.fxft.ascsareavoice.ltmonitor.util.ConverterUtils;
-import net.fxft.ascsareavoice.service.impl.RealDataService;
-import net.fxft.ascsareavoice.service.takingPhotosbyTime.cache.IsPhotoCache;
-import net.fxft.ascsareavoice.service.takingPhotosbyTime.dao.TakephotoDao;
-import net.fxft.ascsareavoice.service.takingPhotosbyTime.entity.Takingphotosbytime;
 import net.fxft.ascsareavoice.service.takingPhotosbyTime.entity.Takingphotosbytimedetail;
-import net.fxft.ascsareavoice.service.takingPhotosbyTime.entity.Takingphotosbytimeresult;
-import net.fxft.ascsareavoice.service.takingPhotosbyTime.service.dto.CmdIdDto;
-import net.fxft.ascsareavoice.service.takingPhotosbyTime.service.dto.QueueDto;
 import net.fxft.common.jdbc.ColumnSet;
 import net.fxft.common.jdbc.JdbcUtil;
 import net.fxft.common.tpool.AbstractBatchExecThreadPoolExecutor;
-import net.fxft.common.tpool.BlockedThreadPoolExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutorService;
+import java.util.List;
 
 /**
  * @author ：hzz
@@ -40,6 +25,10 @@ public class TakingPhotosbyTimeDetailQueue {
     @Autowired
     private JdbcUtil jdbcUtil;
 
+    /**
+     * 加入到拍照详情处理线程池当中
+     * @param req
+     */
     public void addexecpool(Takingphotosbytimedetail req) {
         execPool.submit(req);
     }
