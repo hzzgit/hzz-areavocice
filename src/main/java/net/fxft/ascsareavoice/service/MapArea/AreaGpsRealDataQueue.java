@@ -3,8 +3,6 @@ package net.fxft.ascsareavoice.service.MapArea;
 import lombok.extern.slf4j.Slf4j;
 import net.fxft.ascsareavoice.service.MapArea.dto.AreagpsrealdataDto;
 import net.fxft.ascsareavoice.service.MapArea.entiry.Areagpsrealdata;
-import net.fxft.ascsareavoice.service.takingPhotosbyTime.entity.Takingphotosbytimedetail;
-import net.fxft.ascsutils.config.rocksdb.RocksdbTableUtil;
 import net.fxft.common.jdbc.ColumnSet;
 import net.fxft.common.jdbc.JdbcUtil;
 import net.fxft.common.tpool.AbstractBatchExecThreadPoolExecutor;
@@ -42,6 +40,7 @@ public class AreaGpsRealDataQueue {
     private void init() {
 
 
+        //这个线程主要是保存当前围栏内有哪些车辆
         execPool = new AbstractBatchExecThreadPoolExecutor<Integer, AreagpsrealdataDto>("围栏实时位置处理线程",
                 2, 2000, 10, 2000) {
             @Override
@@ -49,11 +48,12 @@ public class AreaGpsRealDataQueue {
                 return 0;
             }
 
-            //这边就是到达时间和数量的时候会执行一次
+
             @Override
             public void batchRun(Integer splitKey, List<AreagpsrealdataDto> reqlist) {
 
                 try {
+                    //这边是将刚进去围栏的车辆主键保存起来
                     List<Areagpsrealdata> addList = new ArrayList<>();
                     Map<String, Byte> isaddMap = new HashMap<>();
                     List<Areagpsrealdata> deleteList = new ArrayList<>();
@@ -69,6 +69,7 @@ public class AreaGpsRealDataQueue {
                         }
                     }
                     long s = System.currentTimeMillis();   //获取开始时间
+                    //这边是将刚进入围栏的车辆信息保存到数据库
                     if (addList != null && addList.size() > 0) {
                         try {
                             jdbcUtil.insertList(addList).insertColumn(ColumnSet.all()).executeBatch(true);
@@ -88,6 +89,7 @@ public class AreaGpsRealDataQueue {
                             }
                         }
                     }
+                    //这边是将离开围栏的车辆主键删除掉，这样这张表永远只有在围栏里面的车辆主键信息
                     for (AreagpsrealdataDto areagpsrealdataDto : reqlist) {
                         Areagpsrealdata areagpsrealdata = areagpsrealdataDto.getAreagpsrealdata();
                         if (areagpsrealdataDto.isIsadd()) {
