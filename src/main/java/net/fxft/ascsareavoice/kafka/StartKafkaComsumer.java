@@ -1,16 +1,21 @@
 package net.fxft.ascsareavoice.kafka;
 
 import com.ltmonitor.entity.GPSRealData;
-import net.fxft.ascsareavoice.ltmonitor.entity.VehicleData;
 import com.ltmonitor.jt808.protocol.JT_0200;
 import com.ltmonitor.util.DateUtil;
 import com.ltmonitor.util.StringUtil;
-import net.fxft.ascsareavoice.ltmonitor.util.TimeUtils;
 import net.fxft.ascsareavoice.AscsAreaVoiceApplicationStart;
+import net.fxft.ascsareavoice.cache.IndividualAgreementService;
+import net.fxft.ascsareavoice.ltmonitor.entity.VehicleData;
+import net.fxft.ascsareavoice.ltmonitor.util.TimeUtils;
+import net.fxft.ascsareavoice.protocal.ProtocolType;
+import net.fxft.ascsareavoice.protocal.workcard.JT_0200_FJ_WORKCARD;
 import net.fxft.ascsareavoice.service.IMessageProcessService;
 import net.fxft.ascsareavoice.service.impl.RealDataService;
+import net.fxft.common.util.ByteUtil;
 import net.fxft.gateway.kafka.UnitConfigManager;
 import net.fxft.gateway.kafka.devicemsg.IFromDeviceMsgProcessor;
+import net.fxft.gateway.protocol.DevMsgAttrConst;
 import net.fxft.gateway.protocol.DeviceMsg;
 import net.fxft.gateway.protocol.gps.LocationMsg;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -34,6 +39,9 @@ public class StartKafkaComsumer implements IFromDeviceMsgProcessor {
     public boolean isPausePoll() {
         return ispausepool;
     }
+
+    @Autowired
+    private IndividualAgreementService individualAgreementService;
 
     @Autowired
     private RealDataService realDataService;
@@ -132,8 +140,18 @@ public class StartKafkaComsumer implements IFromDeviceMsgProcessor {
             if (dm.getMsgType() == 0x0200) {
                 if (dm.getMsgBody() instanceof JT_0200) {
                     JT_0200 jt_0200 = (JT_0200) dm.getMsgBody();
-                    if("012805920003".equalsIgnoreCase(dm.getSimNo())){
-                        System.out.println(1);
+                    //这边要解析电子工牌的附加协议`
+                    if(individualAgreementService.isIndividualAgreement(dm.getSimNo(), ProtocolType.电子工牌.getName())){
+                        //解析电子工牌特殊的gps定位，gps未定位取wifi-wifi未定位取lbs定位
+                        try {
+                            byte[] OrgData = (byte[]) deviceMsg.getDevMsgAttr().extendValue(DevMsgAttrConst.KEY_ORIGINAL_BYTES);//这个是原始数据
+                            log.debug("电子工牌协议解析,simNo:"+dm.getSimNo()+",原始报文为"+ ByteUtil.byteToHexStr(OrgData));
+                            JT_0200_FJ_WORKCARD jt_0200_fj_workcard=new JT_0200_FJ_WORKCARD();
+                            jt_0200_fj_workcard.ReadFromBytes(OrgData);
+                            jt_0200_fj_workcard.WriteJt0200(jt_0200);
+                        } catch (Exception e) {
+                            log.error("解析电子工牌协议异常",e);
+                        }
                     }
                     GPSRealData rd = getGPS(dm.getSimNo(), jt_0200);
                     messageProcessService.processMsg(rd);
