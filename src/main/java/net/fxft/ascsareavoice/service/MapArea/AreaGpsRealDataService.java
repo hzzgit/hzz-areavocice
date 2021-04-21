@@ -68,8 +68,8 @@ public class AreaGpsRealDataService {
         areagpsrealdata.setCreatedate(new Date());
         areagpsrealdataDto.setAreagpsrealdata(areagpsrealdata);
         String getkey = getkey(vehicleId, areaId);
-        //要不存在这个字段数据才进行插入
-        if(rocksdbTableUtil.isexsitkey(rockskey,getkey)==false){
+        //要不存在这个字段数据才进行插入,或者离开围栏也可以
+        if(inArea==false||rocksdbTableUtil.isexsitkey(rockskey,getkey)==false){
             areaGpsRealDataQueue.addexecpool(areagpsrealdataDto);
         }
 
